@@ -6,6 +6,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { CalendarHeader } from "./CalendarHeader";
 import { CalendarDayCell } from "./CalendarDayCell";
 import { MobileEventsList } from "./MobileEventsList";
+import { StatusFilter } from "./StatusFilter";
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -26,6 +27,12 @@ export function CalendarView({
 }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [draggingEventId, setDraggingEventId] = useState<string | null>(null);
+  const [selectedStatuses, setSelectedStatuses] = useState<VideoStatus[]>(["in-progress", "submitted", "approved", "rejected"]);
+
+  // Filter events based on selected statuses
+  const filteredEvents = events.filter(event => 
+    selectedStatuses.includes(event.status)
+  );
 
   // Generate dates based on view mode
   const getDatesForView = () => {
@@ -121,13 +128,21 @@ export function CalendarView({
 
   return (
     <div className="space-y-4">
-      <CalendarHeader 
-        currentDate={currentDate}
-        viewMode={viewMode}
-        calendarDates={calendarDates}
-        onPrevPeriod={handlePrevPeriod}
-        onNextPeriod={handleNextPeriod}
-      />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <CalendarHeader 
+          currentDate={currentDate}
+          viewMode={viewMode}
+          calendarDates={calendarDates}
+          onPrevPeriod={handlePrevPeriod}
+          onNextPeriod={handleNextPeriod}
+        />
+        
+        <StatusFilter
+          selectedStatuses={selectedStatuses}
+          onChange={setSelectedStatuses}
+          className="ml-auto"
+        />
+      </div>
 
       {/* Desktop Calendar View */}
       <div className="hidden md:block">
@@ -156,7 +171,7 @@ export function CalendarView({
                     <CalendarDayCell 
                       key={`${weekIndex}-${dayIndex}`}
                       day={day}
-                      events={events}
+                      events={filteredEvents}
                       isCurrentMonth={isCurrentMonth(day)}
                       isToday={isToday(day)}
                       onDateClick={onDateClick}
@@ -178,7 +193,7 @@ export function CalendarView({
               <CalendarDayCell 
                 key={i}
                 day={day}
-                events={events}
+                events={filteredEvents}
                 isCurrentMonth={true}
                 isToday={isToday(day)}
                 onDateClick={onDateClick}
@@ -198,7 +213,7 @@ export function CalendarView({
       {/* Mobile Calendar View */}
       <MobileEventsList
         calendarDates={calendarDates}
-        events={events}
+        events={filteredEvents}
         onEventClick={onEventClick}
         getEventColorClass={getEventColorClass}
         isToday={isToday}

@@ -1,8 +1,8 @@
 
 import React from "react";
-import { format, isSameDay } from "date-fns";
-import { CalendarEvent } from "@/types";
-import { cn } from "@/lib/utils";
+import { CalendarEvent, VideoStatus } from "@/types";
+import { format, isSameDay, parseISO } from "date-fns";
+import { CalendarVideoCard } from "@/components/video/CalendarVideoCard";
 
 interface CalendarDayCellProps {
   day: Date;
@@ -16,7 +16,7 @@ interface CalendarDayCellProps {
   handleDragStart: (e: React.DragEvent, eventId: string) => void;
   draggingEventId: string | null;
   readOnly: boolean;
-  getEventColorClass: (status: string) => string;
+  getEventColorClass: (status: VideoStatus) => string;
 }
 
 export function CalendarDayCell({
@@ -33,41 +33,37 @@ export function CalendarDayCell({
   readOnly,
   getEventColorClass
 }: CalendarDayCellProps) {
-  const dayEvents = events.filter(
-    (event) => format(new Date(event.date), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
-  );
+  // Get events for this day
+  const dayEvents = events.filter(event => {
+    try {
+      const eventDate = parseISO(event.date);
+      return isSameDay(eventDate, day);
+    } catch (error) {
+      console.error("Error parsing date", event.date, error);
+      return false;
+    }
+  });
 
   return (
     <div
-      className={cn(
-        "border rounded-md p-1 overflow-y-auto",
-        isToday ? "border-primary/50" : "border-border",
-        !isCurrentMonth ? "opacity-50 bg-muted/20" : "",
-        !readOnly ? "cursor-pointer" : "",
-        "min-h-[80px] max-h-[120px]"
-      )}
-      onClick={() => onDateClick && !readOnly && onDateClick(day)}
+      className={`border rounded-md h-24 p-1 overflow-hidden transition-colors flex flex-col ${
+        isToday ? "border-primary" : isCurrentMonth ? "border-border" : "border-muted bg-muted/20"
+      }`}
+      onClick={() => onDateClick && onDateClick(day)}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, day)}
     >
-      <div className={cn(
-        "text-xs font-medium mb-1 flex items-center justify-center rounded-full w-5 h-5 mx-auto",
-        isToday ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-      )}>
+      <div className={`text-xs text-right mb-1 ${isCurrentMonth ? "" : "text-muted-foreground"}`}>
         {format(day, "d")}
       </div>
       
-      {/* Events for this day */}
-      <div className="space-y-1">
+      <div className="flex-1 overflow-y-auto space-y-1 scrollbar-hide">
         {dayEvents.map((event) => (
           <div
             key={event.id}
-            className={cn(
-              "p-0.5 rounded text-[0.65rem] text-white flex flex-col",
-              getEventColorClass(event.status),
-              draggingEventId === event.id ? "opacity-50" : "",
-              "hover:opacity-80 transition-opacity cursor-pointer"
-            )}
+            className={`text-xs p-1 rounded cursor-pointer truncate ${
+              draggingEventId === event.id ? "opacity-50" : ""
+            } ${getEventColorClass(event.status)} text-white`}
             onClick={(e) => {
               e.stopPropagation();
               onEventClick(event.id);
@@ -75,10 +71,8 @@ export function CalendarDayCell({
             draggable={!readOnly}
             onDragStart={(e) => handleDragStart(e, event.id)}
           >
-            <div className="font-medium truncate">{event.title}</div>
-            {event.videoType && (
-              <div className="text-[0.6rem] opacity-90 truncate">{event.videoType}</div>
-            )}
+            {event.title}
+            {event.videoType && <span className="text-[0.65rem] ml-1 opacity-80">[{event.videoType}]</span>}
           </div>
         ))}
       </div>

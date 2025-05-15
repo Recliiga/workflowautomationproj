@@ -1,8 +1,7 @@
 
 import React from "react";
-import { format } from "date-fns";
 import { CalendarEvent } from "@/types";
-import { cn } from "@/lib/utils";
+import { format, isSameDay, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 
 interface MobileEventsListProps {
@@ -20,45 +19,56 @@ export function MobileEventsList({
   getEventColorClass,
   isToday
 }: MobileEventsListProps) {
+  // Group events by date for mobile view
+  const groupedEvents = calendarDates.reduce<Record<string, CalendarEvent[]>>((acc, date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    const dateEvents = events.filter(event => {
+      try {
+        const eventDate = parseISO(event.date);
+        return isSameDay(eventDate, date);
+      } catch (error) {
+        return false;
+      }
+    });
+
+    if (dateEvents.length > 0) {
+      acc[dateStr] = dateEvents;
+    }
+
+    return acc;
+  }, {});
+
+  // If no events for any date, show message
+  if (Object.keys(groupedEvents).length === 0) {
+    return (
+      <div className="md:hidden p-4 text-center text-muted-foreground">
+        No events in this period for the selected status filters.
+      </div>
+    );
+  }
+
   return (
-    <div className="md:hidden space-y-3">
-      {calendarDates.map((day, idx) => {
-        const dayEvents = events.filter(
-          (event) => format(new Date(event.date), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
-        );
-
-        if (dayEvents.length === 0) return null;
-
+    <div className="md:hidden space-y-4">
+      {Object.entries(groupedEvents).map(([dateStr, dateEvents]) => {
+        const date = new Date(dateStr);
         return (
-          <div key={idx} className="border rounded-md p-2">
-            <div className={cn(
-              "flex items-center gap-2 font-medium mb-2",
-              isToday(day) ? "text-primary" : ""
-            )}>
-              <div className={cn(
-                "flex items-center justify-center rounded-full w-6 h-6 text-xs",
-                isToday(day) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-              )}>
-                {format(day, "d")}
-              </div>
-              <span className="text-sm">{format(day, "EEEE")}</span>
+          <div key={dateStr} className="border rounded-md overflow-hidden">
+            <div className={`p-2 font-medium text-sm border-b ${isToday(date) ? "bg-primary/10" : ""}`}>
+              {format(date, "EEEE, MMMM d")}
+              {isToday(date) && <Badge className="ml-2 bg-primary">Today</Badge>}
             </div>
-
-            <div className="space-y-1.5">
-              {dayEvents.map((event) => (
-                <div 
+            <div className="divide-y">
+              {dateEvents.map(event => (
+                <div
                   key={event.id}
-                  className="flex items-center gap-2 p-1.5 bg-background border rounded-md"
+                  className="p-2 flex items-center cursor-pointer hover:bg-muted/50"
                   onClick={() => onEventClick(event.id)}
                 >
-                  <Badge variant="outline" className={cn(
-                    "w-2 h-2 rounded-full p-0",
-                    getEventColorClass(event.status)
-                  )} />
-                  <div className="flex-1 truncate">
-                    <div className="font-medium text-xs truncate">{event.title}</div>
+                  <div className={`w-3 h-3 rounded-full mr-2 ${getEventColorClass(event.status)}`}></div>
+                  <div className="overflow-hidden">
+                    <div className="font-medium text-sm truncate">{event.title}</div>
                     {event.videoType && (
-                      <div className="text-[0.65rem] text-muted-foreground">{event.videoType}</div>
+                      <div className="text-xs text-muted-foreground truncate">{event.videoType}</div>
                     )}
                   </div>
                 </div>
