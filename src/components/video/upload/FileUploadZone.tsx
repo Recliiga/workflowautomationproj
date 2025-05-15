@@ -55,14 +55,14 @@ export function FileUploadZone({ onFilesSelected, maxFiles }: FileUploadZoneProp
           ref={inputRef}
           type="file"
           multiple
-          accept="video/*"
+          accept="video/*,image/*"
           onChange={handleChange}
           className="hidden"
         />
         
         <div className="flex flex-col items-center justify-center text-center">
           <Upload className="h-10 w-10 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">Drag and drop video files</h3>
+          <h3 className="text-lg font-medium">Drag and drop video or image files</h3>
           <p className="text-sm text-muted-foreground mt-1 mb-4">
             or click to browse (max {maxFiles} files)
           </p>

@@ -33,6 +33,7 @@ export function UploadSection({
     const newVideos: Video[] = files.map((file, index) => {
       const fileId = Object.keys(metadata)[index];
       const { title, description, notes } = metadata[fileId];
+      const isVideo = file.type.startsWith('video/');
       
       return {
         id: `new-${Date.now()}-${index}`,
@@ -42,7 +43,7 @@ export function UploadSection({
         videoType: submissionData.videoType,
         clientId: "2", // Current user ID would be used here
         originalUrl: URL.createObjectURL(file),
-        thumbnailUrl: "", // In real app, this would be generated
+        thumbnailUrl: isVideo ? "" : URL.createObjectURL(file), // Use image as its own thumbnail
         status: "in-progress",
         uploadDate: new Date().toISOString(),
         dueDate: submissionData.targetDate ? submissionData.targetDate.toISOString() : undefined,
@@ -52,14 +53,14 @@ export function UploadSection({
     
     onVideosUploaded(newVideos);
     setIsUploadModalOpen(false);
-    toast.success(`${files.length} video${files.length > 1 ? 's' : ''} uploaded successfully!`);
+    toast.success(`${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully!`);
   };
 
   return (
     <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Upload Videos</DialogTitle>
+          <DialogTitle>Upload Videos & Photos</DialogTitle>
         </DialogHeader>
         <FileUploadModule 
           onFilesSelected={handleFileUpload} 

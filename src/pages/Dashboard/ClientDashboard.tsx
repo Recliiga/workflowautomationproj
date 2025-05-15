@@ -140,6 +140,7 @@ export default function ClientDashboard() {
     const newVideos: Video[] = files.map((file, index) => {
       const fileId = Object.keys(metadata)[index];
       const { title, description, notes } = metadata[fileId];
+      const isVideo = file.type.startsWith('video/');
       
       return {
         id: `new-${Date.now()}-${index}`,
@@ -149,7 +150,7 @@ export default function ClientDashboard() {
         videoType: submissionData.videoType,
         clientId: "2", // Current user ID would be used here
         originalUrl: URL.createObjectURL(file),
-        thumbnailUrl: "", // In real app, this would be generated
+        thumbnailUrl: isVideo ? "" : URL.createObjectURL(file), // Use image as its own thumbnail
         status: "in-progress",
         uploadDate: new Date().toISOString(),
         dueDate: submissionData.targetDate ? submissionData.targetDate.toISOString() : undefined,
@@ -158,7 +159,7 @@ export default function ClientDashboard() {
     
     setVideos(prev => [...newVideos, ...prev]);
     setIsUploadModalOpen(false);
-    toast.success(`${files.length} video${files.length > 1 ? 's' : ''} uploaded successfully!`);
+    toast.success(`${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully!`);
   };
   
   const videosByStatus = {
@@ -173,7 +174,7 @@ export default function ClientDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Client Dashboard</h1>
-          <p className="text-muted-foreground">Manage your videos and content</p>
+          <p className="text-muted-foreground">Manage your videos and photos</p>
         </div>
         
         <div className="flex gap-2">
@@ -186,7 +187,7 @@ export default function ClientDashboard() {
           </Button>
           <Button onClick={() => setIsUploadModalOpen(true)}>
             <Upload className="mr-2 h-4 w-4" />
-            Upload Videos
+            Upload Files
           </Button>
         </div>
       </div>
@@ -219,7 +220,7 @@ export default function ClientDashboard() {
         <TabsContent value="in-progress" className="mt-6">
           {videosByStatus["in-progress"].length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No videos in progress</p>
+              <p className="text-muted-foreground">No files in progress</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -296,7 +297,7 @@ export default function ClientDashboard() {
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Upload Videos</DialogTitle>
+            <DialogTitle>Upload Videos & Photos</DialogTitle>
           </DialogHeader>
           <FileUploadModule 
             onFilesSelected={handleFileUpload} 

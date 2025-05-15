@@ -30,19 +30,22 @@ export function UploadModal({
   onFileChange,
   onSubmit
 }: UploadModalProps) {
+  const isImage = selectedVideo?.originalUrl.includes("image") || 
+                 (selectedVideo?.thumbnailUrl && !selectedVideo.editedUrl);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {isResubmission ? "Resubmit Video" : "Submit Edited Video"}
+            {isResubmission ? "Resubmit" : "Submit Edited"} {isImage ? "Image" : "Video"}
           </DialogTitle>
         </DialogHeader>
         
         {selectedVideo && (
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium">Original Video: {selectedVideo.title}</h3>
+              <h3 className="font-medium">Original {isImage ? "Image" : "Video"}: {selectedVideo.title}</h3>
               <p className="text-sm text-muted-foreground mt-1">{selectedVideo.description}</p>
               
               {selectedVideo.notes && (
@@ -54,11 +57,11 @@ export function UploadModal({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="video-file">Upload {isResubmission ? "Resubmission" : "Edited Video"}</Label>
+              <Label htmlFor="file-upload">Upload {isResubmission ? "Resubmission" : "Edited"} {isImage ? "Image" : "Video"}</Label>
               <Input
-                id="video-file"
+                id="file-upload"
                 type="file"
-                accept="video/*"
+                accept={isImage ? "image/*" : "video/*"}
                 onChange={onFileChange}
               />
             </div>
@@ -68,7 +71,7 @@ export function UploadModal({
                 onClick={onSubmit}
                 disabled={!uploadedFile}
               >
-                {isResubmission ? "Resubmit" : "Submit"} Video
+                {isResubmission ? "Resubmit" : "Submit"} {isImage ? "Image" : "Video"}
               </Button>
             </div>
           </div>

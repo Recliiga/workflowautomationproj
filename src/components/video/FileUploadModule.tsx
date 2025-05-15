@@ -58,20 +58,20 @@ export function FileUploadModule({
 
   const handleFiles = (files: FileList) => {
     if (uploadedFiles.length + files.length > maxFiles) {
-      setError(`You can only upload up to ${maxFiles} videos.`);
+      setError(`You can only upload up to ${maxFiles} files.`);
       return;
     }
 
-    const videoFiles = Array.from(files).filter(
-      file => file.type.startsWith('video/')
+    const validFiles = Array.from(files).filter(
+      file => file.type.startsWith('video/') || file.type.startsWith('image/')
     );
 
-    if (videoFiles.length !== files.length) {
-      setError('Only video files are allowed.');
+    if (validFiles.length !== files.length) {
+      setError('Only video and image files are allowed.');
       return;
     }
 
-    const newFiles = videoFiles.map(file => {
+    const newFiles = validFiles.map(file => {
       const id = `file-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       const previewUrl = URL.createObjectURL(file);
       
@@ -174,7 +174,7 @@ export function FileUploadModule({
       {/* List of uploaded files */}
       {uploadedFiles.length > 0 && (
         <div className="space-y-6">
-          <h3 className="text-lg font-medium">Uploaded Videos ({uploadedFiles.length}/{maxFiles})</h3>
+          <h3 className="text-lg font-medium">Uploaded Files ({uploadedFiles.length}/{maxFiles})</h3>
           
           <VideoCarousel
             files={uploadedFiles}
