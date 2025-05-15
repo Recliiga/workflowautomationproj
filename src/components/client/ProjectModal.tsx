@@ -49,7 +49,7 @@ export function ProjectModal({ project, onVideoClick }: ProjectModalProps) {
           </Badge>
         </div>
         
-        {/* Project-level description (Video Context) */}
+        {/* Video Context (moved above Notes section) */}
         {project.videos?.[0]?.description && (
           <Card className="border border-muted">
             <CardHeader className="py-3">
@@ -61,7 +61,7 @@ export function ProjectModal({ project, onVideoClick }: ProjectModalProps) {
           </Card>
         )}
         
-        {/* Project-level notes */}
+        {/* Notes section (moved below Video Context) */}
         {project.videos?.[0]?.notes && (
           <Card className="border border-muted">
             <CardHeader className="py-3">
@@ -74,7 +74,7 @@ export function ProjectModal({ project, onVideoClick }: ProjectModalProps) {
         )}
         
         <h3 className="text-lg font-medium mt-2">Videos in this project:</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4">
           {project.videos?.map((video: Video) => (
             <CalendarVideoCard
               key={video.id}

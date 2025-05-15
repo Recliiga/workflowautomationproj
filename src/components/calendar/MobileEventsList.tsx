@@ -3,21 +3,18 @@ import React from "react";
 import { CalendarEvent } from "@/types";
 import { format, isSameDay, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { getEventColorClass, isToday } from "@/utils/calendarUtils";
 
 interface MobileEventsListProps {
   calendarDates: Date[];
   events: CalendarEvent[];
   onEventClick: (eventId: string) => void;
-  getEventColorClass: (status: string) => string;
-  isToday: (date: Date) => boolean;
 }
 
 export function MobileEventsList({
   calendarDates,
   events,
   onEventClick,
-  getEventColorClass,
-  isToday
 }: MobileEventsListProps) {
   // Group events by date for mobile view
   const groupedEvents = calendarDates.reduce<Record<string, CalendarEvent[]>>((acc, date) => {

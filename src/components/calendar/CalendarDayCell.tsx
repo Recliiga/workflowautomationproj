@@ -2,7 +2,6 @@
 import React from "react";
 import { CalendarEvent, VideoStatus } from "@/types";
 import { format, isSameDay, parseISO } from "date-fns";
-import { CalendarVideoCard } from "@/components/video/CalendarVideoCard";
 
 interface CalendarDayCellProps {
   day: Date;
