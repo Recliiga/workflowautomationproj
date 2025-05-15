@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { User } from "@/types";
+import { toast } from "sonner";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -15,7 +16,9 @@ interface AppLayoutProps {
 export function AppLayout({ children, requiredRole }: AppLayoutProps) {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [authorized, setAuthorized] = useState<boolean>(false);
+  const [lastCheckTimestamp, setLastCheckTimestamp] = useState<number>(Date.now());
 
   useEffect(() => {
     // Check authentication and authorization
@@ -23,7 +26,7 @@ export function AppLayout({ children, requiredRole }: AppLayoutProps) {
       if (!user) {
         // Not authenticated, redirect to login
         console.log("No user found, redirecting to login");
-        navigate("/login");
+        navigate("/login", { replace: true, state: { from: location.pathname } });
         return;
       }
 
@@ -36,23 +39,35 @@ export function AppLayout({ children, requiredRole }: AppLayoutProps) {
         if (!hasRequiredRole) {
           console.log(`User role ${user.role} doesn't have permission for this page`);
           // Not authorized, redirect to dashboard
-          navigate("/dashboard");
+          toast.error("You don't have permission to access this page");
+          navigate("/dashboard", { replace: true });
           return;
         }
       }
 
       setAuthorized(true);
+      setLastCheckTimestamp(Date.now());
     }
-  }, [user, isLoading, navigate, requiredRole]);
+  }, [user, isLoading, navigate, requiredRole, location.pathname]);
 
-  // Add an additional check to detect if user gets cleared unexpectedly
+  // Set up a regular check to verify the user session is still valid
   useEffect(() => {
-    // Only run this effect if we were previously authorized
-    if (authorized && !user && !isLoading) {
-      console.log("User session lost, redirecting to login");
-      navigate("/login");
-    }
-  }, [user, authorized, isLoading, navigate]);
+    if (!authorized) return;
+
+    const checkInterval = setInterval(() => {
+      // If user disappears unexpectedly, navigate back to login
+      if (!isLoading && !user) {
+        console.log("User session lost, redirecting to login");
+        toast.error("Your session has expired. Please log in again.");
+        navigate("/login", { replace: true });
+        clearInterval(checkInterval);
+      }
+      
+      setLastCheckTimestamp(Date.now());
+    }, 10000); // Check every 10 seconds
+    
+    return () => clearInterval(checkInterval);
+  }, [authorized, user, isLoading, navigate, lastCheckTimestamp]);
 
   if (isLoading) {
     return (

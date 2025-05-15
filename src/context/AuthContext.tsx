@@ -39,19 +39,42 @@ const MOCK_USERS: User[] = [
 // A more stable storage key
 const STORAGE_KEY = 'videoflow_user_session';
 
+// Session timeout duration in milliseconds (30 minutes)
+const SESSION_TIMEOUT = 30 * 60 * 1000;
+
+// How often to check/refresh the session (every minute)
+const REFRESH_INTERVAL = 60 * 1000;
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastActivity, setLastActivity] = useState<number>(Date.now());
 
+  // Load user from localStorage on initial mount
   useEffect(() => {
     // Check for saved user in localStorage with improved error handling
     try {
       const savedUser = localStorage.getItem(STORAGE_KEY);
       if (savedUser) {
-        const parsedUser = JSON.parse(savedUser);
-        // Verify that the parsed user has the expected structure
-        if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.role) {
-          setUser(parsedUser);
+        const parsedData = JSON.parse(savedUser);
+        
+        // Check that the parsed user has the expected structure
+        if (parsedData && parsedData.user && parsedData.user.id && parsedData.user.email && parsedData.user.role) {
+          setUser(parsedData.user);
+          
+          // Check if the session has expired
+          const timestamp = parsedData.timestamp || 0;
+          const now = Date.now();
+          
+          if (now - timestamp < SESSION_TIMEOUT) {
+            // Session is still valid
+            setLastActivity(timestamp);
+          } else {
+            // Session has expired
+            console.log("Session expired, clearing user data");
+            localStorage.removeItem(STORAGE_KEY);
+            setUser(null);
+          }
         }
       }
     } catch (error) {
@@ -63,21 +86,73 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Set up a session check/refresh interval
+  // Set up activity tracking
   useEffect(() => {
-    // Ping the session every minute to keep it active
-    const interval = setInterval(() => {
-      if (user) {
-        // Update the timestamp to keep the session fresh
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          ...user,
-          _lastActive: new Date().toISOString()
-        }));
-      }
-    }, 60000); // every minute
+    if (!user) return;
 
-    return () => clearInterval(interval);
+    // Update session timestamp on user activity events
+    const updateTimestamp = () => {
+      setLastActivity(Date.now());
+    };
+
+    // Track user activity
+    window.addEventListener('click', updateTimestamp);
+    window.addEventListener('keypress', updateTimestamp);
+    window.addEventListener('scroll', updateTimestamp);
+    window.addEventListener('mousemove', updateTimestamp);
+
+    return () => {
+      window.removeEventListener('click', updateTimestamp);
+      window.removeEventListener('keypress', updateTimestamp);
+      window.removeEventListener('scroll', updateTimestamp);
+      window.removeEventListener('mousemove', updateTimestamp);
+    };
   }, [user]);
+
+  // Keep session active and persisted based on user activity
+  useEffect(() => {
+    if (!user) return;
+
+    // Update localStorage with the latest timestamp whenever lastActivity changes
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      user,
+      timestamp: lastActivity,
+    }));
+
+    // Set up a regular check/refresh interval
+    const intervalId = setInterval(() => {
+      try {
+        // Get the current session data
+        const savedUser = localStorage.getItem(STORAGE_KEY);
+        if (!savedUser) {
+          // No session data found, user has been logged out elsewhere
+          setUser(null);
+          return;
+        }
+
+        const parsedData = JSON.parse(savedUser);
+        const timestamp = parsedData.timestamp || 0;
+        const now = Date.now();
+
+        if (now - timestamp < SESSION_TIMEOUT) {
+          // Session is still valid, keep it fresh by updating the timestamp
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            user,
+            timestamp: lastActivity,
+          }));
+        } else {
+          // Session has expired
+          console.log("Session timed out");
+          localStorage.removeItem(STORAGE_KEY);
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Error refreshing session:', error);
+      }
+    }, REFRESH_INTERVAL);
+
+    return () => clearInterval(intervalId);
+  }, [user, lastActivity]);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -90,13 +165,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!foundUser) throw new Error('Invalid credentials');
       
       // Add timestamp and store user in state and localStorage
-      const userWithTimestamp = {
-        ...foundUser,
-        _lastActive: new Date().toISOString()
-      };
+      const now = Date.now();
+      setLastActivity(now);
+      setUser(foundUser);
       
-      setUser(userWithTimestamp);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(userWithTimestamp));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        user: foundUser,
+        timestamp: now
+      }));
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -111,12 +187,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const setCurrentUser = (newUser: User) => {
-    const userWithTimestamp = {
-      ...newUser,
-      _lastActive: new Date().toISOString()
-    };
-    setUser(userWithTimestamp);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userWithTimestamp));
+    const now = Date.now();
+    setLastActivity(now);
+    setUser(newUser);
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      user: newUser,
+      timestamp: now
+    }));
   };
 
   return (
