@@ -6,12 +6,17 @@ import {
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function RoleSwitcher() {
   const { user, switchRole } = useAuth();
+  const navigate = useNavigate();
   
   const roles: UserRole[] = ["admin", "client", "freelancer"];
   
@@ -24,16 +29,23 @@ export function RoleSwitcher() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {roles.map((role) => (
-          <DropdownMenuItem
-            key={role}
-            onClick={() => switchRole(role)}
-            className={user.role === role ? "bg-secondary" : ""}
-          >
-            <span className="capitalize">{role}</span>
-            {user.role === role && <span className="ml-2">✓</span>}
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuLabel>Switch Role</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          {roles.map((role) => (
+            <DropdownMenuItem
+              key={role}
+              onClick={() => switchRole(role)}
+              className={user.role === role ? "bg-secondary" : ""}
+            >
+              <span className="capitalize">{role}</span>
+              {user.role === role && <span className="ml-2">✓</span>}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate('/profile')}>
+          Profile Settings
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

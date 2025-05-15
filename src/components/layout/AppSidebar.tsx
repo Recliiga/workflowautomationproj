@@ -4,8 +4,6 @@ import { useAuth } from "@/context/AuthContext";
 import { 
   Home, 
   User, 
-  Calendar, 
-  History, 
   Users, 
   Settings,
   FileVideo,
@@ -29,31 +27,19 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Menu items based on user role
+  // Simplified menu items based on user role
   const getMenuItems = () => {
     const baseItems = [
-      { title: "Dashboard", url: "/dashboard", icon: Home },
-      { title: "Profile", url: "/profile", icon: User },
+      { title: "Main", url: "/main", icon: Home },
     ];
 
-    const roleSpecificItems = {
-      admin: [
-        { title: "Users", url: "/users", icon: Users },
-        { title: "Calendar", url: "/calendar", icon: Calendar },
-        { title: "Settings", url: "/settings", icon: Settings },
-      ],
-      client: [
-        { title: "Calendar", url: "/calendar", icon: Calendar },
-        { title: "Task History", url: "/history", icon: History },
-      ],
-      freelancer: [
-        { title: "Assignments", url: "/assignments", icon: FileVideo },
-        { title: "Calendar", url: "/calendar", icon: Calendar },
-      ],
-    };
+    const adminItems = [
+      { title: "Users", url: "/users", icon: Users },
+      { title: "Settings", url: "/settings", icon: Settings },
+    ];
 
     if (!user) return baseItems;
-    return [...baseItems, ...roleSpecificItems[user.role]];
+    return user.role === 'admin' ? [...baseItems, ...adminItems] : baseItems;
   };
 
   const handleLogout = () => {

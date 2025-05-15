@@ -8,10 +8,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import { useState } from "react";
 import { UserRole } from "@/types";
 
-import Dashboard from "./pages/Dashboard";
-import Calendar from "./pages/Calendar";
+import MainPage from "./pages/MainPage";
 import Profile from "./pages/Profile";
-import TaskHistory from "./pages/TaskHistory";
 import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 
@@ -36,12 +34,10 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/main" element={<MainPage />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/history" element={<TaskHistory />} />
               <Route path="/users" element={<Users />} />
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<Navigate to="/main" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
