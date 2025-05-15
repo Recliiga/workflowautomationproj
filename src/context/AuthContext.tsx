@@ -14,12 +14,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Fix: Define AuthProvider as a proper React functional component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Create a state to manage the current user with role switching
   const [currentUser, setCurrentUser] = useState<User>(mockUser);
   
   // Mock login function
-  const login = async () => {
+  const login = async (email: string, password: string) => {
     console.log("Mock login - always successful");
     return Promise.resolve();
   };
