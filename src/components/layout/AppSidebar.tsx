@@ -53,13 +53,16 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar>
+    <Sidebar
+      className="w-52" // Make the sidebar skinnier
+      style={{ "--sidebar-width": "13rem", "--sidebar-width-icon": "3rem" } as React.CSSProperties} // Define custom widths
+    >
       {/* Add the rail with custom blue styling and tab indicator */}
       <div className="relative">
         <SidebarRail className={cn(sidebarStyles.rail, sidebarStyles.railTab)} />
         {/* Add a visible chevron indicator on the rail to indicate expandability */}
         <div className="absolute top-1/3 left-0 z-30 hidden group-data-[collapsible=offcanvas]:flex items-center justify-center">
-          <ChevronRight className="h-5 w-5 ml-1 text-white bg-blue-500 rounded-full p-0.5" />
+          <ChevronRight className="h-5 w-5 ml-1 text-white bg-sidebar-primary rounded-full p-0.5" />
         </div>
       </div>
       
