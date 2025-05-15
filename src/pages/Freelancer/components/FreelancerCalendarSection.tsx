@@ -1,9 +1,8 @@
 
 import React from "react";
 import { CalendarEvent } from "@/types";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { Button } from "@/components/ui/button";
-import { CalendarView } from "@/components/calendar/CalendarView";
 
 interface FreelancerCalendarSectionProps {
   calendarEvents: CalendarEvent[];
@@ -19,34 +18,33 @@ export function FreelancerCalendarSection({
   setCalendarViewMode
 }: FreelancerCalendarSectionProps) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle>Content Calendar</CardTitle>
-        <div className="flex items-center gap-2">
-          <Button 
-            size="sm" 
-            variant={calendarViewMode === "twoWeeks" ? "default" : "outline"} 
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Content Schedule</h2>
+        <div className="space-x-2">
+          <Button
+            variant={calendarViewMode === "twoWeeks" ? "default" : "outline"}
+            size="sm"
             onClick={() => setCalendarViewMode("twoWeeks")}
           >
             2 Weeks
           </Button>
-          <Button 
-            size="sm" 
+          <Button
             variant={calendarViewMode === "month" ? "default" : "outline"}
+            size="sm"
             onClick={() => setCalendarViewMode("month")}
           >
             Month
           </Button>
         </div>
-      </CardHeader>
-      <CardContent>
-        <CalendarView
-          events={calendarEvents}
-          onEventClick={onEventClick}
-          readOnly={true}
-          viewMode={calendarViewMode}
-        />
-      </CardContent>
-    </Card>
+      </div>
+      
+      <CalendarContainer
+        events={calendarEvents}
+        onEventClick={onEventClick}
+        readOnly={true}
+        viewMode={calendarViewMode}
+      />
+    </div>
   );
 }

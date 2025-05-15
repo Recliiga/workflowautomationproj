@@ -1,6 +1,6 @@
 
 import React from "react";
-import { CalendarEvent, Video } from "@/types";
+import { CalendarEvent } from "@/types";
 import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { toast } from "sonner";
 

@@ -8,7 +8,7 @@ import { ProjectModal } from "@/components/client/ProjectModal";
 interface VideoDetailSectionProps {
   isModalOpen: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
-  selectedVideo: Video | null;
+  selectedVideo: Video | undefined;
   selectedProject: CalendarEvent | null;
   setSelectedProjectState: React.Dispatch<React.SetStateAction<CalendarEvent | null>>;
   setSelectedVideoId: React.Dispatch<React.SetStateAction<string | null>>;
