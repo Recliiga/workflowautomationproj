@@ -269,18 +269,7 @@ export default function Calendar() {
                     </Badge>
                   </div>
                   
-                  {/* Project-level notes and context */}
-                  {selectedProject.videos?.[0]?.notes && (
-                    <Card className="border border-muted">
-                      <CardHeader className="py-3">
-                        <CardTitle className="text-base">Notes for Freelancer</CardTitle>
-                      </CardHeader>
-                      <CardContent className="py-3">
-                        <p className="text-sm whitespace-pre-wrap">{selectedProject.videos[0].notes}</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  
+                  {/* Project-level description (Video Context) - Moved above notes */}
                   {selectedProject.videos?.[0]?.description && (
                     <Card className="border border-muted">
                       <CardHeader className="py-3">
@@ -292,8 +281,20 @@ export default function Calendar() {
                     </Card>
                   )}
                   
+                  {/* Project-level notes - Moved below description */}
+                  {selectedProject.videos?.[0]?.notes && (
+                    <Card className="border border-muted">
+                      <CardHeader className="py-3">
+                        <CardTitle className="text-base">Notes for Freelancer</CardTitle>
+                      </CardHeader>
+                      <CardContent className="py-3">
+                        <p className="text-sm whitespace-pre-wrap">{selectedProject.videos[0].notes}</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                  
                   <h3 className="text-lg font-medium mt-2">Videos in this project:</h3>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {selectedProject.videos?.map((video: Video) => (
                       <CalendarVideoCard
                         key={video.id}
@@ -303,6 +304,7 @@ export default function Calendar() {
                           setSelectedProject(null);
                           setSelectedVideoId(video.id);
                         }}
+                        hideStatus={true} // Hide status since it's already shown at the top
                       />
                     ))}
                   </div>

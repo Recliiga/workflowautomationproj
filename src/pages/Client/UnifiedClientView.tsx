@@ -14,99 +14,10 @@ import { format } from "date-fns";
 import { ApprovalCard } from "@/components/client/ApprovalCard";
 import { RejectModal } from "@/components/client/RejectModal";
 import { CalendarVideoCard } from "@/components/video/CalendarVideoCard";
+import { ProjectModal } from "@/components/client/ProjectModal";
 
-// Mock data for demonstration
-const MOCK_VIDEOS: Video[] = [
-  {
-    id: "1",
-    title: "Brand Introduction Video",
-    description: "A short introduction to our brand values and mission.",
-    clientId: "2",
-    originalUrl: "https://example.com/videos/original1.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=300",
-    status: "in-progress",
-    uploadDate: "2023-05-01T12:00:00Z",
-    dueDate: "2023-05-10T12:00:00Z",
-    aiContent: {
-      caption: "Introducing our brand's mission to transform the industry through innovative solutions.",
-      hook: "Tired of the same old solutions? Here's how we're changing the game...",
-      cta: "Visit our website to learn more and schedule a demo today!",
-      emailCopy: "Dear [Name],\n\nWe're excited to introduce our brand new approach to solving [industry problem]. Our team has worked tirelessly to develop a solution that not only addresses your pain points but revolutionizes the way you work.\n\nClick below to learn more and schedule your personalized demo.\n\nBest regards,\nThe Team"
-    }
-  },
-  {
-    id: "2",
-    title: "Product Demo - New Feature",
-    description: "Walkthrough of our latest product feature.",
-    clientId: "2",
-    freelancerId: "3",
-    originalUrl: "https://example.com/videos/original2.mp4",
-    editedUrl: "https://example.com/videos/edited2.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1626908013351-800ddd734b8a?q=80&w=300",
-    status: "submitted",
-    uploadDate: "2023-05-02T12:00:00Z",
-    dueDate: "2023-05-12T12:00:00Z",
-    videoType: "Product Demo",
-    publishDate: "2023-06-15T12:00:00Z",
-    aiContent: {
-      caption: "Our new feature makes your workflow 10x faster. See it in action!",
-      hook: "What if you could save 5 hours every week with just one click?",
-      cta: "Try our new feature now - free for 14 days!",
-      emailCopy: "Hi [Name],\n\nWe've just released our most requested feature, and we think you're going to love it. In the attached video, you'll see how it can save you hours every week.\n\nLog in now to try it yourself!\n\nRegards,\nProduct Team"
-    }
-  },
-  {
-    id: "3",
-    title: "Customer Testimonial - Johnson Inc.",
-    description: "Interview with the CEO of Johnson Inc. about their experience.",
-    clientId: "2",
-    freelancerId: "3",
-    originalUrl: "https://example.com/videos/original3.mp4",
-    editedUrl: "https://example.com/videos/edited3.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1560439514-4e9645039924?q=80&w=300",
-    status: "approved",
-    uploadDate: "2023-04-20T12:00:00Z",
-    publishDate: "2023-05-15T12:00:00Z",
-    videoType: "Testimonial",
-    aiContent: {
-      caption: "Hear how Johnson Inc. increased productivity by 35% using our platform.",
-      hook: "Johnson Inc. was struggling with efficiency. Then they found us.",
-      cta: "Join hundreds of satisfied customers - book a call today!",
-      emailCopy: "Hello [Name],\n\nSuccess stories speak louder than features. That's why we wanted to share this testimonial from Johnson Inc., who saw a 35% increase in productivity within just 2 months of implementing our solution.\n\nWatch the full story in the video below.\n\nCheers,\nCustomer Success Team"
-    }
-  },
-  {
-    id: "4",
-    title: "How-To Guide: Advanced Features",
-    description: "Step by step tutorial on using advanced features.",
-    clientId: "2",
-    freelancerId: "3",
-    originalUrl: "https://example.com/videos/original4.mp4",
-    editedUrl: "https://example.com/videos/edited4.mp4",
-    resubmittedUrl: "https://example.com/videos/resubmitted4.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?q=80&w=300",
-    status: "rejected",
-    uploadDate: "2023-04-25T12:00:00Z",
-    dueDate: "2023-05-05T12:00:00Z",
-    videoType: "How-To Guide",
-    aiContent: {
-      caption: "Master our advanced features with this comprehensive guide.",
-      hook: "Did you know you're only using 20% of our platform's capabilities?",
-      cta: "Unlock your full potential - watch the full tutorial now!",
-      emailCopy: "Hi [Name],\n\nAre you getting the most out of our platform? Our data shows that most users are only scratching the surface of what's possible.\n\nWe've created a comprehensive tutorial to help you leverage our advanced features and maximize your ROI.\n\nCheck it out below!\n\nBest,\nTraining Team"
-    }
-  }
-];
-
-// Video Types - these would typically be fetched from the server
-const VIDEO_TYPES = [
-  "Dialogue",
-  "Evergreen Content",
-  "Exercises",
-  "Huge Client Win",
-  "Partnership/Sponsorship",
-  "Testimonial"
-].sort((a, b) => a.localeCompare(b));
+// Move MOCK_VIDEOS and VIDEO_TYPES to a separate file
+import { MOCK_VIDEOS, VIDEO_TYPES } from "@/data/mockData";
 
 export default function UnifiedClientView() {
   const [videos, setVideos] = useState<Video[]>(MOCK_VIDEOS);
@@ -116,25 +27,7 @@ export default function UnifiedClientView() {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [calendarViewMode, setCalendarViewMode] = useState<"twoWeeks" | "month">("twoWeeks");
-  
-  // Add back the state variable for selectedProject
   const [selectedProjectState, setSelectedProjectState] = useState<CalendarEvent | null>(null);
-  
-  // Helper function to get color for video status
-  const getStatusColor = (status: VideoStatus) => {
-    switch (status) {
-      case "in-progress":
-        return "bg-indigo-500 text-white";
-      case "submitted":
-        return "bg-amber-500 text-white";
-      case "approved":
-        return "bg-emerald-500 text-white";
-      case "rejected":
-        return "bg-red-500 text-white";
-      default:
-        return "bg-gray-500 text-white";
-    }
-  };
   
   // Filter videos for approval section
   const videosForApproval = useMemo(() => 
@@ -143,7 +36,7 @@ export default function UnifiedClientView() {
   );
   
   // Create calendar events from videos with publish dates,
-  // grouping them by project (using title as project identifier for simplicity)
+  // grouping them by project
   const calendarEvents = useMemo(() => {
     const projectMap = new Map();
     
@@ -173,7 +66,6 @@ export default function UnifiedClientView() {
         project.videos.push(video);
       });
     
-    // Convert the map to an array of calendar events
     const events: CalendarEvent[] = [];
     projectMap.forEach(dateProjects => {
       dateProjects.forEach(project => {
@@ -188,7 +80,7 @@ export default function UnifiedClientView() {
     return videos.find(v => v.id === selectedVideoId);
   }, [selectedVideoId, videos]);
   
-  // Use the existing selectedProject from useMemo, but rename it to avoid conflicts
+  // Use renamed variable to avoid conflicts
   const selectedProjectFromId = useMemo(() => {
     if (!selectedVideoId) return null;
     return calendarEvents.find(event => event.id === selectedVideoId);
@@ -312,20 +204,12 @@ export default function UnifiedClientView() {
 
       {/* Videos requiring approval section */}
       {videosForApproval.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Videos Requiring Your Approval ({videosForApproval.length})</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {videosForApproval.map(video => (
-              <ApprovalCard
-                key={video.id}
-                video={video}
-                onViewDetails={(id) => { setSelectedVideoId(id); setIsModalOpen(true); }}
-                onReject={openRejectModal}
-                onApprove={handleApprove}
-              />
-            ))}
-          </div>
-        </div>
+        <ApprovalSection 
+          videos={videosForApproval}
+          onViewDetails={(id) => { setSelectedVideoId(id); setIsModalOpen(true); }}
+          onReject={openRejectModal}
+          onApprove={handleApprove}
+        />
       )}
 
       {/* Content Calendar section */}
@@ -373,64 +257,13 @@ export default function UnifiedClientView() {
           )}
           
           {selectedProject && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-xl">{selectedProject.title}</DialogTitle>
-              </DialogHeader>
-              
-              <div className="space-y-6 mt-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">
-                    Scheduled for: {format(new Date(selectedProject.date), "MMMM d, yyyy")}
-                  </p>
-                  <Badge className={cn(
-                    "px-2 py-0.5",
-                    getStatusColor(selectedProject.videos?.[0]?.status || "in-progress")
-                  )}>
-                    {selectedProject.videos?.[0]?.status || "in-progress"}
-                  </Badge>
-                </div>
-                
-                {/* Project-level notes and context */}
-                {selectedProject.videos?.[0]?.notes && (
-                  <Card className="border border-muted">
-                    <CardHeader className="py-3">
-                      <CardTitle className="text-base">Notes for Freelancer</CardTitle>
-                    </CardHeader>
-                    <CardContent className="py-3">
-                      <p className="text-sm whitespace-pre-wrap">{selectedProject.videos[0].notes}</p>
-                    </CardContent>
-                  </Card>
-                )}
-                
-                {selectedProject.videos?.[0]?.description && (
-                  <Card className="border border-muted">
-                    <CardHeader className="py-3">
-                      <CardTitle className="text-base">Video Context</CardTitle>
-                    </CardHeader>
-                    <CardContent className="py-3">
-                      <p className="text-sm whitespace-pre-wrap">{selectedProject.videos[0].description}</p>
-                    </CardContent>
-                  </Card>
-                )}
-                
-                <h3 className="text-lg font-medium mt-2">Videos in this project:</h3>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-                  {selectedProject.videos?.map((video: Video) => (
-                    <CalendarVideoCard
-                      key={video.id}
-                      video={video}
-                      className="h-auto"
-                      compact={true}
-                      onClick={() => {
-                        setSelectedProjectState(null);
-                        setSelectedVideoId(video.id);
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </>
+            <ProjectModal 
+              project={selectedProject}
+              onVideoClick={(videoId) => {
+                setSelectedProjectState(null);
+                setSelectedVideoId(videoId);
+              }}
+            />
           )}
         </DialogContent>
       </Dialog>
@@ -456,6 +289,36 @@ export default function UnifiedClientView() {
           />
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+// Extract the approval section into a separate component
+function ApprovalSection({ 
+  videos,
+  onViewDetails,
+  onReject, 
+  onApprove 
+}: { 
+  videos: Video[], 
+  onViewDetails: (id: string) => void,
+  onReject: (id: string) => void, 
+  onApprove: (id: string) => void 
+}) {
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold">Videos Requiring Your Approval ({videos.length})</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {videos.map(video => (
+          <ApprovalCard
+            key={video.id}
+            video={video}
+            onViewDetails={onViewDetails}
+            onReject={onReject}
+            onApprove={onApprove}
+          />
+        ))}
+      </div>
     </div>
   );
 }

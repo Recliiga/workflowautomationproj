@@ -9,13 +9,15 @@ interface CalendarVideoCardProps {
   onClick?: () => void;
   className?: string;
   compact?: boolean;
+  hideStatus?: boolean; // New prop to optionally hide the status badge
 }
 
 export function CalendarVideoCard({ 
   video, 
   onClick, 
   className,
-  compact = false
+  compact = false,
+  hideStatus = false
 }: CalendarVideoCardProps) {
   const getStatusColor = (status: VideoStatus) => {
     switch (status) {
@@ -41,25 +43,27 @@ export function CalendarVideoCard({
       )}
       onClick={onClick}
     >
-      <div className={cn("relative flex-shrink-0", compact ? "w-14 h-14" : "w-16 h-16")}>
+      <div className={cn("relative flex-shrink-0", compact ? "w-14 h-14" : "w-20 h-20")}>
         <img
           src={video.thumbnailUrl || "https://via.placeholder.com/640x360?text=Video"}
           alt={video.title}
           className="object-cover w-full h-full"
         />
-        <Badge 
-          variant="outline" 
-          className={cn(
-            "absolute bottom-0.5 left-0.5 z-20 text-white border-none text-[0.65rem] py-0 px-1",
-            getStatusColor(video.status)
-          )}
-        >
-          {video.status}
-        </Badge>
+        {!hideStatus && (
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "absolute bottom-0.5 left-0.5 z-20 text-white border-none text-[0.65rem] py-0 px-1",
+              getStatusColor(video.status)
+            )}
+          >
+            {video.status}
+          </Badge>
+        )}
       </div>
-      <div className="p-1.5 flex-grow overflow-hidden">
+      <div className="p-2 flex-grow overflow-hidden">
         <h3 className={cn("font-medium truncate", compact ? "text-xs" : "text-sm")}>{video.title}</h3>
-        <div className="text-[0.65rem] text-muted-foreground truncate">
+        <div className="text-[0.7rem] text-muted-foreground truncate">
           {video.videoType || "Unclassified"}
         </div>
       </div>
