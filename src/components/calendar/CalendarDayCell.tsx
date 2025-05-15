@@ -44,7 +44,7 @@ export function CalendarDayCell({
         isToday ? "border-primary/50" : "border-border",
         !isCurrentMonth ? "opacity-50 bg-muted/20" : "",
         !readOnly ? "cursor-pointer" : "",
-        "min-h-[80px]"
+        "min-h-[80px] max-h-[120px]"
       )}
       onClick={() => onDateClick && !readOnly && onDateClick(day)}
       onDragOver={onDragOver}
@@ -63,7 +63,7 @@ export function CalendarDayCell({
           <div
             key={event.id}
             className={cn(
-              "p-1 rounded text-xs text-white flex flex-col",
+              "p-0.5 rounded text-[0.65rem] text-white flex flex-col",
               getEventColorClass(event.status),
               draggingEventId === event.id ? "opacity-50" : "",
               "hover:opacity-80 transition-opacity cursor-pointer"
@@ -77,7 +77,7 @@ export function CalendarDayCell({
           >
             <div className="font-medium truncate">{event.title}</div>
             {event.videoType && (
-              <div className="text-[10px] opacity-90 truncate">{event.videoType}</div>
+              <div className="text-[0.6rem] opacity-90 truncate">{event.videoType}</div>
             )}
           </div>
         ))}

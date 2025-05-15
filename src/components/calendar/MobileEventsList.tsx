@@ -21,7 +21,7 @@ export function MobileEventsList({
   isToday
 }: MobileEventsListProps) {
   return (
-    <div className="md:hidden space-y-4">
+    <div className="md:hidden space-y-3">
       {calendarDates.map((day, idx) => {
         const dayEvents = events.filter(
           (event) => format(new Date(event.date), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
@@ -36,19 +36,19 @@ export function MobileEventsList({
               isToday(day) ? "text-primary" : ""
             )}>
               <div className={cn(
-                "flex items-center justify-center rounded-full w-7 h-7",
+                "flex items-center justify-center rounded-full w-6 h-6 text-xs",
                 isToday(day) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
               )}>
                 {format(day, "d")}
               </div>
-              <span>{format(day, "EEEE")}</span>
+              <span className="text-sm">{format(day, "EEEE")}</span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {dayEvents.map((event) => (
                 <div 
                   key={event.id}
-                  className="flex items-center gap-2 p-2 bg-background border rounded-md"
+                  className="flex items-center gap-2 p-1.5 bg-background border rounded-md"
                   onClick={() => onEventClick(event.id)}
                 >
                   <Badge variant="outline" className={cn(
@@ -56,9 +56,9 @@ export function MobileEventsList({
                     getEventColorClass(event.status)
                   )} />
                   <div className="flex-1 truncate">
-                    <div className="font-medium text-sm truncate">{event.title}</div>
+                    <div className="font-medium text-xs truncate">{event.title}</div>
                     {event.videoType && (
-                      <div className="text-xs text-muted-foreground">{event.videoType}</div>
+                      <div className="text-[0.65rem] text-muted-foreground">{event.videoType}</div>
                     )}
                   </div>
                 </div>
