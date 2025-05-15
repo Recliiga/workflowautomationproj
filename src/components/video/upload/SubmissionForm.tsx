@@ -12,11 +12,9 @@ import { cn } from "@/lib/utils";
 interface SubmissionFormProps {
   title: string;
   description: string;
-  notes: string;
   targetDate: Date | undefined;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
-  onNotesChange: (value: string) => void;
   onTargetDateChange: (date: Date | undefined) => void;
   onSubmit: () => void;
   filesCount: number;
@@ -25,11 +23,9 @@ interface SubmissionFormProps {
 export function SubmissionForm({
   title,
   description,
-  notes,
   targetDate,
   onTitleChange,
   onDescriptionChange,
-  onNotesChange,
   onTargetDateChange,
   onSubmit,
   filesCount

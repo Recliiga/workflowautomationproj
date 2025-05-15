@@ -1,3 +1,4 @@
+
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { cn } from "@/lib/utils";
 import { VideoTypeSelector } from "./upload/VideoTypeSelector";
@@ -51,8 +52,6 @@ export function FileUploadModule({
     setSubmissionTitle,
     submissionDescription,
     setSubmissionDescription,
-    submissionNotes,
-    setSubmissionNotes,
     videoType,
     setVideoType,
     targetDate,

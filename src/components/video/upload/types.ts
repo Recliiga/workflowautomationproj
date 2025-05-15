@@ -17,7 +17,7 @@ export interface MetadataRecord {
 export interface SubmissionData {
   title: string;
   description: string;
-  notes: string; // Kept for backward compatibility
+  notes?: string; // Make notes optional
   videoType: string;
   targetDate: Date | undefined;
 }

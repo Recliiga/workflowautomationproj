@@ -4,7 +4,6 @@ import { useState } from "react";
 export function useSubmissionData(defaultVideoType: string) {
   const [submissionTitle, setSubmissionTitle] = useState("");
   const [submissionDescription, setSubmissionDescription] = useState("");
-  const [submissionNotes, setSubmissionNotes] = useState("");
   const [videoType, setVideoType] = useState<string>(defaultVideoType);
   const [targetDate, setTargetDate] = useState<Date | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
@@ -38,8 +37,6 @@ export function useSubmissionData(defaultVideoType: string) {
     setSubmissionTitle,
     submissionDescription,
     setSubmissionDescription,
-    submissionNotes,
-    setSubmissionNotes,
     videoType,
     setVideoType,
     targetDate,
