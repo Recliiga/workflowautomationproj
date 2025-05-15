@@ -1,4 +1,5 @@
 
+
 import { existing types file content }
 
 // Add videoType to CalendarEvent interface
@@ -9,4 +10,6 @@ export interface CalendarEvent {
   date: string;
   status: VideoStatus;
   videoType?: string;
+  videos?: Video[];
 }
+

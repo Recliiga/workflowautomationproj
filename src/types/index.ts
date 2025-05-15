@@ -1,4 +1,3 @@
-
 export type UserRole = 'admin' | 'client' | 'freelancer';
 
 export interface User {
@@ -85,10 +84,12 @@ export interface Video {
 
 export interface CalendarEvent {
   id: string;
-  videoId: string;
+  videoId?: string;
   title: string;
   date: string;
   status: VideoStatus;
+  videoType?: string;
+  videos?: Video[];
 }
 
 export interface DashboardStats {
