@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext } from 'react';
-import { User } from '@/types';
+import { User, UserRole } from '@/types';
 import { mockUser } from '../App';
 
 interface AuthContextType {
