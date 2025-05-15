@@ -38,6 +38,23 @@ export interface Admin extends User {
   role: 'admin';
 }
 
+// New interface that avoids type conflicts
+export interface ProfileData extends User {
+  // Common fields that can be shared by all roles
+  company?: string;
+  certifications?: string[];
+  specialties?: string[];
+  socialMedia?: {
+    platform: string;
+    handle: string;
+  }[];
+  phone?: string;
+  website?: string;
+  // Role-specific fields can be accessed conditionally
+  assignedFreelancers?: string[];
+  assignedClients?: string[];
+}
+
 export type VideoStatus = 'in-progress' | 'submitted' | 'approved' | 'rejected';
 
 export interface AIContent {

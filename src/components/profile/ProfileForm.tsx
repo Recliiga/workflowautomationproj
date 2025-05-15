@@ -1,21 +1,19 @@
 
 import { useState } from "react";
-import { User, Client, Freelancer } from "@/types";
+import { ProfileData } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { X, Plus } from "lucide-react";
 
 interface ProfileFormProps {
-  initialData: User & Partial<Client> & Partial<Freelancer>;
-  onSubmit: (data: User & Partial<Client> & Partial<Freelancer>) => void;
+  initialData: ProfileData;
+  onSubmit: (data: ProfileData) => void;
 }
 
 export function ProfileForm({ initialData, onSubmit }: ProfileFormProps) {
-  const [formData, setFormData] = useState<User & Partial<Client> & Partial<Freelancer>>(initialData);
+  const [formData, setFormData] = useState<ProfileData>(initialData);
   const [socialInputs, setSocialInputs] = useState<{ platform: string; handle: string }[]>(
     initialData.socialMedia || [{ platform: "", handle: "" }]
   );

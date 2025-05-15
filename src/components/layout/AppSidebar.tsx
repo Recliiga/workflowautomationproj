@@ -18,7 +18,6 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarHeaderTitle,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -65,10 +64,10 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <SidebarHeaderTitle className="flex items-center gap-2">
+        <div className="flex items-center gap-2 px-4">
           <FileVideo className="h-6 w-6" />
           <span>VideoFlow</span>
-        </SidebarHeaderTitle>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>

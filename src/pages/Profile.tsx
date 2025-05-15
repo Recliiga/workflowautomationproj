@@ -4,10 +4,10 @@ import { useAuth } from "@/context/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Client, Freelancer } from "@/types";
+import { User, ProfileData } from "@/types";
 
 // Mock additional user data for demonstration
-const MOCK_CLIENT_DATA: Partial<Client> = {
+const MOCK_CLIENT_DATA = {
   company: "Acme Inc.",
   socialMedia: [
     { platform: "Twitter", handle: "@acmeinc" },
@@ -17,7 +17,7 @@ const MOCK_CLIENT_DATA: Partial<Client> = {
   website: "https://acme-inc.com"
 };
 
-const MOCK_FREELANCER_DATA: Partial<Freelancer> = {
+const MOCK_FREELANCER_DATA = {
   certifications: ["Adobe Certified Expert", "YouTube Content Creation"],
   specialties: ["Motion Graphics", "Video Editing"],
   socialMedia: [
@@ -30,7 +30,7 @@ const MOCK_FREELANCER_DATA: Partial<Freelancer> = {
 
 export default function Profile() {
   const { user, setCurrentUser } = useAuth();
-  const [profileData, setProfileData] = useState<User & Partial<Client> & Partial<Freelancer> | null>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
   
   useEffect(() => {
     // In a real app, this would fetch user profile data from an API
@@ -50,7 +50,7 @@ export default function Profile() {
     }
   }, [user]);
   
-  const handleSubmit = (data: User & Partial<Client> & Partial<Freelancer>) => {
+  const handleSubmit = (data: ProfileData) => {
     // In a real app, this would update the profile via an API
     setCurrentUser({
       ...user!,
