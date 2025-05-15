@@ -6,6 +6,7 @@ import { Upload } from "lucide-react";
 import { RejectModal } from "@/components/client/RejectModal";
 import { MOCK_VIDEOS, VIDEO_TYPES } from "@/data/mockData";
 import { useCalendarEvents, updateVideoSchedule } from "@/hooks/useCalendarEvents";
+import { toast } from "sonner";
 
 // Import refactored components
 import { ApprovalSection } from "./components/ApprovalSection";
@@ -98,6 +99,11 @@ export default function UnifiedClientView() {
     setVideos(prev => [...newVideos, ...prev]);
   };
 
+  const handleDeleteVideo = (videoId: string) => {
+    setVideos(prev => prev.filter(video => video.id !== videoId));
+    toast.success("Content successfully deleted");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -139,6 +145,7 @@ export default function UnifiedClientView() {
         setSelectedVideoId={setSelectedVideoId}
         onApprove={handleApprove}
         openRejectModal={openRejectModal}
+        onDelete={handleDeleteVideo}
       />
       
       {/* Reject Modal with Required Reasoning */}
