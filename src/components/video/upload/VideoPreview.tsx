@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,14 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { FileWithPreview, FileMetadata } from "./types";
-
 interface VideoPreviewProps {
   file: FileWithPreview;
   metadata: FileMetadata;
   onRemove: (id: string) => void;
   onMetadataChange: (id: string, field: 'title' | 'description' | 'notes', value: string) => void;
 }
-
 export function VideoPreview({
   file,
   metadata,
@@ -21,81 +18,34 @@ export function VideoPreview({
   onMetadataChange
 }: VideoPreviewProps) {
   const [expanded, setExpanded] = useState(false);
-  
   const isVideo = file.type.startsWith('video/');
-  
-  return (
-    <div className="flex-shrink-0 w-72 border rounded-md overflow-hidden bg-card">
+  return <div className="flex-shrink-0 w-72 border rounded-md overflow-hidden bg-card">
       <div className="relative">
         <AspectRatio ratio={16 / 9}>
-          {isVideo ? (
-            <video 
-              src={file.previewUrl} 
-              className="object-cover w-full h-full" 
-              controls 
-            />
-          ) : (
-            <img 
-              src={file.previewUrl}
-              alt="Preview"
-              className="object-cover w-full h-full"
-            />
-          )}
+          {isVideo ? <video src={file.previewUrl} className="object-cover w-full h-full" controls /> : <img src={file.previewUrl} alt="Preview" className="object-cover w-full h-full" />}
         </AspectRatio>
-        <Button 
-          variant="destructive" 
-          size="icon" 
-          className="absolute top-2 right-2 h-7 w-7"
-          onClick={() => onRemove(file.id)}
-        >
+        <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => onRemove(file.id)}>
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
       
       <div className="p-3 space-y-3">
         <div>
-          <p className="text-xs font-medium">
-            {isVideo ? "Video" : "Image"} Title
-          </p>
-          <Input
-            value={metadata.title}
-            onChange={(e) => onMetadataChange(file.id, 'title', e.target.value)}
-            placeholder="Enter title"
-            className="mt-1 h-8 text-xs"
-          />
+          
+          
         </div>
         
         <div>
           <p className="text-xs font-medium">Description</p>
-          <Textarea
-            value={metadata.description}
-            onChange={(e) => onMetadataChange(file.id, 'description', e.target.value)}
-            placeholder="Enter description"
-            className="mt-1 h-20 text-xs"
-          />
+          <Textarea value={metadata.description} onChange={e => onMetadataChange(file.id, 'description', e.target.value)} placeholder="Enter description" className="mt-1 h-20 text-xs" />
         </div>
         
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="w-full text-xs h-6"
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? "Less Details" : "More Details"}
-        </Button>
         
-        {expanded && (
-          <div className="mt-2">
+        
+        {expanded && <div className="mt-2">
             <p className="text-xs font-medium">Additional Notes for Freelancer</p>
-            <Textarea
-              value={metadata.notes}
-              onChange={(e) => onMetadataChange(file.id, 'notes', e.target.value)}
-              placeholder="Enter notes for the freelancer"
-              className="mt-1 h-20 text-xs"
-            />
-          </div>
-        )}
+            <Textarea value={metadata.notes} onChange={e => onMetadataChange(file.id, 'notes', e.target.value)} placeholder="Enter notes for the freelancer" className="mt-1 h-20 text-xs" />
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 }
