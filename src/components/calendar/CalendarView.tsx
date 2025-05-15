@@ -1,11 +1,11 @@
+
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CalendarEvent, VideoStatus } from "@/types";
-import { Button } from "@/components/ui/button";
 import { format, addWeeks, subWeeks, startOfWeek, addDays, isSameDay, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { CalendarHeader } from "./CalendarHeader";
+import { CalendarDayCell } from "./CalendarDayCell";
+import { MobileEventsList } from "./MobileEventsList";
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -113,23 +113,6 @@ export function CalendarView({
   const isCurrentMonth = (date: Date) => {
     return date.getMonth() === currentDate.getMonth();
   };
-
-  const formatDateRange = () => {
-    if (viewMode === "month") {
-      return format(currentDate, "MMMM yyyy");
-    } else {
-      const startDate = calendarDates[0];
-      const endDate = calendarDates[calendarDates.length - 1];
-      
-      if (startDate.getMonth() === endDate.getMonth()) {
-        // Same month
-        return `${format(startDate, "MMMM d")} - ${format(endDate, "d, yyyy")}`;
-      } else {
-        // Different months
-        return `${format(startDate, "MMM d")} - ${format(endDate, "MMM d, yyyy")}`;
-      }
-    }
-  };
   
   // For month view, we need to generate week rows
   const weeks = viewMode === "month" 
@@ -138,19 +121,13 @@ export function CalendarView({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">
-          {formatDateRange()}
-        </h2>
-        <div className="flex space-x-2">
-          <Button variant="outline" size="icon" onClick={handlePrevPeriod}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={handleNextPeriod}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <CalendarHeader 
+        currentDate={currentDate}
+        viewMode={viewMode}
+        calendarDates={calendarDates}
+        onPrevPeriod={handlePrevPeriod}
+        onNextPeriod={handleNextPeriod}
+      />
 
       {/* Desktop Calendar View */}
       <div className="hidden md:block">
@@ -175,175 +152,57 @@ export function CalendarView({
               
               return (
                 <React.Fragment key={weekIndex}>
-                  {weekDays.map((day, dayIndex) => {
-                    const dayEvents = events.filter(
-                      (event) => format(new Date(event.date), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
-                    );
-
-                    return (
-                      <div
-                        key={`${weekIndex}-${dayIndex}`}
-                        className={cn(
-                          "border rounded-md p-1 overflow-y-auto",
-                          isToday(day) ? "border-primary/50" : "border-border",
-                          !isCurrentMonth(day) ? "opacity-50 bg-muted/20" : "",
-                          !readOnly ? "cursor-pointer" : "",
-                          "min-h-[80px]"
-                        )}
-                        onClick={() => onDateClick && !readOnly && onDateClick(day)}
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, day)}
-                      >
-                        <div className={cn(
-                          "text-xs font-medium mb-1 flex items-center justify-center rounded-full w-5 h-5 mx-auto",
-                          isToday(day) ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-                        )}>
-                          {format(day, "d")}
-                        </div>
-                        
-                        {/* Events for this day */}
-                        <div className="space-y-1">
-                          {dayEvents.map((event) => (
-                            <div
-                              key={event.id}
-                              className={cn(
-                                "p-1 rounded text-xs text-white flex flex-col",
-                                getEventColorClass(event.status),
-                                draggingEventId === event.id ? "opacity-50" : "",
-                                "hover:opacity-80 transition-opacity cursor-pointer"
-                              )}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onEventClick(event.id);
-                              }}
-                              draggable={!readOnly}
-                              onDragStart={(e) => handleDragStart(e, event.id)}
-                            >
-                              <div className="font-medium truncate">{event.title}</div>
-                              {event.videoType && (
-                                <div className="text-[10px] opacity-90 truncate">{event.videoType}</div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {weekDays.map((day, dayIndex) => (
+                    <CalendarDayCell 
+                      key={`${weekIndex}-${dayIndex}`}
+                      day={day}
+                      events={events}
+                      isCurrentMonth={isCurrentMonth(day)}
+                      isToday={isToday(day)}
+                      onDateClick={onDateClick}
+                      onEventClick={onEventClick}
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                      handleDragStart={handleDragStart}
+                      draggingEventId={draggingEventId}
+                      readOnly={readOnly}
+                      getEventColorClass={getEventColorClass}
+                    />
+                  ))}
                 </React.Fragment>
               );
             })
           ) : (
             // Two-week view - simpler layout
-            calendarDates.map((day, i) => {
-              const dayEvents = events.filter(
-                (event) => format(new Date(event.date), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
-              );
-
-              return (
-                <div
-                  key={i}
-                  className={cn(
-                    "border rounded-md min-h-[140px] p-1 overflow-y-auto",
-                    isToday(day) ? "border-primary/50" : "border-border",
-                    !readOnly ? "cursor-pointer" : ""
-                  )}
-                  onClick={() => onDateClick && !readOnly && onDateClick(day)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, day)}
-                >
-                  <div className={cn(
-                    "text-center text-sm font-medium",
-                    isToday(day) ? "text-primary" : "text-muted-foreground"
-                  )}>
-                    <div>{format(day, "EEE")}</div>
-                    <div className={cn(
-                      "inline-flex items-center justify-center rounded-full w-7 h-7",
-                      isToday(day) ? "bg-primary text-primary-foreground" : ""
-                    )}>
-                      {format(day, "d")}
-                    </div>
-                  </div>
-
-                  {/* Events for this day */}
-                  <div className="space-y-1 mt-1">
-                    {dayEvents.map((event) => (
-                      <div
-                        key={event.id}
-                        className={cn(
-                          "p-1 rounded text-xs text-white flex flex-col",
-                          getEventColorClass(event.status),
-                          draggingEventId === event.id ? "opacity-50" : "",
-                          "hover:opacity-80 transition-opacity cursor-pointer"
-                        )}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEventClick(event.id);
-                        }}
-                        draggable={!readOnly}
-                        onDragStart={(e) => handleDragStart(e, event.id)}
-                      >
-                        <div className="font-medium truncate">{event.title}</div>
-                        {event.videoType && (
-                          <div className="text-[10px] opacity-90 truncate">{event.videoType}</div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })
+            calendarDates.map((day, i) => (
+              <CalendarDayCell 
+                key={i}
+                day={day}
+                events={events}
+                isCurrentMonth={true}
+                isToday={isToday(day)}
+                onDateClick={onDateClick}
+                onEventClick={onEventClick}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                handleDragStart={handleDragStart}
+                draggingEventId={draggingEventId}
+                readOnly={readOnly}
+                getEventColorClass={getEventColorClass}
+              />
+            ))
           )}
         </div>
       </div>
 
       {/* Mobile Calendar View */}
-      <div className="md:hidden space-y-4">
-        {calendarDates.map((day, idx) => {
-          const dayEvents = events.filter(
-            (event) => format(new Date(event.date), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
-          );
-
-          if (dayEvents.length === 0) return null;
-
-          return (
-            <div key={idx} className="border rounded-md p-2">
-              <div className={cn(
-                "flex items-center gap-2 font-medium mb-2",
-                isToday(day) ? "text-primary" : ""
-              )}>
-                <div className={cn(
-                  "flex items-center justify-center rounded-full w-7 h-7",
-                  isToday(day) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                )}>
-                  {format(day, "d")}
-                </div>
-                <span>{format(day, "EEEE")}</span>
-              </div>
-
-              <div className="space-y-2">
-                {dayEvents.map((event) => (
-                  <div 
-                    key={event.id}
-                    className="flex items-center gap-2 p-2 bg-background border rounded-md"
-                    onClick={() => onEventClick(event.id)}
-                  >
-                    <Badge variant="outline" className={cn(
-                      "w-2 h-2 rounded-full p-0",
-                      getEventColorClass(event.status)
-                    )} />
-                    <div className="flex-1 truncate">
-                      <div className="font-medium text-sm truncate">{event.title}</div>
-                      {event.videoType && (
-                        <div className="text-xs text-muted-foreground">{event.videoType}</div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <MobileEventsList
+        calendarDates={calendarDates}
+        events={events}
+        onEventClick={onEventClick}
+        getEventColorClass={getEventColorClass}
+        isToday={isToday}
+      />
     </div>
   );
 }

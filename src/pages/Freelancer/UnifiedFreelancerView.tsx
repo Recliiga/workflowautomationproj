@@ -1,17 +1,15 @@
-
 import { useState, useMemo } from "react";
 import { Video, VideoStatus, CalendarEvent } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Upload } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { VideoPreviewCard } from "@/components/video/VideoPreviewCard";
 import { CalendarView } from "@/components/calendar/CalendarView";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
+import { ActionCard } from "@/components/freelancer/ActionCard";
+import { UploadModal } from "@/components/freelancer/UploadModal";
 
 // Mock data for demonstration
 const MOCK_VIDEOS: Video[] = [
@@ -208,47 +206,14 @@ export default function UnifiedFreelancerView() {
       {urgentVideos.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Videos Requiring Action ({urgentVideos.length})</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {urgentVideos.map(video => (
-              <div key={video.id} className="border rounded-md p-2 shadow-sm">
-                <div className="aspect-video bg-muted relative overflow-hidden rounded-sm mb-2">
-                  {video.thumbnailUrl && (
-                    <img 
-                      src={video.thumbnailUrl} 
-                      alt={video.title}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-                <h3 className="font-medium text-sm line-clamp-1 mb-1">{video.title}</h3>
-                <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
-                  {video.videoType || "Unclassified"}
-                </p>
-                
-                {video.status === "rejected" && video.notes && (
-                  <div className="bg-red-50 border border-red-100 rounded p-1 mb-2">
-                    <p className="text-xs text-red-700 font-medium">Feedback:</p>
-                    <p className="text-xs text-red-600 line-clamp-2">{video.notes}</p>
-                  </div>
-                )}
-                
-                <Button 
-                  className="w-full text-xs"
-                  size="sm"
-                  onClick={() => openUploadModal(video.id, video.status === "rejected")}
-                >
-                  <Upload className="mr-2 h-3 w-3" />
-                  {video.status === "rejected" ? "Resubmit Video" : "Submit Edited Video"}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full mt-1 text-xs"
-                  onClick={() => { setSelectedVideoId(video.id); setIsModalOpen(true); }}
-                >
-                  View Details
-                </Button>
-              </div>
+              <ActionCard 
+                key={video.id}
+                video={video}
+                onViewDetails={(id) => { setSelectedVideoId(id); setIsModalOpen(true); }}
+                onSubmit={openUploadModal}
+              />
             ))}
           </div>
         </div>
@@ -302,7 +267,7 @@ export default function UnifiedFreelancerView() {
               
               <h3 className="text-lg font-medium mt-4 mb-2">Videos in this project:</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {selectedProject.videos.map((video: Video) => (
+                {selectedProject.videos?.map((video: Video) => (
                   <VideoPreviewCard
                     key={video.id}
                     video={video}
@@ -316,50 +281,15 @@ export default function UnifiedFreelancerView() {
       </Dialog>
       
       {/* Upload Modal */}
-      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {isResubmission ? "Resubmit Video" : "Submit Edited Video"}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {selectedVideo && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-medium">Original Video: {selectedVideo.title}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{selectedVideo.description}</p>
-                
-                {selectedVideo.notes && (
-                  <div className="mt-3 p-3 bg-secondary/30 rounded-md">
-                    <h4 className="text-sm font-medium">Client Notes:</h4>
-                    <p className="text-sm mt-1">{selectedVideo.notes}</p>
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="video-file">Upload {isResubmission ? "Resubmission" : "Edited Video"}</Label>
-                <Input
-                  id="video-file"
-                  type="file"
-                  accept="video/*"
-                  onChange={handleFileChange}
-                />
-              </div>
-              
-              <div className="flex justify-end">
-                <Button 
-                  onClick={handleSubmitVideo}
-                  disabled={!uploadedFile}
-                >
-                  {isResubmission ? "Resubmit" : "Submit"} Video
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <UploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        selectedVideo={selectedVideo}
+        isResubmission={isResubmission}
+        uploadedFile={uploadedFile}
+        onFileChange={handleFileChange}
+        onSubmit={handleSubmitVideo}
+      />
     </div>
   );
 }

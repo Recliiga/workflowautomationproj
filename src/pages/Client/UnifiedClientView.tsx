@@ -1,17 +1,16 @@
-
 import { useState, useMemo } from "react";
 import { Video, VideoStatus, CalendarEvent } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload } from "lucide-react";
 import { FileUploadModule } from "@/components/video/FileUploadModule";
 import { VideoPreviewCard } from "@/components/video/VideoPreviewCard";
 import { CalendarView } from "@/components/calendar/CalendarView";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { ApprovalCard } from "@/components/client/ApprovalCard";
+import { RejectModal } from "@/components/client/RejectModal";
 
 // Mock data for demonstration
 const MOCK_VIDEOS: Video[] = [
@@ -251,7 +250,7 @@ export default function UnifiedClientView() {
       // It's a project group, update all videos in this project
       setVideos(prev => 
         prev.map(video => {
-          if (project.videos.some((v: any) => v.id === video.id)) {
+          if (project.videos!.some((v: any) => v.id === video.id)) {
             return { ...video, publishDate: format(newDate, "yyyy-MM-dd'T'HH:mm:ss'Z'") };
           }
           return video;
@@ -289,48 +288,15 @@ export default function UnifiedClientView() {
       {videosForApproval.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Videos Requiring Your Approval ({videosForApproval.length})</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {videosForApproval.map(video => (
-              <div key={video.id} className="border rounded-md p-2 shadow-sm">
-                <div className="aspect-video bg-muted relative overflow-hidden rounded-sm mb-2">
-                  {video.thumbnailUrl && (
-                    <img 
-                      src={video.thumbnailUrl} 
-                      alt={video.title}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-                <h3 className="font-medium text-sm line-clamp-1 mb-1">{video.title}</h3>
-                <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
-                  {video.videoType || "Unclassified"}
-                </p>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => openRejectModal(video.id)}
-                    className="text-xs flex-1 border-red-200 hover:bg-red-50 text-red-600"
-                  >
-                    Reject
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    onClick={() => handleApprove(video.id)}
-                    className="text-xs flex-1 bg-emerald-600 hover:bg-emerald-700"
-                  >
-                    Approve
-                  </Button>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full mt-1 text-xs"
-                  onClick={() => { setSelectedVideoId(video.id); setIsModalOpen(true); }}
-                >
-                  View Details
-                </Button>
-              </div>
+              <ApprovalCard
+                key={video.id}
+                video={video}
+                onViewDetails={(id) => { setSelectedVideoId(id); setIsModalOpen(true); }}
+                onReject={openRejectModal}
+                onApprove={handleApprove}
+              />
             ))}
           </div>
         </div>
@@ -387,7 +353,7 @@ export default function UnifiedClientView() {
               
               <h3 className="text-lg font-medium mt-4 mb-2">Videos in this project:</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {selectedProject.videos.map((video: Video) => (
+                {selectedProject.videos?.map((video: Video) => (
                   <VideoPreviewCard
                     key={video.id}
                     video={video}
@@ -403,46 +369,13 @@ export default function UnifiedClientView() {
       </Dialog>
       
       {/* Reject Modal with Required Reasoning */}
-      <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reject Video</DialogTitle>
-            <DialogDescription>
-              Please provide detailed feedback explaining why this video requires amendments.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="reason" className="required">Rejection Reason</Label>
-              <Textarea
-                id="reason"
-                placeholder="Please explain what needs to be fixed..."
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                className="min-h-[100px]"
-                required
-              />
-              {rejectionReason.trim().length === 0 && (
-                <p className="text-xs text-red-500">This field is required</p>
-              )}
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsRejectModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleReject}
-              disabled={rejectionReason.trim().length === 0}
-            >
-              Submit Feedback
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <RejectModal
+        isOpen={isRejectModalOpen}
+        onClose={() => setIsRejectModalOpen(false)}
+        rejectionReason={rejectionReason}
+        onReasonChange={setRejectionReason}
+        onConfirm={handleReject}
+      />
       
       {/* Upload Modal */}
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
