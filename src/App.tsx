@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { useState } from "react";
 import { UserRole } from "@/types";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 import MainPage from "./pages/MainPage";
 import Profile from "./pages/Profile";
@@ -30,17 +31,19 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/main" element={<MainPage />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/users" element={<Users />} />
-              <Route path="/" element={<Navigate to="/main" replace />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <SidebarProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/main" element={<MainPage />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/users" element={<Users />} />
+                <Route path="/" element={<Navigate to="/main" replace />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </SidebarProvider>
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>

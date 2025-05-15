@@ -20,6 +20,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
+  SidebarTrigger
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -53,6 +54,9 @@ export function AppSidebar() {
         <div className="flex items-center gap-2 px-4">
           <FileVideo className="h-6 w-6" />
           <span>VideoFlow</span>
+          <div className="ml-auto">
+            <SidebarTrigger />
+          </div>
         </div>
       </SidebarHeader>
 
