@@ -5,19 +5,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-
-interface FileWithPreview extends File {
-  id: string;
-  previewUrl: string;
-}
+import { FileWithPreview, FileMetadata } from "./types";
 
 interface VideoPreviewProps {
   file: FileWithPreview;
-  metadata: {
-    title: string;
-    description: string;
-    notes: string;
-  };
+  metadata: FileMetadata;
   onRemove: (id: string) => void;
   onMetadataChange: (id: string, field: 'title' | 'description' | 'notes', value: string) => void;
 }

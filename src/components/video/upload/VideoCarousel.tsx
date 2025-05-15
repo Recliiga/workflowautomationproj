@@ -3,15 +3,11 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { VideoPreview } from "./VideoPreview";
-
-interface FileWithPreview extends File {
-  id: string;
-  previewUrl: string;
-}
+import { FileWithPreview, FileMetadata, MetadataRecord } from "./types";
 
 interface VideoCarouselProps {
   files: FileWithPreview[];
-  metadata: { [key: string]: { title: string; description: string; notes: string } };
+  metadata: MetadataRecord;
   onRemove: (id: string) => void;
   onMetadataChange: (id: string, field: 'title' | 'description' | 'notes', value: string) => void;
 }

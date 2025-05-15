@@ -1,29 +1,20 @@
 
-import { useState } from "react";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { cn } from "@/lib/utils";
 import { VideoTypeSelector } from "./upload/VideoTypeSelector";
 import { FileUploadZone } from "./upload/FileUploadZone";
 import { VideoCarousel } from "./upload/VideoCarousel";
 import { SubmissionForm } from "./upload/SubmissionForm";
-
-interface FileWithPreview extends File {
-  id: string;
-  previewUrl: string;
-}
+import { useFileUpload } from "./upload/useFileUpload";
+import { useSubmissionData } from "./upload/useSubmissionData";
+import { FileWithPreview, SubmissionData } from "./upload/types";
 
 interface FileUploadModuleProps {
   maxFiles?: number;
   onFilesSelected: (
     files: File[], 
     metadata: { [key: string]: { title: string; description: string; notes: string } },
-    submissionData: {
-      title: string;
-      description: string;
-      notes: string;
-      videoType: string;
-      targetDate: Date | undefined;
-    }
+    submissionData: SubmissionData
   ) => void;
   className?: string;
   videoTypes?: string[];
@@ -45,92 +36,36 @@ export function FileUploadModule({
   className,
   videoTypes = DEFAULT_VIDEO_TYPES
 }: FileUploadModuleProps) {
-  const [uploadedFiles, setUploadedFiles] = useState<FileWithPreview[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [metadata, setMetadata] = useState<{ [key: string]: { title: string; description: string; notes: string } }>({});
+  const {
+    uploadedFiles,
+    metadata,
+    error: fileError,
+    setError: setFileError,
+    handleFiles,
+    removeFile,
+    updateMetadata
+  } = useFileUpload(maxFiles);
   
-  // Submission-wide metadata
-  const [submissionTitle, setSubmissionTitle] = useState("");
-  const [submissionDescription, setSubmissionDescription] = useState("");
-  const [submissionNotes, setSubmissionNotes] = useState("");
-  const [videoType, setVideoType] = useState<string>(videoTypes[0] || "");
-  const [targetDate, setTargetDate] = useState<Date | undefined>(undefined);
+  const {
+    submissionTitle,
+    setSubmissionTitle,
+    submissionDescription,
+    setSubmissionDescription,
+    submissionNotes,
+    setSubmissionNotes,
+    videoType,
+    setVideoType,
+    targetDate,
+    setTargetDate,
+    error: submissionError,
+    setError: setSubmissionError,
+    validateSubmission
+  } = useSubmissionData(videoTypes[0] || "");
 
-  const handleFiles = (files: FileList) => {
-    if (uploadedFiles.length + files.length > maxFiles) {
-      setError(`You can only upload up to ${maxFiles} files.`);
-      return;
-    }
-
-    const validFiles = Array.from(files).filter(
-      file => file.type.startsWith('video/') || file.type.startsWith('image/')
-    );
-
-    if (validFiles.length !== files.length) {
-      setError('Only video and image files are allowed.');
-      return;
-    }
-
-    const newFiles = validFiles.map(file => {
-      const id = `file-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-      const previewUrl = URL.createObjectURL(file);
-      
-      // Initialize metadata for new file
-      setMetadata(prev => ({
-        ...prev,
-        [id]: { title: '', description: '', notes: '' }
-      }));
-      
-      return Object.assign(file, { id, previewUrl });
-    });
-
-    setUploadedFiles(prev => [...prev, ...newFiles]);
-    setError(null);
-  };
-
-  const removeFile = (id: string) => {
-    setUploadedFiles(prev => prev.filter(file => file.id !== id));
-    setMetadata(prev => {
-      const newMetadata = { ...prev };
-      delete newMetadata[id];
-      return newMetadata;
-    });
-  };
-
-  const updateMetadata = (id: string, field: 'title' | 'description' | 'notes', value: string) => {
-    setMetadata(prev => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        [field]: value
-      }
-    }));
-  };
+  const error = fileError || submissionError;
 
   const handleSubmit = () => {
-    // Validate required submission-wide fields
-    if (!submissionTitle) {
-      setError('Submission title is required.');
-      return;
-    }
-    
-    if (!submissionDescription) {
-      setError('Video context is required.');
-      return;
-    }
-    
-    if (!submissionNotes) {
-      setError('Submission notes for the freelancer are required.');
-      return;
-    }
-    
-    if (!videoType) {
-      setError('Please select a video type.');
-      return;
-    }
-    
-    if (!targetDate) {
-      setError('Please select a target content calendar date.');
+    if (!validateSubmission()) {
       return;
     }
 
@@ -154,7 +89,10 @@ export function FileUploadModule({
         <NotificationBanner
           message={error}
           type="error"
-          onDismiss={() => setError(null)}
+          onDismiss={() => {
+            setFileError(null);
+            setSubmissionError(null);
+          }}
         />
       )}
       
