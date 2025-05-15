@@ -20,11 +20,6 @@ export function useSubmissionData(defaultVideoType: string) {
       return false;
     }
     
-    if (!submissionNotes) {
-      setError('Submission notes for the freelancer are required.');
-      return false;
-    }
-    
     if (!videoType) {
       setError('Please select a video type.');
       return false;

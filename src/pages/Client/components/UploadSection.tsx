@@ -32,14 +32,13 @@ export function UploadSection({
     // In a real app, this would upload files to a server and get URLs back
     const newVideos: Video[] = files.map((file, index) => {
       const fileId = Object.keys(metadata)[index];
-      const { title, description, notes } = metadata[fileId];
+      const { title, description } = metadata[fileId];
       const isVideo = file.type.startsWith('video/');
       
       return {
         id: `new-${Date.now()}-${index}`,
         title: title || submissionData.title, 
         description: description || submissionData.description,
-        notes: notes || submissionData.notes, 
         videoType: submissionData.videoType,
         clientId: "2", // Current user ID would be used here
         originalUrl: URL.createObjectURL(file),

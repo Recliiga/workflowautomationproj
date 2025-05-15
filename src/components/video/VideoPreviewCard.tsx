@@ -154,15 +154,6 @@ export function VideoPreviewCard({
               </div>
             )}
             
-            {video.notes && (
-              <div>
-                <h4 className="text-sm font-medium">Notes</h4>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {video.notes}
-                </p>
-              </div>
-            )}
-            
             {/* Show AI content if available and requested */}
             {showAIContent && video.aiContent && (
               <div className="mt-6">

@@ -8,6 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 interface SubmissionFormProps {
   title: string;
   description: string;
@@ -20,6 +21,7 @@ interface SubmissionFormProps {
   onSubmit: () => void;
   filesCount: number;
 }
+
 export function SubmissionForm({
   title,
   description,
@@ -28,7 +30,6 @@ export function SubmissionForm({
   onTitleChange,
   onDescriptionChange,
   onNotesChange,
-  onTargetDateChange,
   onSubmit,
   filesCount
 }: SubmissionFormProps) {
@@ -58,8 +59,6 @@ export function SubmissionForm({
             />
             <p className="text-xs text-muted-foreground mt-1.5">The more context you provide, the more engaging and effective your video captions will be.</p>
           </div>
-          
-          
         </div>
       </div>
       

@@ -47,13 +47,6 @@ export function UploadModal({
             <div>
               <h3 className="font-medium">Original {isImage ? "Image" : "Video"}: {selectedVideo.title}</h3>
               <p className="text-sm text-muted-foreground mt-1">{selectedVideo.description}</p>
-              
-              {selectedVideo.notes && (
-                <div className="mt-3 p-3 bg-secondary/30 rounded-md">
-                  <h4 className="text-sm font-medium">Client Notes:</h4>
-                  <p className="text-sm mt-1">{selectedVideo.notes}</p>
-                </div>
-              )}
             </div>
             
             <div className="space-y-2">

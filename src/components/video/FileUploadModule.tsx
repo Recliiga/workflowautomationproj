@@ -76,7 +76,7 @@ export function FileUploadModule({
       {
         title: submissionTitle,
         description: submissionDescription,
-        notes: submissionNotes,
+        notes: submissionNotes, // We still pass this for backward compatibility
         videoType: videoType,
         targetDate: targetDate
       }
