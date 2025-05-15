@@ -60,7 +60,7 @@ export function CalendarGrid({
                     onDateClick={onDateClick}
                     onEventClick={onEventClick}
                     onDragOver={onDragOver}
-                    onDrop={handleDrop}
+                    onDrop={onDrop}
                     handleDragStart={handleDragStart}
                     draggingEventId={draggingEventId}
                     readOnly={readOnly}
@@ -82,7 +82,7 @@ export function CalendarGrid({
               onDateClick={onDateClick}
               onEventClick={onEventClick}
               onDragOver={onDragOver}
-              onDrop={handleDrop}
+              onDrop={onDrop}
               handleDragStart={handleDragStart}
               draggingEventId={draggingEventId}
               readOnly={readOnly}
