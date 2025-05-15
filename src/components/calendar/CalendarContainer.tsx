@@ -13,6 +13,7 @@ interface CalendarContainerProps {
   onEventDrop?: (eventId: string, newDate: Date) => void;
   onDateClick?: (date: Date) => void;
   readOnly: boolean;
+  viewMode?: "twoWeeks" | "month";
 }
 
 export function CalendarContainer({
@@ -20,9 +21,13 @@ export function CalendarContainer({
   onEventClick,
   onEventDrop,
   onDateClick,
-  readOnly
+  readOnly,
+  viewMode = "twoWeeks"
 }: CalendarContainerProps) {
-  const [viewMode, setViewMode] = useState<"twoWeeks" | "month">("twoWeeks");
+  const [internalViewMode, setInternalViewMode] = useState<"twoWeeks" | "month">(viewMode);
+  
+  // Use the provided viewMode if available, otherwise use the internal state
+  const effectiveViewMode = viewMode || internalViewMode;
 
   const handleEventDrop = (eventId: string, newDate: Date) => {
     if (readOnly) return;
@@ -37,22 +42,24 @@ export function CalendarContainer({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle>Content Calendar</CardTitle>
-        <div className="flex items-center gap-2">
-          <Button 
-            size="sm" 
-            variant={viewMode === "twoWeeks" ? "default" : "outline"} 
-            onClick={() => setViewMode("twoWeeks")}
-          >
-            2 Weeks
-          </Button>
-          <Button 
-            size="sm" 
-            variant={viewMode === "month" ? "default" : "outline"}
-            onClick={() => setViewMode("month")}
-          >
-            Month
-          </Button>
-        </div>
+        {!viewMode && (
+          <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              variant={effectiveViewMode === "twoWeeks" ? "default" : "outline"} 
+              onClick={() => setInternalViewMode("twoWeeks")}
+            >
+              2 Weeks
+            </Button>
+            <Button 
+              size="sm" 
+              variant={effectiveViewMode === "month" ? "default" : "outline"}
+              onClick={() => setInternalViewMode("month")}
+            >
+              Month
+            </Button>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <CalendarView
@@ -61,7 +68,7 @@ export function CalendarContainer({
           onDateClick={onDateClick}
           onEventDrop={handleEventDrop}
           readOnly={readOnly}
-          viewMode={viewMode}
+          viewMode={effectiveViewMode}
         />
       </CardContent>
     </Card>
