@@ -81,7 +81,7 @@ export function VideoCarousel({
           <VideoPreview
             key={file.id}
             file={file}
-            metadata={metadata[file.id] || { notes: '' }}
+            metadata={metadata[file.id] || { title: '', description: '', notes: '' }}
             onRemove={onRemove}
             onMetadataChange={onMetadataChange}
           />
