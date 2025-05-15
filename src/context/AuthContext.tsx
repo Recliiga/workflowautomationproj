@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '@/types';
 
@@ -37,18 +36,48 @@ const MOCK_USERS: User[] = [
   },
 ];
 
+// A more stable storage key
+const STORAGE_KEY = 'videoflow_user_session';
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for saved user in localStorage (for demo purposes)
-    const savedUser = localStorage.getItem('videoflow_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    // Check for saved user in localStorage with improved error handling
+    try {
+      const savedUser = localStorage.getItem(STORAGE_KEY);
+      if (savedUser) {
+        const parsedUser = JSON.parse(savedUser);
+        // Verify that the parsed user has the expected structure
+        if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.role) {
+          setUser(parsedUser);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading saved user:', error);
+      // Clear potentially corrupted data
+      localStorage.removeItem(STORAGE_KEY);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
+
+  // Set up a session check/refresh interval
+  useEffect(() => {
+    // Ping the session every minute to keep it active
+    const interval = setInterval(() => {
+      if (user) {
+        // Update the timestamp to keep the session fresh
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          ...user,
+          _lastActive: new Date().toISOString()
+        }));
+      }
+    }, 60000); // every minute
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -60,9 +89,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const foundUser = MOCK_USERS.find(u => u.email === email);
       if (!foundUser) throw new Error('Invalid credentials');
       
-      // Store user in state and localStorage
-      setUser(foundUser);
-      localStorage.setItem('videoflow_user', JSON.stringify(foundUser));
+      // Add timestamp and store user in state and localStorage
+      const userWithTimestamp = {
+        ...foundUser,
+        _lastActive: new Date().toISOString()
+      };
+      
+      setUser(userWithTimestamp);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(userWithTimestamp));
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -73,12 +107,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('videoflow_user');
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const setCurrentUser = (newUser: User) => {
-    setUser(newUser);
-    localStorage.setItem('videoflow_user', JSON.stringify(newUser));
+    const userWithTimestamp = {
+      ...newUser,
+      _lastActive: new Date().toISOString()
+    };
+    setUser(userWithTimestamp);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(userWithTimestamp));
   };
 
   return (

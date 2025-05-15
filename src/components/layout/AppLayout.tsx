@@ -22,6 +22,7 @@ export function AppLayout({ children, requiredRole }: AppLayoutProps) {
     if (!isLoading) {
       if (!user) {
         // Not authenticated, redirect to login
+        console.log("No user found, redirecting to login");
         navigate("/login");
         return;
       }
@@ -33,6 +34,7 @@ export function AppLayout({ children, requiredRole }: AppLayoutProps) {
           : user.role === requiredRole;
 
         if (!hasRequiredRole) {
+          console.log(`User role ${user.role} doesn't have permission for this page`);
           // Not authorized, redirect to dashboard
           navigate("/dashboard");
           return;
@@ -42,6 +44,15 @@ export function AppLayout({ children, requiredRole }: AppLayoutProps) {
       setAuthorized(true);
     }
   }, [user, isLoading, navigate, requiredRole]);
+
+  // Add an additional check to detect if user gets cleared unexpectedly
+  useEffect(() => {
+    // Only run this effect if we were previously authorized
+    if (authorized && !user && !isLoading) {
+      console.log("User session lost, redirecting to login");
+      navigate("/login");
+    }
+  }, [user, authorized, isLoading, navigate]);
 
   if (isLoading) {
     return (
