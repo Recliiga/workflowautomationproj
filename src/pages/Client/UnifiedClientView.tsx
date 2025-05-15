@@ -2,15 +2,18 @@ import { useState, useMemo } from "react";
 import { Video, VideoStatus, CalendarEvent } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload } from "lucide-react";
 import { FileUploadModule } from "@/components/video/FileUploadModule";
 import { VideoPreviewCard } from "@/components/video/VideoPreviewCard";
 import { CalendarView } from "@/components/calendar/CalendarView";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ApprovalCard } from "@/components/client/ApprovalCard";
 import { RejectModal } from "@/components/client/RejectModal";
+import { CalendarVideoCard } from "@/components/video/CalendarVideoCard";
 
 // Mock data for demonstration
 const MOCK_VIDEOS: Video[] = [
@@ -113,6 +116,23 @@ export default function UnifiedClientView() {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [calendarViewMode, setCalendarViewMode] = useState<"twoWeeks" | "month">("twoWeeks");
+  const [selectedProject, setSelectedProject] = useState<CalendarEvent | null>(null);
+  
+  // Helper function to get color for video status
+  const getStatusColor = (status: VideoStatus) => {
+    switch (status) {
+      case "in-progress":
+        return "bg-indigo-500 text-white";
+      case "submitted":
+        return "bg-amber-500 text-white";
+      case "approved":
+        return "bg-emerald-500 text-white";
+      case "rejected":
+        return "bg-red-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
+  };
   
   // Filter videos for approval section
   const videosForApproval = useMemo(() => 
@@ -336,8 +356,8 @@ export default function UnifiedClientView() {
 
       {/* Video Detail Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-3xl">
-          {selectedVideo && (
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          {selectedVideo && !selectedProject && (
             <VideoPreviewCard
               video={selectedVideo}
               role="client"
@@ -347,23 +367,63 @@ export default function UnifiedClientView() {
           )}
           
           {selectedProject && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">{selectedProject.title}</h2>
-              <p>Scheduled for: {format(new Date(selectedProject.date), "MMMM d, yyyy")}</p>
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl">{selectedProject.title}</DialogTitle>
+              </DialogHeader>
               
-              <h3 className="text-lg font-medium mt-4 mb-2">Videos in this project:</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {selectedProject.videos?.map((video: Video) => (
-                  <VideoPreviewCard
-                    key={video.id}
-                    video={video}
-                    role="client"
-                    onApprove={video.status === "submitted" ? handleApprove : undefined}
-                    onReject={video.status === "submitted" ? () => openRejectModal(video.id) : undefined}
-                  />
-                ))}
+              <div className="space-y-6 mt-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Scheduled for: {format(new Date(selectedProject.date), "MMMM d, yyyy")}
+                  </p>
+                  <Badge className={cn(
+                    "px-2 py-0.5",
+                    getStatusColor(selectedProject.videos?.[0]?.status || "in-progress")
+                  )}>
+                    {selectedProject.videos?.[0]?.status || "in-progress"}
+                  </Badge>
+                </div>
+                
+                {/* Project-level notes and context */}
+                {selectedProject.videos?.[0]?.notes && (
+                  <Card className="border border-muted">
+                    <CardHeader className="py-3">
+                      <CardTitle className="text-base">Notes for Freelancer</CardTitle>
+                    </CardHeader>
+                    <CardContent className="py-3">
+                      <p className="text-sm whitespace-pre-wrap">{selectedProject.videos[0].notes}</p>
+                    </CardContent>
+                  </Card>
+                )}
+                
+                {selectedProject.videos?.[0]?.description && (
+                  <Card className="border border-muted">
+                    <CardHeader className="py-3">
+                      <CardTitle className="text-base">Video Context</CardTitle>
+                    </CardHeader>
+                    <CardContent className="py-3">
+                      <p className="text-sm whitespace-pre-wrap">{selectedProject.videos[0].description}</p>
+                    </CardContent>
+                  </Card>
+                )}
+                
+                <h3 className="text-lg font-medium mt-2">Videos in this project:</h3>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                  {selectedProject.videos?.map((video: Video) => (
+                    <CalendarVideoCard
+                      key={video.id}
+                      video={video}
+                      className="h-auto"
+                      onClick={() => {
+                        setSelectedProject(null);
+                        setSelectedVideoId(video.id);
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>

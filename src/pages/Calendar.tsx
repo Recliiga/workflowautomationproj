@@ -1,10 +1,12 @@
-
 import { useState, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { CalendarView } from "@/components/calendar/CalendarView";
 import { VideoPreviewCard } from "@/components/video/VideoPreviewCard";
+import { CalendarVideoCard } from "@/components/video/CalendarVideoCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { CalendarEvent, Video, VideoStatus } from "@/types";
 import { format, parseISO } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
@@ -72,21 +74,66 @@ export default function Calendar() {
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [schedulingVideoId, setSchedulingVideoId] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<CalendarEvent | null>(null);
   
   const isClient = user?.role === "client";
   const isReadOnly = user?.role === "freelancer";
   
+  // Helper function to get color for video status
+  const getStatusColor = (status: VideoStatus) => {
+    switch (status) {
+      case "in-progress":
+        return "bg-indigo-500 text-white";
+      case "submitted":
+        return "bg-amber-500 text-white";
+      case "approved":
+        return "bg-emerald-500 text-white";
+      case "rejected":
+        return "bg-red-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
+  };
+  
   // Create calendar events from approved videos with publish dates
   const calendarEvents = useMemo(() => {
-    return videos
+    // First, group videos by date
+    const groupedByDate = videos
       .filter(video => video.publishDate || video.dueDate)
-      .map(video => ({
-        id: video.id,
-        videoId: video.id,
-        title: video.title,
-        date: video.publishDate || video.dueDate || "",
-        status: video.status
-      }));
+      .reduce((acc, video) => {
+        const date = video.publishDate || video.dueDate || "";
+        if (!acc[date]) {
+          acc[date] = [];
+        }
+        acc[date].push(video);
+        return acc;
+      }, {} as Record<string, Video[]>);
+    
+    // Then create calendar events for each group
+    return Object.entries(groupedByDate).map(([date, dateVideos]) => {
+      // If there's only one video on this date, create a simple event
+      if (dateVideos.length === 1) {
+        const video = dateVideos[0];
+        return {
+          id: video.id,
+          videoId: video.id,
+          title: video.title,
+          date: date,
+          status: video.status,
+          videoType: video.videoType
+        };
+      }
+      
+      // Otherwise, create a project/group event
+      return {
+        id: `project-${date}`,
+        title: `${dateVideos.length} Videos`,
+        date: date,
+        status: dateVideos[0].status,
+        videoType: "Project",
+        videos: dateVideos
+      };
+    });
   }, [videos]);
   
   const selectedVideo = useMemo(() => {
@@ -94,7 +141,19 @@ export default function Calendar() {
   }, [selectedVideoId, videos]);
   
   const handleEventClick = (eventId: string) => {
-    setSelectedVideoId(eventId);
+    // Check if this is a project or individual video
+    const event = calendarEvents.find(e => e.id === eventId);
+    
+    if (event && event.videos) {
+      // It's a project, set the selected project
+      setSelectedProject(event);
+      setSelectedVideoId(null);
+    } else {
+      // It's a single video
+      setSelectedVideoId(eventId);
+      setSelectedProject(null);
+    }
+    
     setIsModalOpen(true);
   };
   
@@ -118,13 +177,29 @@ export default function Calendar() {
   const handleEventDrop = (eventId: string, newDate: Date) => {
     if (isReadOnly) return;
     
-    setVideos(prev => 
-      prev.map(video => 
-        video.id === eventId 
-          ? { ...video, publishDate: format(newDate, "yyyy-MM-dd'T'HH:mm:ss'Z'") } 
-          : video
-      )
-    );
+    // Check if this is a project or individual video
+    const event = calendarEvents.find(e => e.id === eventId);
+    
+    if (event && event.videos) {
+      // It's a project, update all videos in this project
+      setVideos(prev => 
+        prev.map(video => {
+          if (event.videos!.some(v => v.id === video.id)) {
+            return { ...video, publishDate: format(newDate, "yyyy-MM-dd'T'HH:mm:ss'Z'") };
+          }
+          return video;
+        })
+      );
+    } else {
+      // It's a single video
+      setVideos(prev => 
+        prev.map(video => 
+          video.id === eventId 
+            ? { ...video, publishDate: format(newDate, "yyyy-MM-dd'T'HH:mm:ss'Z'") } 
+            : video
+        )
+      );
+    }
     
     toast.success("Video rescheduled successfully!");
   };
@@ -158,8 +233,8 @@ export default function Calendar() {
         
         {/* Video Detail Modal */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="max-w-3xl">
-            {selectedVideo && (
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            {selectedVideo && !selectedProject && (
               <VideoPreviewCard
                 video={selectedVideo}
                 role={user?.role || "client"}
@@ -173,6 +248,66 @@ export default function Calendar() {
                     : undefined
                 }
               />
+            )}
+            
+            {selectedProject && (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="text-xl">{selectedProject.title}</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-6 mt-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      Scheduled for: {format(new Date(selectedProject.date), "MMMM d, yyyy")}
+                    </p>
+                    <Badge className={cn(
+                      "px-2 py-0.5",
+                      getStatusColor(selectedProject.videos?.[0]?.status || "in-progress")
+                    )}>
+                      {selectedProject.videos?.[0]?.status || "in-progress"}
+                    </Badge>
+                  </div>
+                  
+                  {/* Project-level notes and context */}
+                  {selectedProject.videos?.[0]?.notes && (
+                    <Card className="border border-muted">
+                      <CardHeader className="py-3">
+                        <CardTitle className="text-base">Notes for Freelancer</CardTitle>
+                      </CardHeader>
+                      <CardContent className="py-3">
+                        <p className="text-sm whitespace-pre-wrap">{selectedProject.videos[0].notes}</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                  
+                  {selectedProject.videos?.[0]?.description && (
+                    <Card className="border border-muted">
+                      <CardHeader className="py-3">
+                        <CardTitle className="text-base">Video Context</CardTitle>
+                      </CardHeader>
+                      <CardContent className="py-3">
+                        <p className="text-sm whitespace-pre-wrap">{selectedProject.videos[0].description}</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                  
+                  <h3 className="text-lg font-medium mt-2">Videos in this project:</h3>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                    {selectedProject.videos?.map((video: Video) => (
+                      <CalendarVideoCard
+                        key={video.id}
+                        video={video}
+                        className="h-auto"
+                        onClick={() => {
+                          setSelectedProject(null);
+                          setSelectedVideoId(video.id);
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
           </DialogContent>
         </Dialog>

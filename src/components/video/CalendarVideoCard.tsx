@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Video, VideoStatus } from "@/types";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -9,9 +8,15 @@ interface CalendarVideoCardProps {
   video: Video;
   onClick?: () => void;
   className?: string;
+  compact?: boolean;
 }
 
-export function CalendarVideoCard({ video, onClick, className }: CalendarVideoCardProps) {
+export function CalendarVideoCard({ 
+  video, 
+  onClick, 
+  className,
+  compact = false
+}: CalendarVideoCardProps) {
   const getStatusColor = (status: VideoStatus) => {
     switch (status) {
       case "in-progress":
@@ -31,11 +36,12 @@ export function CalendarVideoCard({ video, onClick, className }: CalendarVideoCa
     <div 
       className={cn(
         "rounded-md overflow-hidden border cursor-pointer hover:border-accent transition-colors flex",
+        compact ? "h-14" : "h-auto",
         className
       )}
       onClick={onClick}
     >
-      <div className="w-16 h-16 relative flex-shrink-0">
+      <div className={cn("relative flex-shrink-0", compact ? "w-14 h-14" : "w-16 h-16")}>
         <img
           src={video.thumbnailUrl || "https://via.placeholder.com/640x360?text=Video"}
           alt={video.title}
@@ -52,7 +58,7 @@ export function CalendarVideoCard({ video, onClick, className }: CalendarVideoCa
         </Badge>
       </div>
       <div className="p-1.5 flex-grow overflow-hidden">
-        <h3 className="font-medium text-xs truncate">{video.title}</h3>
+        <h3 className={cn("font-medium truncate", compact ? "text-xs" : "text-sm")}>{video.title}</h3>
         <div className="text-[0.65rem] text-muted-foreground truncate">
           {video.videoType || "Unclassified"}
         </div>
