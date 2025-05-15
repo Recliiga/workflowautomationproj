@@ -11,6 +11,16 @@ import { FileUploadModule } from "@/components/video/FileUploadModule";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+// Video Types - these would typically be fetched from the server
+const VIDEO_TYPES = [
+  "Dialogue",
+  "Evergreen Content",
+  "Exercises",
+  "Huge Client Win",
+  "Partnership/Sponsorship",
+  "Testimonial"
+].sort((a, b) => a.localeCompare(b));
+
 // Mock data for demonstration
 const MOCK_VIDEOS: Video[] = [
   {
@@ -133,9 +143,9 @@ export default function ClientDashboard() {
       
       return {
         id: `new-${Date.now()}-${index}`,
-        title: title || submissionData.title, // Use submission title if individual title is not provided
-        description: description || submissionData.description, // Use submission description if individual description is not provided
-        notes: notes || submissionData.notes, // Use submission notes if individual notes are not provided
+        title: title || submissionData.title, 
+        description: description || submissionData.description,
+        notes: notes || submissionData.notes, 
         videoType: submissionData.videoType,
         clientId: "2", // Current user ID would be used here
         originalUrl: URL.createObjectURL(file),
@@ -288,7 +298,10 @@ export default function ClientDashboard() {
           <DialogHeader>
             <DialogTitle>Upload Videos</DialogTitle>
           </DialogHeader>
-          <FileUploadModule onFilesSelected={handleFileUpload} />
+          <FileUploadModule 
+            onFilesSelected={handleFileUpload} 
+            videoTypes={VIDEO_TYPES}
+          />
         </DialogContent>
       </Dialog>
     </div>
