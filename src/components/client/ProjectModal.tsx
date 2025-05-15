@@ -67,19 +67,7 @@ export function ProjectModal({ project, onVideoClick }: ProjectModalProps) {
           )}
         </div>
 
-        {/* Notes section if any video has notes */}
-        {project.videos?.[0]?.notes && (
-          <Card className="border border-muted">
-            <CardHeader className="py-3">
-              <CardTitle className="text-base">Notes for Freelancer</CardTitle>
-            </CardHeader>
-            <CardContent className="py-3">
-              <p className="text-sm whitespace-pre-wrap">{project.videos[0].notes}</p>
-            </CardContent>
-          </Card>
-        )}
-        
-        {/* Video Context section if any video has description */}
+        {/* Video Context section if any video has description - NOW ABOVE NOTES */}
         {project.videos?.[0]?.description && (
           <Card className="border border-muted">
             <CardHeader className="py-3">
@@ -87,6 +75,18 @@ export function ProjectModal({ project, onVideoClick }: ProjectModalProps) {
             </CardHeader>
             <CardContent className="py-3">
               <p className="text-sm whitespace-pre-wrap">{project.videos[0].description}</p>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Notes section if any video has notes - NOW BELOW VIDEO CONTEXT */}
+        {project.videos?.[0]?.notes && (
+          <Card className="border border-muted">
+            <CardHeader className="py-3">
+              <CardTitle className="text-base">Notes for Freelancer</CardTitle>
+            </CardHeader>
+            <CardContent className="py-3">
+              <p className="text-sm whitespace-pre-wrap">{project.videos[0].notes}</p>
             </CardContent>
           </Card>
         )}

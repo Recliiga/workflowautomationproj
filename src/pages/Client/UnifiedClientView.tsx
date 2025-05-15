@@ -1,23 +1,17 @@
 
 import { useState, useMemo } from "react";
 import { Video, VideoStatus, CalendarEvent } from "@/types";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload } from "lucide-react";
-import { FileUploadModule } from "@/components/video/FileUploadModule";
-import { VideoPreviewCard } from "@/components/video/VideoPreviewCard";
-import { CalendarContainer } from "@/components/calendar/CalendarContainer";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { ApprovalCard } from "@/components/client/ApprovalCard";
 import { RejectModal } from "@/components/client/RejectModal";
-import { ProjectModal } from "@/components/client/ProjectModal";
 import { MOCK_VIDEOS, VIDEO_TYPES } from "@/data/mockData";
 import { useCalendarEvents, updateVideoSchedule } from "@/hooks/useCalendarEvents";
 
-// Extract approval section into a separate file
+// Import refactored components
 import { ApprovalSection } from "./components/ApprovalSection";
+import { CalendarSection } from "./components/CalendarSection";
+import { VideoDetailSection } from "./components/VideoDetailSection";
+import { UploadSection } from "./components/UploadSection";
 
 export default function UnifiedClientView() {
   const [videos, setVideos] = useState<Video[]>(MOCK_VIDEOS);
@@ -50,50 +44,13 @@ export default function UnifiedClientView() {
   // Use either the state-based selectedProject or the memo-based one
   const selectedProject = selectedProjectState || selectedProjectFromId;
 
-  const handleFileUpload = (
-    files: File[], 
-    metadata: any,
-    submissionData: {
-      title: string;
-      description: string;
-      notes: string;
-      videoType: string;
-      targetDate: Date | undefined;
-    }
-  ) => {
-    // In a real app, this would upload files to a server and get URLs back
-    const newVideos: Video[] = files.map((file, index) => {
-      const fileId = Object.keys(metadata)[index];
-      const { title, description, notes } = metadata[fileId];
-      
-      return {
-        id: `new-${Date.now()}-${index}`,
-        title: title || submissionData.title, 
-        description: description || submissionData.description,
-        notes: notes || submissionData.notes, 
-        videoType: submissionData.videoType,
-        clientId: "2", // Current user ID would be used here
-        originalUrl: URL.createObjectURL(file),
-        thumbnailUrl: "", // In real app, this would be generated
-        status: "in-progress",
-        uploadDate: new Date().toISOString(),
-        dueDate: submissionData.targetDate ? submissionData.targetDate.toISOString() : undefined,
-        publishDate: submissionData.targetDate ? submissionData.targetDate.toISOString() : undefined,
-      };
-    });
-    
-    setVideos(prev => [...newVideos, ...prev]);
-    setIsUploadModalOpen(false);
-    toast.success(`${files.length} video${files.length > 1 ? 's' : ''} uploaded successfully!`);
-  };
-
   const handleApprove = (videoId: string) => {
     setVideos(prev => 
       prev.map(video => 
         video.id === videoId ? { ...video, status: 'approved' as VideoStatus } : video
       )
     );
-    toast.success("Video approved successfully!");
+    setIsModalOpen(false);
   };
   
   const handleReject = () => {
@@ -107,7 +64,6 @@ export default function UnifiedClientView() {
       );
       setIsRejectModalOpen(false);
       setRejectionReason("");
-      toast.error("Video rejected and sent back for amendments.");
     }
   };
   
@@ -133,10 +89,13 @@ export default function UnifiedClientView() {
     setIsModalOpen(true);
   };
   
-  const handleEventDrop = (eventId: string, newDate: Date) => {
+  const updateVideoSchedules = (eventId: string, newDate: Date) => {
     // Use the utility function to update video schedules
     setVideos(prev => updateVideoSchedule(prev, eventId, newDate, calendarEvents));
-    toast.success("Content rescheduled successfully!");
+  };
+
+  const handleVideosUploaded = (newVideos: Video[]) => {
+    setVideos(prev => [...newVideos, ...prev]);
   };
 
   return (
@@ -164,36 +123,23 @@ export default function UnifiedClientView() {
       )}
 
       {/* Content Calendar section */}
-      <CalendarContainer
-        events={calendarEvents}
+      <CalendarSection
+        calendarEvents={calendarEvents}
         onEventClick={handleEventClick}
-        onEventDrop={handleEventDrop}
-        readOnly={false}
+        updateVideoSchedules={updateVideoSchedules}
       />
 
       {/* Video Detail Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          {selectedVideo && !selectedProject && (
-            <VideoPreviewCard
-              video={selectedVideo}
-              role="client"
-              onApprove={selectedVideo.status === "submitted" ? handleApprove : undefined}
-              onReject={selectedVideo.status === "submitted" ? () => openRejectModal(selectedVideo.id) : undefined}
-            />
-          )}
-          
-          {selectedProject && (
-            <ProjectModal 
-              project={selectedProject}
-              onVideoClick={(videoId) => {
-                setSelectedProjectState(null);
-                setSelectedVideoId(videoId);
-              }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <VideoDetailSection 
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        selectedVideo={selectedVideo}
+        selectedProject={selectedProject}
+        setSelectedProjectState={setSelectedProjectState}
+        setSelectedVideoId={setSelectedVideoId}
+        onApprove={handleApprove}
+        openRejectModal={openRejectModal}
+      />
       
       {/* Reject Modal with Required Reasoning */}
       <RejectModal
@@ -205,17 +151,12 @@ export default function UnifiedClientView() {
       />
       
       {/* Upload Modal */}
-      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Upload Videos</DialogTitle>
-          </DialogHeader>
-          <FileUploadModule 
-            onFilesSelected={handleFileUpload} 
-            videoTypes={VIDEO_TYPES}
-          />
-        </DialogContent>
-      </Dialog>
+      <UploadSection 
+        isUploadModalOpen={isUploadModalOpen}
+        setIsUploadModalOpen={setIsUploadModalOpen}
+        videoTypes={VIDEO_TYPES}
+        onVideosUploaded={handleVideosUploaded}
+      />
     </div>
   );
 }
