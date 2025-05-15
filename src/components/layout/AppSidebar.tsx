@@ -7,7 +7,8 @@ import {
   Users, 
   Settings,
   FileVideo,
-  LogOut 
+  LogOut,
+  ChevronRight 
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RoleSwitcher } from "./RoleSwitcher";
+import { cn, sidebarStyles } from "@/lib/utils";
 
 export function AppSidebar() {
   const { user, logout } = useAuth();
@@ -52,8 +54,14 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      {/* Add the rail to make sidebar expandable when collapsed */}
-      <SidebarRail />
+      {/* Add the rail with custom blue styling and tab indicator */}
+      <div className="relative">
+        <SidebarRail className={cn(sidebarStyles.rail, sidebarStyles.railTab)} />
+        {/* Add a visible chevron indicator on the rail to indicate expandability */}
+        <div className="absolute top-1/3 left-0 z-30 hidden group-data-[collapsible=offcanvas]:flex items-center justify-center">
+          <ChevronRight className="h-5 w-5 ml-1 text-white bg-blue-500 rounded-full p-0.5" />
+        </div>
+      </div>
       
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4">
