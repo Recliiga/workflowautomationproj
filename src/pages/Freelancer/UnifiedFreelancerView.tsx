@@ -89,6 +89,7 @@ export default function UnifiedFreelancerView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isResubmission, setIsResubmission] = useState(false);
+  const [calendarViewMode, setCalendarViewMode] = useState<"twoWeeks" | "month">("twoWeeks");
 
   // Videos that need attention (in-progress or rejected)
   const urgentVideos = useMemo(() => 
@@ -97,22 +98,55 @@ export default function UnifiedFreelancerView() {
   );
   
   // Create calendar events from videos with publish dates
+  // grouping them by project (using title as project identifier for simplicity)
   const calendarEvents = useMemo(() => {
-    return videos
+    const projectMap = new Map();
+    
+    videos
       .filter(video => video.publishDate)
-      .map(video => ({
-        id: video.id,
-        videoId: video.id,
-        title: video.title,
-        date: video.publishDate || "",
-        status: video.status,
-        videoType: video.videoType || "Unknown"
-      }));
+      .forEach(video => {
+        const projectTitle = video.title.split(' - ')[0]; // Simple grouping by title prefix
+        const date = video.publishDate || "";
+        
+        if (!projectMap.has(date)) {
+          projectMap.set(date, new Map());
+        }
+        
+        const dateProjects = projectMap.get(date);
+        if (!dateProjects.has(projectTitle)) {
+          dateProjects.set(projectTitle, {
+            id: `project-${projectTitle}-${date}`,
+            title: projectTitle,
+            date: date,
+            status: video.status,
+            videoType: "Project",
+            videos: []
+          });
+        }
+        
+        const project = dateProjects.get(projectTitle);
+        project.videos.push(video);
+      });
+    
+    // Convert the map to an array of calendar events
+    const events: CalendarEvent[] = [];
+    projectMap.forEach(dateProjects => {
+      dateProjects.forEach(project => {
+        events.push(project);
+      });
+    });
+    
+    return events;
   }, [videos]);
   
   const selectedVideo = useMemo(() => {
     return videos.find(v => v.id === selectedVideoId);
   }, [selectedVideoId, videos]);
+  
+  const selectedProject = useMemo(() => {
+    if (!selectedVideoId) return null;
+    return calendarEvents.find(event => event.id === selectedVideoId);
+  }, [selectedVideoId, calendarEvents]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -174,19 +208,45 @@ export default function UnifiedFreelancerView() {
       {urgentVideos.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Videos Requiring Action ({urgentVideos.length})</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {urgentVideos.map(video => (
-              <div key={video.id} className="space-y-2">
-                <VideoPreviewCard
-                  video={video}
-                  role="freelancer"
-                />
+              <div key={video.id} className="border rounded-md p-2 shadow-sm">
+                <div className="aspect-video bg-muted relative overflow-hidden rounded-sm mb-2">
+                  {video.thumbnailUrl && (
+                    <img 
+                      src={video.thumbnailUrl} 
+                      alt={video.title}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+                <h3 className="font-medium text-sm line-clamp-1 mb-1">{video.title}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
+                  {video.videoType || "Unclassified"}
+                </p>
+                
+                {video.status === "rejected" && video.notes && (
+                  <div className="bg-red-50 border border-red-100 rounded p-1 mb-2">
+                    <p className="text-xs text-red-700 font-medium">Feedback:</p>
+                    <p className="text-xs text-red-600 line-clamp-2">{video.notes}</p>
+                  </div>
+                )}
+                
                 <Button 
-                  className="w-full"
+                  className="w-full text-xs"
+                  size="sm"
                   onClick={() => openUploadModal(video.id, video.status === "rejected")}
                 >
-                  <Upload className="mr-2 h-4 w-4" />
+                  <Upload className="mr-2 h-3 w-3" />
                   {video.status === "rejected" ? "Resubmit Video" : "Submit Edited Video"}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full mt-1 text-xs"
+                  onClick={() => { setSelectedVideoId(video.id); setIsModalOpen(true); }}
+                >
+                  View Details
                 </Button>
               </div>
             ))}
@@ -196,14 +256,31 @@ export default function UnifiedFreelancerView() {
 
       {/* Content Calendar section */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Content Calendar</CardTitle>
+          <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              variant={calendarViewMode === "twoWeeks" ? "default" : "outline"} 
+              onClick={() => setCalendarViewMode("twoWeeks")}
+            >
+              2 Weeks
+            </Button>
+            <Button 
+              size="sm" 
+              variant={calendarViewMode === "month" ? "default" : "outline"}
+              onClick={() => setCalendarViewMode("month")}
+            >
+              Month
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <CalendarView
             events={calendarEvents}
             onEventClick={handleEventClick}
             readOnly={true}
+            viewMode={calendarViewMode}
           />
         </CardContent>
       </Card>
@@ -216,6 +293,24 @@ export default function UnifiedFreelancerView() {
               video={selectedVideo}
               role="freelancer"
             />
+          )}
+          
+          {selectedProject && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">{selectedProject.title}</h2>
+              <p>Scheduled for: {format(new Date(selectedProject.date), "MMMM d, yyyy")}</p>
+              
+              <h3 className="text-lg font-medium mt-4 mb-2">Videos in this project:</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {selectedProject.videos.map((video: Video) => (
+                  <VideoPreviewCard
+                    key={video.id}
+                    video={video}
+                    role="freelancer"
+                  />
+                ))}
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>

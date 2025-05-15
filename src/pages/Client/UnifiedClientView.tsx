@@ -3,13 +3,15 @@ import { useState, useMemo } from "react";
 import { Video, VideoStatus, CalendarEvent } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Upload } from "lucide-react";
 import { FileUploadModule } from "@/components/video/FileUploadModule";
 import { VideoPreviewCard } from "@/components/video/VideoPreviewCard";
 import { CalendarView } from "@/components/calendar/CalendarView";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 // Mock data for demonstration
 const MOCK_VIDEOS: Video[] = [
@@ -109,30 +111,66 @@ export default function UnifiedClientView() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [calendarViewMode, setCalendarViewMode] = useState<"twoWeeks" | "month">("twoWeeks");
+  
   // Filter videos for approval section
   const videosForApproval = useMemo(() => 
     videos.filter(v => v.status === "submitted"), 
     [videos]
   );
   
-  // Create calendar events from videos with publish dates
+  // Create calendar events from videos with publish dates,
+  // grouping them by project (using title as project identifier for simplicity)
   const calendarEvents = useMemo(() => {
-    return videos
+    const projectMap = new Map();
+    
+    videos
       .filter(video => video.publishDate)
-      .map(video => ({
-        id: video.id,
-        videoId: video.id,
-        title: video.title,
-        date: video.publishDate || "",
-        status: video.status,
-        videoType: video.videoType || "Unknown"
-      }));
+      .forEach(video => {
+        const projectTitle = video.title.split(' - ')[0]; // Simple grouping by title prefix
+        const date = video.publishDate || "";
+        
+        if (!projectMap.has(date)) {
+          projectMap.set(date, new Map());
+        }
+        
+        const dateProjects = projectMap.get(date);
+        if (!dateProjects.has(projectTitle)) {
+          dateProjects.set(projectTitle, {
+            id: `project-${projectTitle}-${date}`,
+            title: projectTitle,
+            date: date,
+            status: video.status,
+            videoType: "Project",
+            videos: []
+          });
+        }
+        
+        const project = dateProjects.get(projectTitle);
+        project.videos.push(video);
+      });
+    
+    // Convert the map to an array of calendar events
+    const events: CalendarEvent[] = [];
+    projectMap.forEach(dateProjects => {
+      dateProjects.forEach(project => {
+        events.push(project);
+      });
+    });
+    
+    return events;
   }, [videos]);
   
   const selectedVideo = useMemo(() => {
     return videos.find(v => v.id === selectedVideoId);
   }, [selectedVideoId, videos]);
+  
+  const selectedProject = useMemo(() => {
+    if (!selectedVideoId) return null;
+    return calendarEvents.find(event => event.id === selectedVideoId);
+  }, [selectedVideoId, calendarEvents]);
 
   const handleFileUpload = (
     files: File[], 
@@ -180,13 +218,24 @@ export default function UnifiedClientView() {
     toast.success("Video approved successfully!");
   };
   
-  const handleReject = (videoId: string) => {
-    setVideos(prev => 
-      prev.map(video => 
-        video.id === videoId ? { ...video, status: 'rejected' as VideoStatus } : video
-      )
-    );
-    toast.error("Video rejected and sent back for amendments.");
+  const handleReject = () => {
+    if (selectedVideoId && rejectionReason.trim()) {
+      setVideos(prev => 
+        prev.map(video => 
+          video.id === selectedVideoId 
+            ? { ...video, status: 'rejected' as VideoStatus, notes: rejectionReason } 
+            : video
+        )
+      );
+      setIsRejectModalOpen(false);
+      setRejectionReason("");
+      toast.error("Video rejected and sent back for amendments.");
+    }
+  };
+  
+  const openRejectModal = (videoId: string) => {
+    setSelectedVideoId(videoId);
+    setIsRejectModalOpen(true);
   };
   
   const handleEventClick = (eventId: string) => {
@@ -195,15 +244,31 @@ export default function UnifiedClientView() {
   };
   
   const handleEventDrop = (eventId: string, newDate: Date) => {
-    setVideos(prev => 
-      prev.map(video => 
-        video.id === eventId 
-          ? { ...video, publishDate: format(newDate, "yyyy-MM-dd'T'HH:mm:ss'Z'") } 
-          : video
-      )
-    );
+    // Handle both individual videos and project groups
+    const project = calendarEvents.find(event => event.id === eventId);
     
-    toast.success("Video rescheduled successfully!");
+    if (project && project.videos) {
+      // It's a project group, update all videos in this project
+      setVideos(prev => 
+        prev.map(video => {
+          if (project.videos.some((v: any) => v.id === video.id)) {
+            return { ...video, publishDate: format(newDate, "yyyy-MM-dd'T'HH:mm:ss'Z'") };
+          }
+          return video;
+        })
+      );
+    } else {
+      // It's a single video
+      setVideos(prev => 
+        prev.map(video => 
+          video.id === eventId 
+            ? { ...video, publishDate: format(newDate, "yyyy-MM-dd'T'HH:mm:ss'Z'") } 
+            : video
+        )
+      );
+    }
+    
+    toast.success("Content rescheduled successfully!");
   };
 
   return (
@@ -224,15 +289,48 @@ export default function UnifiedClientView() {
       {videosForApproval.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Videos Requiring Your Approval ({videosForApproval.length})</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {videosForApproval.map(video => (
-              <VideoPreviewCard
-                key={video.id}
-                video={video}
-                role="client"
-                onApprove={handleApprove}
-                onReject={handleReject}
-              />
+              <div key={video.id} className="border rounded-md p-2 shadow-sm">
+                <div className="aspect-video bg-muted relative overflow-hidden rounded-sm mb-2">
+                  {video.thumbnailUrl && (
+                    <img 
+                      src={video.thumbnailUrl} 
+                      alt={video.title}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+                <h3 className="font-medium text-sm line-clamp-1 mb-1">{video.title}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
+                  {video.videoType || "Unclassified"}
+                </p>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => openRejectModal(video.id)}
+                    className="text-xs flex-1 border-red-200 hover:bg-red-50 text-red-600"
+                  >
+                    Reject
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleApprove(video.id)}
+                    className="text-xs flex-1 bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    Approve
+                  </Button>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full mt-1 text-xs"
+                  onClick={() => { setSelectedVideoId(video.id); setIsModalOpen(true); }}
+                >
+                  View Details
+                </Button>
+              </div>
             ))}
           </div>
         </div>
@@ -240,8 +338,24 @@ export default function UnifiedClientView() {
 
       {/* Content Calendar section */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Content Calendar</CardTitle>
+          <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              variant={calendarViewMode === "twoWeeks" ? "default" : "outline"} 
+              onClick={() => setCalendarViewMode("twoWeeks")}
+            >
+              2 Weeks
+            </Button>
+            <Button 
+              size="sm" 
+              variant={calendarViewMode === "month" ? "default" : "outline"}
+              onClick={() => setCalendarViewMode("month")}
+            >
+              Month
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <CalendarView
@@ -249,6 +363,7 @@ export default function UnifiedClientView() {
             onEventClick={handleEventClick}
             onEventDrop={handleEventDrop}
             readOnly={false}
+            viewMode={calendarViewMode}
           />
         </CardContent>
       </Card>
@@ -261,9 +376,71 @@ export default function UnifiedClientView() {
               video={selectedVideo}
               role="client"
               onApprove={selectedVideo.status === "submitted" ? handleApprove : undefined}
-              onReject={selectedVideo.status === "submitted" ? handleReject : undefined}
+              onReject={selectedVideo.status === "submitted" ? () => openRejectModal(selectedVideo.id) : undefined}
             />
           )}
+          
+          {selectedProject && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">{selectedProject.title}</h2>
+              <p>Scheduled for: {format(new Date(selectedProject.date), "MMMM d, yyyy")}</p>
+              
+              <h3 className="text-lg font-medium mt-4 mb-2">Videos in this project:</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {selectedProject.videos.map((video: Video) => (
+                  <VideoPreviewCard
+                    key={video.id}
+                    video={video}
+                    role="client"
+                    onApprove={video.status === "submitted" ? handleApprove : undefined}
+                    onReject={video.status === "submitted" ? () => openRejectModal(video.id) : undefined}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Reject Modal with Required Reasoning */}
+      <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Video</DialogTitle>
+            <DialogDescription>
+              Please provide detailed feedback explaining why this video requires amendments.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reason" className="required">Rejection Reason</Label>
+              <Textarea
+                id="reason"
+                placeholder="Please explain what needs to be fixed..."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                className="min-h-[100px]"
+                required
+              />
+              {rejectionReason.trim().length === 0 && (
+                <p className="text-xs text-red-500">This field is required</p>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsRejectModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleReject}
+              disabled={rejectionReason.trim().length === 0}
+            >
+              Submit Feedback
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       

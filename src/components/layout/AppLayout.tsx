@@ -17,12 +17,17 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <main className="flex-1">
+          <header className="border-b sticky top-0 bg-background z-10">
+            <div className="container py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <SidebarTrigger className="md:hidden" />
+                <h1 className="font-semibold text-xl">Video Production</h1>
+              </div>
+              <RoleSwitcher />
+            </div>
+          </header>
           <div className="container py-6 md:py-8">
             <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <SidebarTrigger className="md:hidden" />
-                <RoleSwitcher />
-              </div>
               <Breadcrumbs className="mb-2" />
               <div className="flex-1">
                 {children}

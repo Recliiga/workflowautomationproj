@@ -11,8 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User } from "lucide-react";
+import { ChevronDown, Settings, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function RoleSwitcher() {
   const { user, switchRole } = useAuth();
@@ -23,12 +24,26 @@ export function RoleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="ml-auto">
-          <User className="h-4 w-4 mr-2" />
+        <Button variant="outline" size="sm" className="flex items-center gap-2">
+          <Avatar className="h-6 w-6">
+            <AvatarImage src={user?.avatar} />
+            <AvatarFallback>
+              <User className="h-4 w-4" />
+            </AvatarFallback>
+          </Avatar>
           <span className="capitalize">{user.role}</span>
+          <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>Account</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => navigate('/profile')}>
+            <Settings className="h-4 w-4 mr-2" />
+            Profile Settings
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
         <DropdownMenuLabel>Switch Role</DropdownMenuLabel>
         <DropdownMenuGroup>
           {roles.map((role) => (
@@ -42,10 +57,6 @@ export function RoleSwitcher() {
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate('/profile')}>
-          Profile Settings
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
