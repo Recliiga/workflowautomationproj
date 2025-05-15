@@ -20,9 +20,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
-  SidebarTrigger
+  SidebarTrigger,
+  SidebarRail
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { RoleSwitcher } from "./RoleSwitcher";
 
 export function AppSidebar() {
   const { user, logout } = useAuth();
@@ -50,6 +52,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
+      {/* Add the rail to make sidebar expandable when collapsed */}
+      <SidebarRail />
+      
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4">
           <FileVideo className="h-6 w-6" />
@@ -67,7 +72,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {getMenuItems().map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip={item.title}>
                     <button onClick={() => navigate(item.url)} className="w-full flex items-center">
                       <item.icon className="mr-2 h-5 w-5" />
                       <span>{item.title}</span>
