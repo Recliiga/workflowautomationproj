@@ -24,7 +24,6 @@ export function UploadSection({
     submissionData: {
       title: string;
       description: string;
-      notes: string;
       videoType: string;
       targetDate: Date | undefined;
     }

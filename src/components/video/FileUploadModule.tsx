@@ -1,4 +1,3 @@
-
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { cn } from "@/lib/utils";
 import { VideoTypeSelector } from "./upload/VideoTypeSelector";
@@ -13,7 +12,7 @@ interface FileUploadModuleProps {
   maxFiles?: number;
   onFilesSelected: (
     files: File[], 
-    metadata: { [key: string]: { title: string; description: string; notes: string } },
+    metadata: { [key: string]: { title: string; description: string } },
     submissionData: SubmissionData
   ) => void;
   className?: string;
@@ -36,6 +35,7 @@ export function FileUploadModule({
   className,
   videoTypes = DEFAULT_VIDEO_TYPES
 }: FileUploadModuleProps) {
+  
   const {
     uploadedFiles,
     metadata,
@@ -76,7 +76,6 @@ export function FileUploadModule({
       {
         title: submissionTitle,
         description: submissionDescription,
-        notes: submissionNotes, // We still pass this for backward compatibility
         videoType: videoType,
         targetDate: targetDate
       }
@@ -124,11 +123,9 @@ export function FileUploadModule({
           <SubmissionForm
             title={submissionTitle}
             description={submissionDescription}
-            notes={submissionNotes}
             targetDate={targetDate}
             onTitleChange={setSubmissionTitle}
             onDescriptionChange={setSubmissionDescription}
-            onNotesChange={setSubmissionNotes}
             onTargetDateChange={setTargetDate}
             onSubmit={handleSubmit}
             filesCount={uploadedFiles.length}
