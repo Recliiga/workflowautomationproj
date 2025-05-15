@@ -11,13 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Settings, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ChevronDown, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function RoleSwitcher() {
   const { user, switchRole } = useAuth();
-  const navigate = useNavigate();
   
   const roles: UserRole[] = ["admin", "client", "freelancer"];
   
@@ -36,14 +34,6 @@ export function RoleSwitcher() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Account</DropdownMenuLabel>
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => navigate('/profile')}>
-            <Settings className="h-4 w-4 mr-2" />
-            Profile Settings
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
         <DropdownMenuLabel>Switch Role</DropdownMenuLabel>
         <DropdownMenuGroup>
           {roles.map((role) => (

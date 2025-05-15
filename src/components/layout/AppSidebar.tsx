@@ -8,7 +8,8 @@ import {
   Settings,
   FileVideo,
   LogOut,
-  ChevronRight 
+  ChevronRight,
+  UserCog
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,7 +26,6 @@ import {
   SidebarRail
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { RoleSwitcher } from "./RoleSwitcher";
 import { cn, sidebarStyles } from "@/lib/utils";
 
 export function AppSidebar() {
@@ -50,6 +50,10 @@ export function AppSidebar() {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleProfileSettings = () => {
+    navigate('/profile');
   };
 
   return (
@@ -98,8 +102,8 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
         {user && (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+          <div className="space-y-2">
+            <div className="flex items-center pb-2">
               <Avatar className="h-8 w-8 mr-2">
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
@@ -109,13 +113,24 @@ export function AppSidebar() {
                 <p className="text-xs text-sidebar-foreground/70 capitalize">{user.role}</p>
               </div>
             </div>
-            <button 
-              onClick={handleLogout}
-              className="rounded-full p-1.5 hover:bg-sidebar-accent"
-              aria-label="Logout"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <button 
+                onClick={handleProfileSettings}
+                className="flex items-center justify-center gap-1 rounded-md px-3 py-1.5 text-xs bg-sidebar-accent/20 hover:bg-sidebar-accent/30 text-sidebar-foreground"
+              >
+                <UserCog className="h-3 w-3" />
+                <span>Profile</span>
+              </button>
+              
+              <button 
+                onClick={handleLogout}
+                className="flex items-center justify-center gap-1 rounded-md px-3 py-1.5 text-xs bg-sidebar-accent/20 hover:bg-sidebar-accent/30 text-sidebar-foreground"
+              >
+                <LogOut className="h-3 w-3" />
+                <span>Logout</span>
+              </button>
+            </div>
           </div>
         )}
       </SidebarFooter>
