@@ -116,7 +116,6 @@ export default function UnifiedClientView() {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [calendarViewMode, setCalendarViewMode] = useState<"twoWeeks" | "month">("twoWeeks");
-  const [selectedProject, setSelectedProject] = useState<CalendarEvent | null>(null);
   
   // Helper function to get color for video status
   const getStatusColor = (status: VideoStatus) => {
@@ -186,6 +185,7 @@ export default function UnifiedClientView() {
     return videos.find(v => v.id === selectedVideoId);
   }, [selectedVideoId, videos]);
   
+  // Use this single declaration of selectedProject
   const selectedProject = useMemo(() => {
     if (!selectedVideoId) return null;
     return calendarEvents.find(event => event.id === selectedVideoId);
@@ -415,6 +415,7 @@ export default function UnifiedClientView() {
                       key={video.id}
                       video={video}
                       className="h-auto"
+                      compact={true}
                       onClick={() => {
                         setSelectedProject(null);
                         setSelectedVideoId(video.id);
