@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Video, VideoStatus } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { MOCK_VIDEOS } from "@/data/mockData";
 import { TasksSection } from "./components/TasksSection";
 import { FreelancerCalendarSection } from "./components/FreelancerCalendarSection";
 import { FreelancerDetailDialog } from "./components/FreelancerDetailDialog";
+import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 
 export default function UnifiedFreelancerView() {
   const { user } = useAuth();
@@ -29,47 +31,8 @@ export default function UnifiedFreelancerView() {
     [videos]
   );
   
-  // Create calendar events from videos with publish dates
-  // grouping them by project (using title as project identifier for simplicity)
-  const calendarEvents = useMemo(() => {
-    const projectMap = new Map();
-    
-    videos
-      .filter(video => video.publishDate)
-      .forEach(video => {
-        const projectTitle = video.title.split(' - ')[0]; // Simple grouping by title prefix
-        const date = video.publishDate || "";
-        
-        if (!projectMap.has(date)) {
-          projectMap.set(date, new Map());
-        }
-        
-        const dateProjects = projectMap.get(date);
-        if (!dateProjects.has(projectTitle)) {
-          dateProjects.set(projectTitle, {
-            id: `project-${projectTitle}-${date}`,
-            title: projectTitle,
-            date: date,
-            status: video.status,
-            videoType: "Project",
-            videos: []
-          });
-        }
-        
-        const project = dateProjects.get(projectTitle);
-        project.videos.push(video);
-      });
-    
-    // Convert the map to an array of calendar events
-    const events = [];
-    projectMap.forEach(dateProjects => {
-      dateProjects.forEach(project => {
-        events.push(project);
-      });
-    });
-    
-    return events;
-  }, [videos]);
+  // Use the custom hook to generate calendar events
+  const calendarEvents = useCalendarEvents(videos);
   
   const selectedVideo = useMemo(() => {
     return videos.find(v => v.id === selectedVideoId);
