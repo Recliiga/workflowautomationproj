@@ -117,6 +117,9 @@ export default function UnifiedClientView() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [calendarViewMode, setCalendarViewMode] = useState<"twoWeeks" | "month">("twoWeeks");
   
+  // Add back the state variable for selectedProject
+  const [selectedProjectState, setSelectedProjectState] = useState<CalendarEvent | null>(null);
+  
   // Helper function to get color for video status
   const getStatusColor = (status: VideoStatus) => {
     switch (status) {
@@ -185,11 +188,14 @@ export default function UnifiedClientView() {
     return videos.find(v => v.id === selectedVideoId);
   }, [selectedVideoId, videos]);
   
-  // Use this single declaration of selectedProject
-  const selectedProject = useMemo(() => {
+  // Use the existing selectedProject from useMemo, but rename it to avoid conflicts
+  const selectedProjectFromId = useMemo(() => {
     if (!selectedVideoId) return null;
     return calendarEvents.find(event => event.id === selectedVideoId);
   }, [selectedVideoId, calendarEvents]);
+
+  // Use either the state-based selectedProject or the memo-based one
+  const selectedProject = selectedProjectState || selectedProjectFromId;
 
   const handleFileUpload = (
     files: File[], 
@@ -417,7 +423,7 @@ export default function UnifiedClientView() {
                       className="h-auto"
                       compact={true}
                       onClick={() => {
-                        setSelectedProject(null);
+                        setSelectedProjectState(null);
                         setSelectedVideoId(video.id);
                       }}
                     />
