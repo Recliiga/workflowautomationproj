@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useCalendarEvents, updateVideoSchedule } from "@/hooks/useCalendarEvents";
 import { MOCK_VIDEOS } from "@/data/mockData";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
 
 export default function Calendar() {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ export default function Calendar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [schedulingVideoId, setSchedulingVideoId] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<CalendarEvent | null>(null);
+  const [calendarViewMode, setCalendarViewMode] = useState<"twoWeeks" | "month">("twoWeeks");
   
   const isClient = user?.role === "client";
   const isReadOnly = user?.role === "freelancer";
@@ -75,13 +77,32 @@ export default function Calendar() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Content Calendar</h1>
-          <p className="text-muted-foreground">
-            {isClient 
-              ? "Schedule and manage your content publishing" 
-              : "View upcoming content schedule"}
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Content Calendar</h1>
+            <p className="text-muted-foreground">
+              {isClient 
+                ? "Schedule and manage your content publishing" 
+                : "View upcoming content schedule"}
+            </p>
+          </div>
+          
+          <div className="space-x-2">
+            <Button
+              variant={calendarViewMode === "twoWeeks" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setCalendarViewMode("twoWeeks")}
+            >
+              2 Weeks
+            </Button>
+            <Button
+              variant={calendarViewMode === "month" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setCalendarViewMode("month")}
+            >
+              Month
+            </Button>
+          </div>
         </div>
         
         <CalendarContainer
@@ -90,6 +111,7 @@ export default function Calendar() {
           onDateClick={handleDateClick}
           onEventDrop={handleEventDrop}
           readOnly={isReadOnly}
+          viewMode={calendarViewMode}
         />
         
         <VideoDetailDialog
