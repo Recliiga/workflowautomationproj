@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { User, Client, Freelancer, DashboardStats, Video } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { VideoPreviewCard } from "@/components/video/VideoPreviewCard";
-import { Button } from "@/components/ui/button";
-import { Users, CheckCircle, AlertCircle, Clock, FileVideo, User as UserIcon, Settings } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { VideoTypeManager } from "@/components/admin/VideoTypeManager";
+import { FileVideo, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { VideoTypeManager } from "@/components/admin/VideoTypeManager";
+import { StatCard } from "@/components/admin/dashboard/StatCard";
+import { RecentVideos } from "@/components/admin/dashboard/RecentVideos";
+import { UserManagement } from "@/components/admin/dashboard/UserManagement";
+import { VideosByStatus } from "@/components/admin/dashboard/VideosByStatus";
 
 // Mock users for demonstration
 const MOCK_CLIENTS: Client[] = [
@@ -205,241 +205,31 @@ export default function AdminDashboard() {
         <TabsContent value="dashboard" className="space-y-6">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Videos</CardTitle>
-                <FileVideo className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalVideos}</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.inProgress}</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Approved</CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.approved}</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-                <AlertCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.rejected}</div>
-              </CardContent>
-            </Card>
+            <StatCard title="Total Videos" value={stats.totalVideos} icon={FileVideo} />
+            <StatCard title="In Progress" value={stats.inProgress} icon={Clock} />
+            <StatCard title="Approved" value={stats.approved} icon={CheckCircle} />
+            <StatCard title="Rejected" value={stats.rejected} icon={AlertCircle} />
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Recent Videos */}
             <div className="lg:col-span-2">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>Recent Videos</CardTitle>
-                  <Button variant="outline" size="sm" onClick={() => navigate('/calendar')}>
-                    View All
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {videos.slice(0, 3).map((video) => (
-                      <div key={video.id} className="flex items-start space-x-4">
-                        <div className="h-12 w-12 rounded-md bg-secondary flex items-center justify-center">
-                          <FileVideo className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                        <div className="space-y-1">
-                          <h4 className="font-medium">{video.title}</h4>
-                          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                            <span>Client: {getClientById(video.clientId)?.name}</span>
-                            <span>•</span>
-                            <span>Status: {video.status}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <RecentVideos videos={videos} getClientById={getClientById} />
             </div>
             
             {/* User Management */}
             <div>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>User Management</CardTitle>
-                  <Button variant="outline" size="sm" onClick={() => navigate('/users')}>
-                    <Users className="h-4 w-4 mr-1" />
-                    Manage
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  <Tabs defaultValue="clients">
-                    <TabsList className="grid grid-cols-2 mb-4">
-                      <TabsTrigger value="clients">Clients</TabsTrigger>
-                      <TabsTrigger value="freelancers">Freelancers</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="clients" className="space-y-4">
-                      {clients.map((client) => (
-                        <div key={client.id} className="flex items-center justify-between p-2 rounded-md hover:bg-secondary/50">
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={client.avatar} alt={client.name} />
-                              <AvatarFallback>{client.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="text-sm font-medium">{client.name}</p>
-                              <p className="text-xs text-muted-foreground">{client.company}</p>
-                            </div>
-                          </div>
-                          <div className="flex space-x-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => viewAssignments(client.id)}
-                            >
-                              <Users className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => impersonateUser('client', client.id)}
-                            >
-                              <UserIcon className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </TabsContent>
-                    
-                    <TabsContent value="freelancers" className="space-y-4">
-                      {freelancers.map((freelancer) => (
-                        <div key={freelancer.id} className="flex items-center justify-between p-2 rounded-md hover:bg-secondary/50">
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={freelancer.avatar} alt={freelancer.name} />
-                              <AvatarFallback>{freelancer.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="text-sm font-medium">{freelancer.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {freelancer.specialties?.join(', ') || 'No specialties'}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex space-x-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => viewAssignments(freelancer.id)}
-                            >
-                              <Users className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => impersonateUser('freelancer', freelancer.id)}
-                            >
-                              <UserIcon className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
+              <UserManagement 
+                clients={clients}
+                freelancers={freelancers}
+                onViewAssignments={viewAssignments}
+                onImpersonate={impersonateUser}
+              />
             </div>
           </div>
           
           {/* Videos by Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Videos by Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="in-progress">
-                <TabsList>
-                  <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-                  <TabsTrigger value="submitted">Submitted</TabsTrigger>
-                  <TabsTrigger value="approved">Approved</TabsTrigger>
-                  <TabsTrigger value="rejected">Rejected</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="in-progress" className="mt-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {videos
-                      .filter(v => v.status === "in-progress")
-                      .map(video => (
-                        <VideoPreviewCard
-                          key={video.id}
-                          video={video}
-                          role="admin"
-                        />
-                      ))}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="submitted" className="mt-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {videos
-                      .filter(v => v.status === "submitted")
-                      .map(video => (
-                        <VideoPreviewCard
-                          key={video.id}
-                          video={video}
-                          role="admin"
-                        />
-                      ))}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="approved" className="mt-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {videos
-                      .filter(v => v.status === "approved")
-                      .map(video => (
-                        <VideoPreviewCard
-                          key={video.id}
-                          video={video}
-                          role="admin"
-                        />
-                      ))}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="rejected" className="mt-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {videos
-                      .filter(v => v.status === "rejected")
-                      .map(video => (
-                        <VideoPreviewCard
-                          key={video.id}
-                          video={video}
-                          role="admin"
-                        />
-                      ))}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+          <VideosByStatus videos={videos} role="admin" />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
