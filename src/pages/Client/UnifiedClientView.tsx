@@ -1,23 +1,23 @@
+
 import { useState, useMemo } from "react";
 import { Video, VideoStatus, CalendarEvent } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload } from "lucide-react";
 import { FileUploadModule } from "@/components/video/FileUploadModule";
 import { VideoPreviewCard } from "@/components/video/VideoPreviewCard";
-import { CalendarView } from "@/components/calendar/CalendarView";
-import { cn } from "@/lib/utils";
+import { CalendarContainer } from "@/components/calendar/CalendarContainer";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ApprovalCard } from "@/components/client/ApprovalCard";
 import { RejectModal } from "@/components/client/RejectModal";
-import { CalendarVideoCard } from "@/components/video/CalendarVideoCard";
 import { ProjectModal } from "@/components/client/ProjectModal";
-
-// Move MOCK_VIDEOS and VIDEO_TYPES to a separate file
 import { MOCK_VIDEOS, VIDEO_TYPES } from "@/data/mockData";
+import { useCalendarEvents, updateVideoSchedule } from "@/hooks/useCalendarEvents";
+
+// Extract approval section into a separate file
+import { ApprovalSection } from "./components/ApprovalSection";
 
 export default function UnifiedClientView() {
   const [videos, setVideos] = useState<Video[]>(MOCK_VIDEOS);
@@ -26,7 +26,6 @@ export default function UnifiedClientView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
-  const [calendarViewMode, setCalendarViewMode] = useState<"twoWeeks" | "month">("twoWeeks");
   const [selectedProjectState, setSelectedProjectState] = useState<CalendarEvent | null>(null);
   
   // Filter videos for approval section
@@ -35,46 +34,8 @@ export default function UnifiedClientView() {
     [videos]
   );
   
-  // Create calendar events from videos with publish dates,
-  // grouping them by project
-  const calendarEvents = useMemo(() => {
-    const projectMap = new Map();
-    
-    videos
-      .filter(video => video.publishDate)
-      .forEach(video => {
-        const projectTitle = video.title.split(' - ')[0]; // Simple grouping by title prefix
-        const date = video.publishDate || "";
-        
-        if (!projectMap.has(date)) {
-          projectMap.set(date, new Map());
-        }
-        
-        const dateProjects = projectMap.get(date);
-        if (!dateProjects.has(projectTitle)) {
-          dateProjects.set(projectTitle, {
-            id: `project-${projectTitle}-${date}`,
-            title: projectTitle,
-            date: date,
-            status: video.status,
-            videoType: "Project",
-            videos: []
-          });
-        }
-        
-        const project = dateProjects.get(projectTitle);
-        project.videos.push(video);
-      });
-    
-    const events: CalendarEvent[] = [];
-    projectMap.forEach(dateProjects => {
-      dateProjects.forEach(project => {
-        events.push(project);
-      });
-    });
-    
-    return events;
-  }, [videos]);
+  // Use the custom hook to generate calendar events
+  const calendarEvents = useCalendarEvents(videos);
   
   const selectedVideo = useMemo(() => {
     return videos.find(v => v.id === selectedVideoId);
@@ -156,35 +117,25 @@ export default function UnifiedClientView() {
   };
   
   const handleEventClick = (eventId: string) => {
-    setSelectedVideoId(eventId);
+    // Check if this is a project or individual video
+    const event = calendarEvents.find(e => e.id === eventId);
+    
+    if (event && event.videos) {
+      // It's a project, set the selected project
+      setSelectedProjectState(event);
+      setSelectedVideoId(null);
+    } else {
+      // It's a single video
+      setSelectedVideoId(eventId);
+      setSelectedProjectState(null);
+    }
+    
     setIsModalOpen(true);
   };
   
   const handleEventDrop = (eventId: string, newDate: Date) => {
-    // Handle both individual videos and project groups
-    const project = calendarEvents.find(event => event.id === eventId);
-    
-    if (project && project.videos) {
-      // It's a project group, update all videos in this project
-      setVideos(prev => 
-        prev.map(video => {
-          if (project.videos!.some((v: any) => v.id === video.id)) {
-            return { ...video, publishDate: format(newDate, "yyyy-MM-dd'T'HH:mm:ss'Z'") };
-          }
-          return video;
-        })
-      );
-    } else {
-      // It's a single video
-      setVideos(prev => 
-        prev.map(video => 
-          video.id === eventId 
-            ? { ...video, publishDate: format(newDate, "yyyy-MM-dd'T'HH:mm:ss'Z'") } 
-            : video
-        )
-      );
-    }
-    
+    // Use the utility function to update video schedules
+    setVideos(prev => updateVideoSchedule(prev, eventId, newDate, calendarEvents));
     toast.success("Content rescheduled successfully!");
   };
 
@@ -213,36 +164,12 @@ export default function UnifiedClientView() {
       )}
 
       {/* Content Calendar section */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Content Calendar</CardTitle>
-          <div className="flex items-center gap-2">
-            <Button 
-              size="sm" 
-              variant={calendarViewMode === "twoWeeks" ? "default" : "outline"} 
-              onClick={() => setCalendarViewMode("twoWeeks")}
-            >
-              2 Weeks
-            </Button>
-            <Button 
-              size="sm" 
-              variant={calendarViewMode === "month" ? "default" : "outline"}
-              onClick={() => setCalendarViewMode("month")}
-            >
-              Month
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <CalendarView
-            events={calendarEvents}
-            onEventClick={handleEventClick}
-            onEventDrop={handleEventDrop}
-            readOnly={false}
-            viewMode={calendarViewMode}
-          />
-        </CardContent>
-      </Card>
+      <CalendarContainer
+        events={calendarEvents}
+        onEventClick={handleEventClick}
+        onEventDrop={handleEventDrop}
+        readOnly={false}
+      />
 
       {/* Video Detail Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -289,36 +216,6 @@ export default function UnifiedClientView() {
           />
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-// Extract the approval section into a separate component
-function ApprovalSection({ 
-  videos,
-  onViewDetails,
-  onReject, 
-  onApprove 
-}: { 
-  videos: Video[], 
-  onViewDetails: (id: string) => void,
-  onReject: (id: string) => void, 
-  onApprove: (id: string) => void 
-}) {
-  return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Videos Requiring Your Approval ({videos.length})</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-        {videos.map(video => (
-          <ApprovalCard
-            key={video.id}
-            video={video}
-            onViewDetails={onViewDetails}
-            onReject={onReject}
-            onApprove={onApprove}
-          />
-        ))}
-      </div>
     </div>
   );
 }
