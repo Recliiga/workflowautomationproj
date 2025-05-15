@@ -36,7 +36,7 @@ export function VideoPreview({
         </div>
         
         <div>
-          <p className="text-xs font-medium">Description</p>
+          <p className="text-xs font-medium">Add Notes</p>
           <Textarea value={metadata.description} onChange={e => onMetadataChange(file.id, 'description', e.target.value)} placeholder="Enter description" className="mt-1 h-20 text-xs" />
         </div>
         
