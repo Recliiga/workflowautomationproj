@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '@/types';
 
@@ -42,8 +43,8 @@ const STORAGE_KEY = 'videoflow_user_session';
 // Session timeout duration in milliseconds (30 minutes)
 const SESSION_TIMEOUT = 30 * 60 * 1000;
 
-// How often to check/refresh the session (every minute)
-const REFRESH_INTERVAL = 60 * 1000;
+// How often to check/refresh the session (every 5 minutes)
+const REFRESH_INTERVAL = 5 * 60 * 1000;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -52,127 +53,169 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Load user from localStorage on initial mount
   useEffect(() => {
-    // Check for saved user in localStorage with improved error handling
-    try {
-      const savedUser = localStorage.getItem(STORAGE_KEY);
-      if (savedUser) {
-        const parsedData = JSON.parse(savedUser);
+    const loadUserFromStorage = () => {
+      console.log("Loading user from storage");
+      setIsLoading(true);
+      
+      try {
+        const savedUserData = localStorage.getItem(STORAGE_KEY);
         
-        // Check that the parsed user has the expected structure
-        if (parsedData && parsedData.user && parsedData.user.id && parsedData.user.email && parsedData.user.role) {
-          setUser(parsedData.user);
-          
-          // Check if the session has expired
-          const timestamp = parsedData.timestamp || 0;
-          const now = Date.now();
-          
-          if (now - timestamp < SESSION_TIMEOUT) {
-            // Session is still valid
-            setLastActivity(timestamp);
-          } else {
-            // Session has expired
-            console.log("Session expired, clearing user data");
-            localStorage.removeItem(STORAGE_KEY);
-            setUser(null);
-          }
+        if (!savedUserData) {
+          console.log("No saved user data found");
+          setIsLoading(false);
+          return;
         }
+        
+        const parsedData = JSON.parse(savedUserData);
+        
+        if (!parsedData || !parsedData.user || !parsedData.user.id) {
+          console.log("Invalid user data format");
+          localStorage.removeItem(STORAGE_KEY);
+          setIsLoading(false);
+          return;
+        }
+        
+        const { user, timestamp } = parsedData;
+        const now = Date.now();
+        
+        // Always set the user first - this prevents race conditions
+        setUser(user);
+        setLastActivity(timestamp || now);
+        
+        // Then check expiration separately - don't remove valid user during initial load
+        if (now - timestamp > SESSION_TIMEOUT) {
+          console.log("Session loaded but expired, will be cleared on next check");
+        } else {
+          console.log("Valid user session loaded, expiry in:", Math.round((SESSION_TIMEOUT - (now - timestamp)) / 60000), "minutes");
+        }
+      } catch (error) {
+        console.error('Error loading saved user:', error);
+        localStorage.removeItem(STORAGE_KEY);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error loading saved user:', error);
-      // Clear potentially corrupted data
-      localStorage.removeItem(STORAGE_KEY);
-    } finally {
-      setIsLoading(false);
-    }
+    };
+    
+    // Load user immediately
+    loadUserFromStorage();
   }, []);
 
-  // Set up activity tracking
+  // Set up activity tracking - but only AFTER user is confirmed loaded
   useEffect(() => {
     if (!user) return;
+    
+    console.log("Setting up activity tracking for user:", user.name);
+    
+    // Update localStorage immediately when user is set
+    const updateStorageWithCurrentTimestamp = () => {
+      const now = Date.now();
+      setLastActivity(now);
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        user,
+        timestamp: now,
+      }));
+      
+      console.log("Updated session timestamp:", new Date(now).toLocaleTimeString());
+    };
+    
+    // Initial storage update when component mounts
+    updateStorageWithCurrentTimestamp();
 
-    // Update session timestamp on user activity events
-    const updateTimestamp = () => {
-      setLastActivity(Date.now());
+    // Track user activity events
+    const activityEvents = ['click', 'keypress', 'scroll', 'mousemove', 'touchstart'];
+    
+    // Throttled event handler (only update timestamp max once per 30 seconds)
+    let lastUpdateTime = Date.now();
+    const THROTTLE_DELAY = 30000; // 30 seconds
+    
+    const handleUserActivity = () => {
+      const now = Date.now();
+      if (now - lastUpdateTime > THROTTLE_DELAY) {
+        updateStorageWithCurrentTimestamp();
+        lastUpdateTime = now;
+      }
     };
 
-    // Track user activity
-    window.addEventListener('click', updateTimestamp);
-    window.addEventListener('keypress', updateTimestamp);
-    window.addEventListener('scroll', updateTimestamp);
-    window.addEventListener('mousemove', updateTimestamp);
+    // Add all event listeners
+    activityEvents.forEach(event => {
+      window.addEventListener(event, handleUserActivity);
+    });
 
+    // Clear on unmount
     return () => {
-      window.removeEventListener('click', updateTimestamp);
-      window.removeEventListener('keypress', updateTimestamp);
-      window.removeEventListener('scroll', updateTimestamp);
-      window.removeEventListener('mousemove', updateTimestamp);
+      activityEvents.forEach(event => {
+        window.removeEventListener(event, handleUserActivity);
+      });
     };
   }, [user]);
 
-  // Keep session active and persisted based on user activity
+  // Separate effect for session refresh interval - don't mix with activity tracking
   useEffect(() => {
     if (!user) return;
-
-    // Update localStorage with the latest timestamp whenever lastActivity changes
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      user,
-      timestamp: lastActivity,
-    }));
-
-    // Set up a regular check/refresh interval
+    
+    // Set up a refresh interval that's independent of user activity
+    // This ensures the session stays valid even if the user is just reading
     const intervalId = setInterval(() => {
+      const savedUserData = localStorage.getItem(STORAGE_KEY);
+      
+      if (!savedUserData) {
+        // Storage was cleared externally
+        console.log("Session data missing during interval check");
+        setUser(null);
+        return;
+      }
+      
       try {
-        // Get the current session data
-        const savedUser = localStorage.getItem(STORAGE_KEY);
-        if (!savedUser) {
-          // No session data found, user has been logged out elsewhere
-          setUser(null);
-          return;
-        }
-
-        const parsedData = JSON.parse(savedUser);
-        const timestamp = parsedData.timestamp || 0;
+        const parsedData = JSON.parse(savedUserData);
+        const timestamp = parsedData?.timestamp || 0;
         const now = Date.now();
-
+        
         if (now - timestamp < SESSION_TIMEOUT) {
-          // Session is still valid, keep it fresh by updating the timestamp
+          // Still valid, refresh the timestamp
+          console.log("Session refresh, extending expiry");
           localStorage.setItem(STORAGE_KEY, JSON.stringify({
             user,
-            timestamp: lastActivity,
+            timestamp: now,
           }));
+          setLastActivity(now);
         } else {
-          // Session has expired
-          console.log("Session timed out");
+          // Session expired due to inactivity
+          console.log("Session expired during interval check");
           localStorage.removeItem(STORAGE_KEY);
           setUser(null);
         }
       } catch (error) {
-        console.error('Error refreshing session:', error);
+        console.error('Error during session refresh:', error);
       }
     }, REFRESH_INTERVAL);
-
+    
     return () => clearInterval(intervalId);
-  }, [user, lastActivity]);
+  }, [user]);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Find mock user by email (for demo)
       const foundUser = MOCK_USERS.find(u => u.email === email);
       if (!foundUser) throw new Error('Invalid credentials');
       
-      // Add timestamp and store user in state and localStorage
       const now = Date.now();
-      setLastActivity(now);
-      setUser(foundUser);
       
+      // Save user data to storage with current timestamp
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         user: foundUser,
         timestamp: now
       }));
+      
+      // Update state AFTER storage is set
+      setLastActivity(now);
+      setUser(foundUser);
+      
+      console.log("User logged in successfully:", foundUser.name);
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -182,19 +225,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    console.log("User logged out");
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
   };
 
   const setCurrentUser = (newUser: User) => {
     const now = Date.now();
-    setLastActivity(now);
-    setUser(newUser);
     
+    // Update storage first
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       user: newUser,
       timestamp: now
     }));
+    
+    // Then update state
+    setLastActivity(now);
+    setUser(newUser);
+    
+    console.log("User profile updated:", newUser.name);
   };
 
   return (

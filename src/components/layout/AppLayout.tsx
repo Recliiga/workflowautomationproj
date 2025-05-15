@@ -5,7 +5,6 @@ import { useAuth } from "@/context/AuthContext";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { User } from "@/types";
 import { toast } from "sonner";
 
 interface AppLayoutProps {
@@ -18,56 +17,61 @@ export function AppLayout({ children, requiredRole }: AppLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [authorized, setAuthorized] = useState<boolean>(false);
-  const [lastCheckTimestamp, setLastCheckTimestamp] = useState<number>(Date.now());
+  
+  // We don't need to track the last check timestamp here - that's handled in AuthContext
 
+  // Check authentication and authorization when user or page changes
   useEffect(() => {
-    // Check authentication and authorization
-    if (!isLoading) {
-      if (!user) {
-        // Not authenticated, redirect to login
-        console.log("No user found, redirecting to login");
-        navigate("/login", { replace: true, state: { from: location.pathname } });
+    // Don't make decisions until we know if there's a user or not
+    if (isLoading) {
+      return;
+    }
+
+    // User is not logged in
+    if (!user) {
+      console.log("AppLayout: No authenticated user, redirecting to login");
+      navigate("/login", { replace: true, state: { from: location.pathname } });
+      return;
+    }
+    
+    // Check role-based access if needed
+    if (requiredRole) {
+      const hasRequiredRole = Array.isArray(requiredRole)
+        ? requiredRole.includes(user.role)
+        : user.role === requiredRole;
+
+      if (!hasRequiredRole) {
+        console.log(`AppLayout: User role ${user.role} doesn't have permission for this page`);
+        toast.error("You don't have permission to access this page");
+        navigate("/dashboard", { replace: true });
         return;
       }
-
-      if (requiredRole) {
-        // Check if user has required role
-        const hasRequiredRole = Array.isArray(requiredRole)
-          ? requiredRole.includes(user.role)
-          : user.role === requiredRole;
-
-        if (!hasRequiredRole) {
-          console.log(`User role ${user.role} doesn't have permission for this page`);
-          // Not authorized, redirect to dashboard
-          toast.error("You don't have permission to access this page");
-          navigate("/dashboard", { replace: true });
-          return;
-        }
-      }
-
-      setAuthorized(true);
-      setLastCheckTimestamp(Date.now());
     }
+    
+    // User is authenticated and has the right role
+    console.log("AppLayout: User is authorized to view this page");
+    setAuthorized(true);
   }, [user, isLoading, navigate, requiredRole, location.pathname]);
 
-  // Set up a regular check to verify the user session is still valid
+  // Separate effect to monitor for unexpected auth state changes
+  // This is separate from the first check to prevent race conditions
   useEffect(() => {
     if (!authorized) return;
-
+    
+    // Only check for sudden user loss, not session expiration
+    // Session expiration is handled in the AuthContext
     const checkInterval = setInterval(() => {
-      // If user disappears unexpectedly, navigate back to login
-      if (!isLoading && !user) {
-        console.log("User session lost, redirecting to login");
-        toast.error("Your session has expired. Please log in again.");
+      if (!isLoading && !user && authorized) {
+        // User was previously authorized but is now gone
+        console.log("AppLayout: User session unexpectedly lost");
+        toast.error("Your session has been lost. Please log in again.");
         navigate("/login", { replace: true });
         clearInterval(checkInterval);
       }
-      
-      setLastCheckTimestamp(Date.now());
-    }, 10000); // Check every 10 seconds
+    }, 30000); // Check less frequently (30 seconds) to reduce overhead
     
     return () => clearInterval(checkInterval);
-  }, [authorized, user, isLoading, navigate, lastCheckTimestamp]);
+  }, [authorized, user, isLoading, navigate]);
 
   if (isLoading) {
     return (
