@@ -4,12 +4,13 @@ import { Video, CalendarEvent, VideoStatus } from "@/types";
 import { format } from "date-fns";
 
 export function useCalendarEvents(videos: Video[]) {
-  // Create calendar events from videos with publish dates
+  // Create calendar events from videos with publish dates or due dates
   return useMemo(() => {
     // First, group videos by date
     const groupedByDate = videos
       .filter(video => video.publishDate || video.dueDate)
       .reduce((acc, video) => {
+        // Use publishDate if available, otherwise fall back to dueDate
         const date = video.publishDate || video.dueDate || "";
         if (!acc[date]) {
           acc[date] = [];

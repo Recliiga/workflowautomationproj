@@ -31,7 +31,7 @@ export default function UnifiedFreelancerView() {
     [videos]
   );
   
-  // Use the custom hook to generate calendar events
+  // Use the custom hook to generate calendar events from all videos
   const calendarEvents = useCalendarEvents(videos);
   
   const selectedVideo = useMemo(() => {

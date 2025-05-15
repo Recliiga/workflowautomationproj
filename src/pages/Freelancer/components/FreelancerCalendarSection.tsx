@@ -20,7 +20,7 @@ export function FreelancerCalendarSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Content Schedule</h2>
+        <h2 className="text-xl font-semibold">Content Calendar</h2>
         <div className="space-x-2">
           <Button
             variant={calendarViewMode === "twoWeeks" ? "default" : "outline"}
