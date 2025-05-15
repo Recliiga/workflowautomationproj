@@ -69,6 +69,7 @@ export interface Video {
   title: string;
   description?: string;
   notes?: string;
+  videoType?: string; // Added for video type classification
   clientId: string;
   freelancerId?: string;
   originalUrl: string;

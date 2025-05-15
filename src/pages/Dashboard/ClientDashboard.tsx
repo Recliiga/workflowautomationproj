@@ -9,6 +9,7 @@ import { Upload, History } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FileUploadModule } from "@/components/video/FileUploadModule";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 // Mock data for demonstration
 const MOCK_VIDEOS: Video[] = [
@@ -114,7 +115,17 @@ export default function ClientDashboard() {
     navigate('/calendar');
   };
   
-  const handleFileUpload = (files: File[], metadata: any) => {
+  const handleFileUpload = (
+    files: File[], 
+    metadata: any,
+    submissionData: {
+      title: string;
+      description: string;
+      notes: string;
+      videoType: string;
+      targetDate: Date | undefined;
+    }
+  ) => {
     // In a real app, this would upload files to a server and get URLs back
     const newVideos: Video[] = files.map((file, index) => {
       const fileId = Object.keys(metadata)[index];
@@ -122,20 +133,22 @@ export default function ClientDashboard() {
       
       return {
         id: `new-${Date.now()}-${index}`,
-        title,
-        description,
-        notes,
+        title: title || submissionData.title, // Use submission title if individual title is not provided
+        description: description || submissionData.description, // Use submission description if individual description is not provided
+        notes: notes || submissionData.notes, // Use submission notes if individual notes are not provided
+        videoType: submissionData.videoType,
         clientId: "2", // Current user ID would be used here
         originalUrl: URL.createObjectURL(file),
         thumbnailUrl: "", // In real app, this would be generated
         status: "in-progress",
         uploadDate: new Date().toISOString(),
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+        dueDate: submissionData.targetDate ? submissionData.targetDate.toISOString() : undefined,
       };
     });
     
     setVideos(prev => [...newVideos, ...prev]);
     setIsUploadModalOpen(false);
+    toast.success(`${files.length} video${files.length > 1 ? 's' : ''} uploaded successfully!`);
   };
   
   const videosByStatus = {
