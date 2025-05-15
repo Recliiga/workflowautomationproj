@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { User } from "@/types";
 
 interface AppLayoutProps {
@@ -60,9 +61,10 @@ export function AppLayout({ children, requiredRole }: AppLayoutProps) {
         <AppSidebar />
         <main className="flex-1">
           <div className="container py-6 md:py-8">
-            <div className="flex items-center justify-between mb-6">
-              <SidebarTrigger className="md:hidden" />
-              <div className="flex-1 md:ml-0">
+            <div className="mb-6">
+              <SidebarTrigger className="md:hidden mb-4" />
+              <Breadcrumbs className="mb-2" />
+              <div className="flex-1">
                 {children}
               </div>
             </div>
