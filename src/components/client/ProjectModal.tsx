@@ -43,25 +43,31 @@ export function ProjectModal({ project, onVideoClick }: ProjectModalProps) {
           </p>
           <Badge className={cn(
             "px-2 py-0.5",
-            getStatusColor(project.videos?.[0]?.status || "in-progress")
+            getStatusColor(project.status)
           )}>
-            {project.videos?.[0]?.status || "in-progress"}
+            {project.status}
           </Badge>
         </div>
         
-        {/* Video Context (moved above Notes section) */}
-        {project.videos?.[0]?.description && (
-          <Card className="border border-muted">
-            <CardHeader className="py-3">
-              <CardTitle className="text-base">Video Context</CardTitle>
-            </CardHeader>
-            <CardContent className="py-3">
-              <p className="text-sm whitespace-pre-wrap">{project.videos[0].description}</p>
-            </CardContent>
-          </Card>
-        )}
-        
-        {/* Notes section (moved below Video Context) */}
+        {/* Video list section */}
+        <h3 className="text-lg font-medium mt-2">Videos in this project:</h3>
+        <div className="grid grid-cols-1 gap-4">
+          {project.videos && project.videos.length > 0 ? (
+            project.videos.map((video: Video) => (
+              <CalendarVideoCard
+                key={video.id}
+                video={video}
+                className="h-auto"
+                onClick={() => onVideoClick(video.id)}
+                hideStatus={false} 
+              />
+            ))
+          ) : (
+            <p className="text-muted-foreground">No videos in this project</p>
+          )}
+        </div>
+
+        {/* Notes section if any video has notes */}
         {project.videos?.[0]?.notes && (
           <Card className="border border-muted">
             <CardHeader className="py-3">
@@ -73,18 +79,17 @@ export function ProjectModal({ project, onVideoClick }: ProjectModalProps) {
           </Card>
         )}
         
-        <h3 className="text-lg font-medium mt-2">Videos in this project:</h3>
-        <div className="grid grid-cols-1 gap-4">
-          {project.videos?.map((video: Video) => (
-            <CalendarVideoCard
-              key={video.id}
-              video={video}
-              className="h-auto"
-              onClick={() => onVideoClick(video.id)}
-              hideStatus={true} // Hide status since it's already shown at the top
-            />
-          ))}
-        </div>
+        {/* Video Context section if any video has description */}
+        {project.videos?.[0]?.description && (
+          <Card className="border border-muted">
+            <CardHeader className="py-3">
+              <CardTitle className="text-base">Video Context</CardTitle>
+            </CardHeader>
+            <CardContent className="py-3">
+              <p className="text-sm whitespace-pre-wrap">{project.videos[0].description}</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </>
   );

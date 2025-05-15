@@ -1,3 +1,4 @@
+
 import { useMemo } from "react";
 import { Video, CalendarEvent, VideoStatus } from "@/types";
 import { format } from "date-fns";
@@ -28,7 +29,8 @@ export function useCalendarEvents(videos: Video[]) {
           title: video.title,
           date: date,
           status: video.status,
-          videoType: video.videoType
+          videoType: video.videoType,
+          videos: [video] // Include the video in videos array to ensure consistent access
         };
       }
       

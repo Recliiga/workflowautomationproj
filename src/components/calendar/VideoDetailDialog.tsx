@@ -24,6 +24,11 @@ export function VideoDetailDialog({
   setSelectedVideoId,
   userRole
 }: VideoDetailDialogProps) {
+  const handleVideoClick = (videoId: string) => {
+    setSelectedProject(null);
+    setSelectedVideoId(videoId);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -45,10 +50,7 @@ export function VideoDetailDialog({
         {selectedProject && (
           <ProjectModal 
             project={selectedProject} 
-            onVideoClick={(videoId) => {
-              setSelectedProject(null);
-              setSelectedVideoId(videoId);
-            }}
+            onVideoClick={handleVideoClick}
           />
         )}
       </DialogContent>

@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { useCalendarEvents, updateVideoSchedule } from "@/hooks/useCalendarEvents";
 import { MOCK_VIDEOS } from "@/data/mockData";
+import { format } from "date-fns";
 
 export default function Calendar() {
   const { user } = useAuth();
@@ -104,6 +105,3 @@ export default function Calendar() {
     </AppLayout>
   );
 }
-
-// Import missing format function from date-fns
-import { format } from "date-fns";
