@@ -5,6 +5,15 @@ export interface FileWithPreview extends File {
   id: string;
 }
 
+export interface FileMetadata {
+  title: string;
+  description: string;
+}
+
+export interface MetadataRecord {
+  [key: string]: FileMetadata;
+}
+
 export interface SubmissionData {
   title: string;
   description: string;

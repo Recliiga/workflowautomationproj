@@ -24,15 +24,15 @@ export function useFileUpload(maxFiles: number) {
 
     const newFiles = validFiles.map(file => {
       const id = `file-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-      const previewUrl = URL.createObjectURL(file);
+      const preview = URL.createObjectURL(file);
       
       // Initialize metadata for new file
       setMetadata(prev => ({
         ...prev,
-        [id]: { title: '', description: '', notes: '' }
+        [id]: { title: '', description: '' }
       }));
       
-      return Object.assign(file, { id, previewUrl });
+      return Object.assign(file, { id, preview }) as FileWithPreview;
     });
 
     setUploadedFiles(prev => [...prev, ...newFiles]);
@@ -48,7 +48,7 @@ export function useFileUpload(maxFiles: number) {
     });
   };
 
-  const updateMetadata = (id: string, field: 'title' | 'description' | 'notes', value: string) => {
+  const updateMetadata = (id: string, field: 'title' | 'description', value: string) => {
     setMetadata(prev => ({
       ...prev,
       [id]: {

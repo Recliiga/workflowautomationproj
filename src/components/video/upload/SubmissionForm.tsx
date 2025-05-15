@@ -30,6 +30,7 @@ export function SubmissionForm({
   onTitleChange,
   onDescriptionChange,
   onNotesChange,
+  onTargetDateChange,
   onSubmit,
   filesCount
 }: SubmissionFormProps) {

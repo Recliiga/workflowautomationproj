@@ -9,7 +9,7 @@ interface VideoCarouselProps {
   files: FileWithPreview[];
   metadata: MetadataRecord;
   onRemove: (id: string) => void;
-  onMetadataChange: (id: string, field: 'title' | 'description' | 'notes', value: string) => void;
+  onMetadataChange: (id: string, field: 'title' | 'description', value: string) => void;
 }
 
 export function VideoCarousel({
@@ -77,7 +77,7 @@ export function VideoCarousel({
           <VideoPreview
             key={file.id}
             file={file}
-            metadata={metadata[file.id] || { title: '', description: '', notes: '' }}
+            metadata={metadata[file.id] || { title: '', description: '' }}
             onRemove={onRemove}
             onMetadataChange={onMetadataChange}
           />
