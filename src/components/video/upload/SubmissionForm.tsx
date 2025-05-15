@@ -1,3 +1,4 @@
+
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -47,7 +48,15 @@ export function SubmissionForm({
             <Label htmlFor="submission-description" className="text-sm font-medium">
               Video Context <span className="text-red-500">*</span>
             </Label>
-            <Textarea id="submission-description" placeholder="Describe the purpose of these videos" value={description} onChange={e => onDescriptionChange(e.target.value)} className="mt-1" required />
+            <Textarea 
+              id="submission-description" 
+              placeholder="Provide rich details about your video - what's the main message, who's featured, key points discussed, and intended audience. These details directly enhance your caption quality." 
+              value={description} 
+              onChange={e => onDescriptionChange(e.target.value)} 
+              className="mt-1 min-h-[120px]" 
+              required 
+            />
+            <p className="text-xs text-muted-foreground mt-1.5">The more context you provide, the more engaging and effective your video captions will be.</p>
           </div>
           
           
