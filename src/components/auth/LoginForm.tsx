@@ -3,7 +3,7 @@ import { useState, FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileVideo } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { DemoAccountsSection } from "./DemoAccountsSection";
 
 interface LoginFormProps {
@@ -27,20 +27,18 @@ export function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormPr
   };
 
   return (
-    <div className="w-full p-6 md:p-8 space-y-6 bg-white rounded-xl shadow-lg">
-      <div className="text-center space-y-2 md:hidden">
+    <div className="w-full p-6 space-y-6 bg-white rounded-xl shadow-lg">
+      <div className="text-center space-y-2">
         <div className="flex items-center justify-center">
           <div className="bg-accent p-3 rounded-full">
-            <FileVideo className="h-8 w-8 text-white" />
+            <LogIn className="h-6 w-6 text-white" />
           </div>
         </div>
         <h1 className="text-2xl font-bold">VideoFlow</h1>
-        <p className="text-muted-foreground">Sign in to your account</p>
+        <p className="text-muted-foreground text-sm">Sign in to your account</p>
       </div>
 
-      <h2 className="text-2xl font-bold hidden md:block">Sign in</h2>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
