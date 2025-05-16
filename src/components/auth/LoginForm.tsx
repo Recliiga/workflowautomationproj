@@ -27,8 +27,8 @@ export function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormPr
   };
 
   return (
-    <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
-      <div className="text-center space-y-2">
+    <div className="w-full p-6 md:p-8 space-y-6 bg-white rounded-xl shadow-lg">
+      <div className="text-center space-y-2 md:hidden">
         <div className="flex items-center justify-center">
           <div className="bg-accent p-3 rounded-full">
             <FileVideo className="h-8 w-8 text-white" />
@@ -38,7 +38,9 @@ export function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormPr
         <p className="text-muted-foreground">Sign in to your account</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <h2 className="text-2xl font-bold hidden md:block">Sign in</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -68,7 +70,7 @@ export function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormPr
         </Button>
       </form>
       
-      <div className="pt-4 text-center">
+      <div className="pt-2 text-center">
         <Button variant="link" onClick={onForgotPassword}>
           Forgot password?
         </Button>

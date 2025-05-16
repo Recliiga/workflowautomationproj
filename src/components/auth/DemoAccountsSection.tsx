@@ -7,13 +7,14 @@ interface DemoAccountsSectionProps {
 
 export function DemoAccountsSection({ onSelectAccount }: DemoAccountsSectionProps) {
   return (
-    <div className="mt-6 text-sm text-center text-muted-foreground">
+    <div className="mt-4 text-sm text-center text-muted-foreground">
       <p>Demo Accounts:</p>
-      <div className="mt-2 grid grid-cols-3 gap-2">
+      <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
         <Button 
           variant="outline" 
           size="sm"
           onClick={() => onSelectAccount("admin@videoflow.com", "password")}
+          className="w-full"
         >
           Admin
         </Button>
@@ -21,6 +22,7 @@ export function DemoAccountsSection({ onSelectAccount }: DemoAccountsSectionProp
           variant="outline" 
           size="sm"
           onClick={() => onSelectAccount("client@company.com", "password")}
+          className="w-full"
         >
           Client
         </Button>
@@ -28,6 +30,7 @@ export function DemoAccountsSection({ onSelectAccount }: DemoAccountsSectionProp
           variant="outline" 
           size="sm"
           onClick={() => onSelectAccount("freelancer@creator.com", "password")}
+          className="w-full"
         >
           Freelancer
         </Button>

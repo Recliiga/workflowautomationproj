@@ -70,11 +70,35 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-accent/10 to-background">
-      <LoginForm 
-        onSubmit={handleLogin} 
-        isLoading={isLoading} 
-        onForgotPassword={() => setIsPasswordReset(true)} 
-      />
+      <div className="w-full max-w-4xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-center gap-8">
+        {/* App branding and info section */}
+        <div className="w-full md:w-1/2 text-center md:text-left mb-6 md:mb-0">
+          <div className="flex items-center justify-center md:justify-start mb-6">
+            <div className="bg-accent p-4 rounded-full">
+              <svg className="h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+              </svg>
+            </div>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">VideoFlow</h1>
+          <p className="text-xl text-muted-foreground mb-6">
+            Streamline your video production workflow
+          </p>
+          <p className="text-muted-foreground hidden md:block">
+            Manage, collaborate, and deliver high-quality video content with our comprehensive platform.
+          </p>
+        </div>
+        
+        {/* Login form section */}
+        <div className="w-full md:w-1/2">
+          <LoginForm 
+            onSubmit={handleLogin} 
+            isLoading={isLoading} 
+            onForgotPassword={() => setIsPasswordReset(true)} 
+          />
+        </div>
+      </div>
       
       <FirstLoginDialog 
         isOpen={firstLogin} 
