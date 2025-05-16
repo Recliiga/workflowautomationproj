@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     console.log("Logging out user");
     setCurrentUser(null);
-    // Note: The actual redirection happens in the AppSidebar component
+    // Note: The redirection now happens via the AppSidebar's navigate call
   };
 
   // Role switcher function

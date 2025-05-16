@@ -1,0 +1,37 @@
+
+import { Button } from "@/components/ui/button";
+
+interface DemoAccountsSectionProps {
+  onSelectAccount: (email: string, password: string) => void;
+}
+
+export function DemoAccountsSection({ onSelectAccount }: DemoAccountsSectionProps) {
+  return (
+    <div className="mt-6 text-sm text-center text-muted-foreground">
+      <p>Demo Accounts:</p>
+      <div className="mt-2 grid grid-cols-3 gap-2">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => onSelectAccount("admin@videoflow.com", "password")}
+        >
+          Admin
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => onSelectAccount("client@company.com", "password")}
+        >
+          Client
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => onSelectAccount("freelancer@creator.com", "password")}
+        >
+          Freelancer
+        </Button>
+      </div>
+    </div>
+  );
+}

@@ -14,8 +14,6 @@ import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 
-// Mock user for development is now moved to AuthContext
-
 const App = () => {
   // Create a new QueryClient instance 
   const queryClient = new QueryClient();
@@ -34,7 +32,7 @@ const App = () => {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/" element={<Navigate to="/main" replace />} />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
