@@ -27,7 +27,7 @@ export function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormPr
   };
 
   return (
-    <div className="w-full p-6 space-y-6 bg-white rounded-xl shadow-lg">
+    <div className="w-full p-6 space-y-6 bg-white dark:bg-card rounded-xl shadow-lg">
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center">
           <div className="bg-accent p-3 rounded-full">

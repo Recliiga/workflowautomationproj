@@ -16,12 +16,16 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirect if user is already logged in
+  // Fix: Only redirect if user is authenticated and component is mounted
   useEffect(() => {
-    if (user) {
+    let mounted = true;
+    
+    if (user && mounted) {
       const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
     }
+    
+    return () => { mounted = false; };
   }, [user, navigate, location]);
 
   const handleLogin = async (email: string, password: string) => {
@@ -69,8 +73,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-accent/10 to-background">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-accent/10 to-background p-4">
+      <div className="w-full max-w-md mx-auto">
         <LoginForm 
           onSubmit={handleLogin} 
           isLoading={isLoading} 

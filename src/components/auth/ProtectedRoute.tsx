@@ -10,11 +10,11 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user } = useAuth();
   const location = useLocation();
 
+  // If user is not authenticated, redirect to login
   if (!user) {
-    // Redirect to login page if user is not authenticated
-    // Store the attempted URL in state for potential redirect after login
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // User is authenticated, render children
   return <>{children}</>;
 };
