@@ -1,7 +1,15 @@
 
 import React, { createContext, useContext, useState } from 'react';
 import { User, UserRole } from '@/types';
-import { mockUser } from '../App';
+
+// Mock user for development (moved from App.tsx)
+const mockUser = {
+  id: '1',
+  name: 'Admin User',
+  email: 'admin@videoflow.com',
+  role: 'admin' as UserRole,
+  avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+};
 
 interface AuthContextType {
   user: User;
@@ -14,7 +22,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Fix: Define AuthProvider as a proper React functional component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Create a state to manage the current user with role switching
   const [currentUser, setCurrentUser] = useState<User>(mockUser);
