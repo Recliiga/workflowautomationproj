@@ -21,6 +21,18 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // If user is authenticated but accessing the dashboard or root,
+  // redirect them to their role-specific page
+  if (location.pathname === "/dashboard" || location.pathname === "/") {
+    if (user.role === "client") {
+      return <Navigate to="/client" replace />;
+    }
+    if (user.role === "freelancer") {
+      return <Navigate to="/freelancer" replace />;
+    }
+    // Admin stays on dashboard
+  }
+
   // User is authenticated, render children
   console.log("User authenticated, rendering protected content");
   return <>{children}</>;

@@ -14,6 +14,8 @@ import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import UnifiedClientView from "./pages/Client/UnifiedClientView";
+import UnifiedFreelancerView from "./pages/Freelancer/UnifiedFreelancerView";
 
 const App = () => {
   // Create a new QueryClient instance 
@@ -50,6 +52,17 @@ const App = () => {
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                } />
+                {/* Add direct routes to client and freelancer views */}
+                <Route path="/client" element={
+                  <ProtectedRoute>
+                    <UnifiedClientView />
+                  </ProtectedRoute>
+                } />
+                <Route path="/freelancer" element={
+                  <ProtectedRoute>
+                    <UnifiedFreelancerView />
                   </ProtectedRoute>
                 } />
                 <Route path="/" element={<Navigate to="/login" replace />} />

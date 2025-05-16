@@ -19,13 +19,24 @@ export default function Login() {
   // Redirect if user is already authenticated
   useEffect(() => {
     if (user) {
-      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
-      console.log("User authenticated, redirecting to:", from);
-      navigate(from, { replace: true });
+      // Redirect based on user role
+      let destination = "/dashboard"; // default for admin
+      
+      if (user.role === "client") {
+        destination = "/client";
+      } else if (user.role === "freelancer") {
+        destination = "/freelancer";
+      }
+      
+      console.log(`User authenticated as ${user.role}, redirecting to:`, destination);
+      navigate(destination, { replace: true });
     }
     
-    // No cleanup needed for this effect
-  }, [user, navigate, location]);
+    // Cleanup function to prevent memory leaks
+    return () => {
+      // No specific cleanup needed, but including for completeness
+    };
+  }, [user, navigate]);
 
   const handleLogin = async (email: string, password: string) => {
     if (isLoading || authLoading) return; // Prevent multiple login attempts
@@ -64,9 +75,7 @@ export default function Login() {
       toast.success("Password changed successfully");
       setFirstLogin(false);
       
-      // Redirect to the page the user was trying to access, or dashboard if none
-      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
-      navigate(from, { replace: true });
+      // The redirect will happen in the useEffect when user state updates
     } catch (error) {
       throw error; // Let the FirstLoginDialog component handle the error
     }
