@@ -1,13 +1,10 @@
+
 import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Client, Freelancer } from "@/types";
-import { ClientsTab } from "@/components/users/ClientsTab";
-import { FreelancersTab } from "@/components/users/FreelancersTab";
 import { AssignFreelancerDialog } from "@/components/users/AssignFreelancerDialog";
+import { UserSearch } from "@/components/users/UserSearch";
+import { UserManagementTabs } from "@/components/users/UserManagementTabs";
 
 // Mock users for demonstration
 const MOCK_CLIENTS: Client[] = [
@@ -156,39 +153,16 @@ export default function Users() {
           <p className="text-muted-foreground">Manage clients and freelancers</p>
         </div>
         
-        <div className="flex items-center max-w-sm">
-          <Input
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="mr-2"
-          />
-          <Button variant="ghost" size="icon">
-            <Search className="h-4 w-4" />
-          </Button>
-        </div>
+        <UserSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
         
-        <Tabs defaultValue="clients">
-          <TabsList>
-            <TabsTrigger value="clients">Clients ({clients.length})</TabsTrigger>
-            <TabsTrigger value="freelancers">Freelancers ({freelancers.length})</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="clients" className="mt-6">
-            <ClientsTab 
-              clients={filteredClients} 
-              onAssignFreelancer={handleAssignFreelancer} 
-            />
-          </TabsContent>
-          
-          <TabsContent value="freelancers" className="mt-6">
-            <FreelancersTab 
-              freelancers={filteredFreelancers}
-              clients={clients}
-              onToggleAssignment={toggleFreelancerAssignment}
-            />
-          </TabsContent>
-        </Tabs>
+        <UserManagementTabs 
+          clients={clients}
+          filteredClients={filteredClients}
+          freelancers={freelancers}
+          filteredFreelancers={filteredFreelancers}
+          onAssignFreelancer={handleAssignFreelancer}
+          toggleFreelancerAssignment={toggleFreelancerAssignment}
+        />
         
         <AssignFreelancerDialog 
           open={isAssignModalOpen} 

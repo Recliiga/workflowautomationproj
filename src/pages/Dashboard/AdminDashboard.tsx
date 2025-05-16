@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { User, Client, Freelancer, DashboardStats, Video } from "@/types";
+import { Client, Freelancer, DashboardStats, Video } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
-import { UserManagement } from "@/components/admin/dashboard/UserManagement";
-import { AdminDashboardContent } from "@/components/admin/AdminDashboardContent";
-import { ClientSettingsTab } from "@/components/admin/ClientSettingsTab";
-import { GlobalSettingsTab } from "@/components/admin/GlobalSettingsTab";
+import { DashboardTab } from "@/components/admin/tabs/DashboardTab";
+import { SettingsTab } from "@/components/admin/tabs/SettingsTab";
 
 // Mock users for demonstration
 const MOCK_CLIENTS: Client[] = [
@@ -182,39 +180,23 @@ export default function AdminDashboard() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="clients">Clients</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <AdminDashboardContent 
-                stats={stats}
-                clients={clients}
-                videos={videos}
-                getClientById={getClientById}
-              />
-            </div>
-            
-            {/* User Management */}
-            <div>
-              <UserManagement 
-                clients={clients}
-                freelancers={freelancers}
-                onViewAssignments={viewAssignments}
-                onImpersonate={impersonateUser}
-              />
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="clients" className="space-y-6">
-          <ClientSettingsTab clients={clients} />
+          <DashboardTab 
+            stats={stats}
+            clients={clients}
+            videos={videos}
+            getClientById={getClientById}
+            getFreelancerById={getFreelancerById}
+            viewAssignments={viewAssignments}
+            impersonateUser={impersonateUser}
+          />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <GlobalSettingsTab />
+          <SettingsTab clients={clients} />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,11 +1,9 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus, X, Edit, Check } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { VideoTypeList } from "./video-types/VideoTypeList";
+import { VideoTypeForm } from "./video-types/VideoTypeForm";
 
 interface VideoTypeManagerProps {
   initialTypes?: string[];
@@ -30,22 +28,15 @@ export function VideoTypeManager({
   const [videoTypes, setVideoTypes] = useState<string[]>(
     initialTypes.sort((a, b) => a.localeCompare(b))
   );
-  const [newType, setNewType] = useState("");
 
-  const handleAddType = () => {
-    if (!newType.trim()) {
-      toast.error("Video type cannot be empty");
-      return;
-    }
-    
-    if (videoTypes.includes(newType.trim())) {
+  const handleAddType = (newType: string) => {
+    if (videoTypes.includes(newType)) {
       toast.error("This video type already exists");
       return;
     }
     
-    const updatedTypes = [...videoTypes, newType.trim()].sort((a, b) => a.localeCompare(b));
+    const updatedTypes = [...videoTypes, newType].sort((a, b) => a.localeCompare(b));
     setVideoTypes(updatedTypes);
-    setNewType("");
     
     if (onTypesChange) {
       onTypesChange(updatedTypes);
@@ -100,17 +91,7 @@ export function VideoTypeManager({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Input
-              placeholder="Add new video type"
-              value={newType}
-              onChange={(e) => setNewType(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleAddType} size="sm">
-              <Plus className="h-4 w-4 mr-1" /> Add
-            </Button>
-          </div>
+          <VideoTypeForm onAddType={handleAddType} />
           
           <VideoTypeList 
             videoTypes={videoTypes}
