@@ -16,10 +16,11 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Fix: Only redirect if user is authenticated and component is mounted
+  // Only redirect if user is authenticated and component is mounted
   useEffect(() => {
     let mounted = true;
     
+    // Only redirect if we have a valid user object
     if (user && mounted) {
       const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
@@ -41,9 +42,8 @@ export default function Login() {
       if (isFirstTimeUser) {
         setFirstLogin(true);
       } else {
-        // Redirect to the page the user was trying to access, or dashboard if none
-        const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
-        navigate(from, { replace: true });
+        // Redirect will happen in the useEffect hook once user state is updated
+        toast.success("Login successful!");
       }
     } catch (error) {
       console.error("Login failed:", error);

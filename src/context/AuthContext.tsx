@@ -23,14 +23,23 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Create a state to manage the current user with role switching
-  const [currentUser, setCurrentUser] = useState<User | null>(mockUser);
+  // Changed: Initialize with null instead of mockUser
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  // Added a loading state for authentication checks
+  const [isLoading, setIsLoading] = useState(false);
   
   // Mock login function
   const login = async (email: string, password: string) => {
-    console.log("Mock login - always successful");
-    setCurrentUser(mockUser);
-    return Promise.resolve();
+    setIsLoading(true);
+    try {
+      console.log("Mock login - always successful");
+      // For development purposes, simulate a network request
+      await new Promise(resolve => setTimeout(resolve, 300));
+      setCurrentUser(mockUser);
+      return Promise.resolve();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Updated logout function
@@ -54,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Auth context value
   const value = {
     user: currentUser,
-    isLoading: false,
+    isLoading,
     login,
     logout,
     setCurrentUser,
