@@ -6,13 +6,18 @@ import { Search } from "lucide-react";
 interface UserSearchProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
+  placeholder?: string;
 }
 
-export function UserSearch({ searchTerm, onSearchChange }: UserSearchProps) {
+export function UserSearch({ 
+  searchTerm, 
+  onSearchChange, 
+  placeholder = "Search users..." 
+}: UserSearchProps) {
   return (
     <div className="flex items-center max-w-sm">
       <Input
-        placeholder="Search users..."
+        placeholder={placeholder}
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
         className="mr-2"

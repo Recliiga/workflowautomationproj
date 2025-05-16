@@ -14,8 +14,18 @@ import { CalendarSection } from "./components/CalendarSection";
 import { VideoDetailSection } from "./components/VideoDetailSection";
 import { UploadSection } from "./components/UploadSection";
 
-export default function UnifiedClientView() {
-  const [videos, setVideos] = useState<Video[]>(MOCK_VIDEOS);
+interface UnifiedClientViewProps {
+  adminView?: boolean;
+  clientId?: string;
+}
+
+export default function UnifiedClientView({ adminView = false, clientId }: UnifiedClientViewProps) {
+  const [videos, setVideos] = useState<Video[]>(
+    // If in admin view with clientId, filter videos by that client
+    clientId 
+      ? MOCK_VIDEOS.filter(v => v.clientId === clientId)
+      : MOCK_VIDEOS
+  );
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,7 +106,12 @@ export default function UnifiedClientView() {
   };
 
   const handleVideosUploaded = (newVideos: Video[]) => {
-    setVideos(prev => [...newVideos, ...prev]);
+    // If in admin view and clientId provided, assign the clientId to new videos
+    const videosWithClientId = clientId ? 
+      newVideos.map(video => ({ ...video, clientId })) : 
+      newVideos;
+    
+    setVideos(prev => [...videosWithClientId, ...prev]);
   };
 
   const handleDeleteVideo = (videoId: string) => {
@@ -105,8 +120,6 @@ export default function UnifiedClientView() {
   };
 
   const handleUpdateAIContent = (videoId: string, updatedContent: AIContent) => {
-    // For clients, we don't allow updating AI content, but this is here for consistency
-    // In a real app with user roles, this would be conditionally enabled
     setVideos(prev => 
       prev.map(video => 
         video.id === videoId ? { ...video, aiContent: updatedContent } : video
@@ -114,12 +127,17 @@ export default function UnifiedClientView() {
     );
   };
 
+  const viewTitle = adminView ? "Client Content Management" : "Client Dashboard";
+  const viewDescription = adminView ? 
+    "Manage client videos and content schedule" : 
+    "Manage your videos and content schedule";
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Client Dashboard</h1>
-          <p className="text-muted-foreground">Manage your videos and content schedule</p>
+          <h1 className="text-3xl font-bold tracking-tight">{viewTitle}</h1>
+          <p className="text-muted-foreground">{viewDescription}</p>
         </div>
         
         <Button onClick={() => setIsUploadModalOpen(true)}>
@@ -157,7 +175,7 @@ export default function UnifiedClientView() {
         openRejectModal={openRejectModal}
         onDelete={handleDeleteVideo}
         onUpdateAIContent={handleUpdateAIContent}
-        role="client"
+        role={adminView ? "admin" : "client"}
       />
       
       {/* Reject Modal with Required Reasoning */}
