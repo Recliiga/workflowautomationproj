@@ -30,13 +30,13 @@ export function UploadSection({
       targetDate: Date | undefined;
     }
   ) => {
-    // Show AI processing state
+    // Show processing state
     setIsProcessing(true);
     
-    // Simulate AI processing with a timeout (this would be replaced by an actual API call)
+    // Simulate backend processing with a timeout (this would be replaced by an actual API call)
     setTimeout(() => {
-      // Generate mock AI content
-      const mockAIContent: AIContent = {
+      // Generate mock content (this would come from the backend in a real implementation)
+      const mockContent: AIContent = {
         hook: "Looking for a way to boost your productivity? Our latest feature solves that problem.",
         caption: `Check out our new ${submissionData.videoType.toLowerCase()} that helps you achieve more in less time.`,
         cta: "Click the link in bio to start your free trial today!",
@@ -61,7 +61,7 @@ export function UploadSection({
           uploadDate: new Date().toISOString(),
           dueDate: submissionData.targetDate ? submissionData.targetDate.toISOString() : undefined,
           publishDate: submissionData.targetDate ? submissionData.targetDate.toISOString() : undefined,
-          aiContent: mockAIContent
+          aiContent: mockContent
         };
       });
       
@@ -71,8 +71,8 @@ export function UploadSection({
       // Close modal and return new videos
       onVideosUploaded(newVideos);
       setIsUploadModalOpen(false);
-      toast.success(`${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully with AI content!`);
-    }, 2000); // Simulate 2 second delay for AI processing
+      toast.success(`${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully with content suggestions!`);
+    }, 2000); // Simulate 2 second delay for processing
   };
 
   return (
@@ -90,7 +90,7 @@ export function UploadSection({
           <div className="mt-4 p-4 bg-secondary/30 rounded-md">
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
-              <p className="text-sm font-medium">AI Processing Content...</p>
+              <p className="text-sm font-medium">Processing Content...</p>
             </div>
           </div>
         )}

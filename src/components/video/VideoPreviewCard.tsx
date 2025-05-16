@@ -75,6 +75,9 @@ export function VideoPreviewCard({
     return null;
   };
 
+  // Only show content suggestions indicator for freelancers, not for clients
+  const shouldShowContentBadge = video.aiContent && role === 'freelancer';
+
   return (
     <>
       <div className="rounded-lg border bg-card overflow-hidden">
@@ -124,8 +127,8 @@ export function VideoPreviewCard({
             )}
           </div>
           
-          {/* Display a preview of AI content if available */}
-          {video.aiContent && (
+          {/* Only show content badge for freelancers */}
+          {shouldShowContentBadge && (
             <div className="mt-3 p-2 bg-secondary/20 rounded-md">
               <p className="text-xs font-medium">Content Suggestions Available</p>
             </div>
@@ -163,8 +166,8 @@ export function VideoPreviewCard({
               </div>
             )}
             
-            {/* Show AI content if available and requested */}
-            {showAIContent && video.aiContent && (
+            {/* Only show content suggestions for freelancers or admin */}
+            {showAIContent && video.aiContent && (role === 'freelancer' || role === 'admin') && (
               <div className="mt-6">
                 <AIContentDisplay 
                   content={video.aiContent} 
