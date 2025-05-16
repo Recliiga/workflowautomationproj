@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn, sidebarStyles } from "@/lib/utils";
+import { RoleSwitcher } from "./RoleSwitcher";
 
 export function AppSidebar() {
   const { user, logout } = useAuth();
@@ -114,6 +115,8 @@ export function AppSidebar() {
                 <p className="text-xs text-sidebar-foreground/70 capitalize">{user.role}</p>
               </div>
             </div>
+            
+            <RoleSwitcher />
             
             <div className="grid grid-cols-2 gap-2">
               <button 
