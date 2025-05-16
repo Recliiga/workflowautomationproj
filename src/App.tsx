@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 import MainPage from "./pages/MainPage";
 import Profile from "./pages/Profile";
@@ -27,11 +28,30 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
+                {/* Public routes */}
                 <Route path="/login" element={<Login />} />
-                <Route path="/main" element={<MainPage />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/users" element={<Users />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                
+                {/* Protected routes */}
+                <Route path="/main" element={
+                  <ProtectedRoute>
+                    <MainPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/users" element={
+                  <ProtectedRoute>
+                    <Users />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { LoginForm } from "@/components/auth/LoginForm";
@@ -12,8 +12,17 @@ export default function Login() {
   const [firstLogin, setFirstLogin] = useState(false);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const [currentEmail, setCurrentEmail] = useState("");
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, location]);
 
   const handleLogin = async (email: string, password: string) => {
     setIsLoading(true);
@@ -28,7 +37,9 @@ export default function Login() {
       if (isFirstTimeUser) {
         setFirstLogin(true);
       } else {
-        navigate('/dashboard');
+        // Redirect to the page the user was trying to access, or dashboard if none
+        const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
+        navigate(from, { replace: true });
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -48,7 +59,10 @@ export default function Login() {
       
       toast.success("Password changed successfully");
       setFirstLogin(false);
-      navigate('/dashboard');
+      
+      // Redirect to the page the user was trying to access, or dashboard if none
+      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
     } catch (error) {
       throw error; // Let the FirstLoginDialog component handle the error
     }
