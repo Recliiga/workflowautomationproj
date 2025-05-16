@@ -2,13 +2,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, X, Edit, Check, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, X, Edit, Check } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
 interface VideoTypeManagerProps {
   initialTypes?: string[];
   onTypesChange?: (types: string[]) => void;
+  clientId?: string;
+  clientName?: string;
 }
 
 export function VideoTypeManager({ 
@@ -20,7 +22,9 @@ export function VideoTypeManager({
     "Partnership/Sponsorship",
     "Testimonial"
   ], 
-  onTypesChange 
+  onTypesChange,
+  clientId,
+  clientName
 }: VideoTypeManagerProps) {
   const [videoTypes, setVideoTypes] = useState<string[]>(
     initialTypes.sort((a, b) => a.localeCompare(b))
@@ -48,7 +52,7 @@ export function VideoTypeManager({
       onTypesChange(updatedTypes);
     }
     
-    toast.success("Video type added successfully");
+    toast.success(`Video type added ${clientName ? `for ${clientName}` : ''}`);
   };
 
   const handleDeleteType = (index: number) => {
@@ -59,7 +63,7 @@ export function VideoTypeManager({
       onTypesChange(updatedTypes);
     }
     
-    toast.success("Video type removed");
+    toast.success(`Video type removed ${clientName ? `for ${clientName}` : ''}`);
   };
 
   const handleStartEdit = (index: number) => {
@@ -90,40 +94,22 @@ export function VideoTypeManager({
         onTypesChange(sortedTypes);
       }
       
-      toast.success("Video type updated");
-    }
-  };
-
-  const handleMoveUp = (index: number) => {
-    if (index > 0) {
-      const updatedTypes = [...videoTypes];
-      [updatedTypes[index - 1], updatedTypes[index]] = [updatedTypes[index], updatedTypes[index - 1]];
-      setVideoTypes(updatedTypes);
-      
-      if (onTypesChange) {
-        onTypesChange(updatedTypes);
-      }
-    }
-  };
-
-  const handleMoveDown = (index: number) => {
-    if (index < videoTypes.length - 1) {
-      const updatedTypes = [...videoTypes];
-      [updatedTypes[index], updatedTypes[index + 1]] = [updatedTypes[index + 1], updatedTypes[index]];
-      setVideoTypes(updatedTypes);
-      
-      if (onTypesChange) {
-        onTypesChange(updatedTypes);
-      }
+      toast.success(`Video type updated ${clientName ? `for ${clientName}` : ''}`);
     }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Manage Video Types</CardTitle>
+        <CardTitle>
+          {clientName 
+            ? `Manage Video Types for ${clientName}` 
+            : "Manage Video Types"}
+        </CardTitle>
         <CardDescription>
-          Add, edit, or remove video types available to clients when uploading videos
+          {clientName 
+            ? `Add, edit, or remove video types available to ${clientName} when uploading videos`
+            : "Add, edit, or remove video types available to clients when uploading videos"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -143,6 +129,7 @@ export function VideoTypeManager({
           <div className="border rounded-lg overflow-hidden">
             <div className="bg-muted px-4 py-2 border-b font-medium text-sm">
               Available Video Types
+              {clientName && <span className="ml-1 text-muted-foreground">for {clientName}</span>}
             </div>
             <ul className="divide-y">
               {videoTypes.map((type, index) => (

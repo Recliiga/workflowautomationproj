@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { User, Client, Freelancer, DashboardStats, Video } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileVideo, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { FileVideo, CheckCircle, AlertCircle, Clock, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { VideoTypeManager } from "@/components/admin/VideoTypeManager";
@@ -10,6 +10,7 @@ import { RecentVideos } from "@/components/admin/dashboard/RecentVideos";
 import { UserManagement } from "@/components/admin/dashboard/UserManagement";
 import { VideosByStatus } from "@/components/admin/dashboard/VideosByStatus";
 import { ClientKnowledgeBase } from "@/components/admin/ClientKnowledgeBase";
+import { ClientSelector } from "@/components/admin/ClientSelector";
 
 // Mock users for demonstration
 const MOCK_CLIENTS: Client[] = [
@@ -150,6 +151,7 @@ export default function AdminDashboard() {
     "Partnership/Sponsorship",
     "Testimonial"
   ]);
+  const [selectedClientId, setSelectedClientId] = useState<string>(clients[0]?.id || "");
   
   // Calculate stats
   const stats: DashboardStats = {
@@ -190,6 +192,17 @@ export default function AdminDashboard() {
     console.log("Video types updated:", newTypes);
   };
   
+  // Get client specific video types (in a real app, this would come from a database)
+  const getClientVideoTypes = (clientId: string) => {
+    // For now, all clients use the same video types
+    return videoTypes;
+  };
+  
+  // Handle client selection change
+  const handleClientChange = (clientId: string) => {
+    setSelectedClientId(clientId);
+  };
+  
   return (
     <div className="space-y-6">
       <div>
@@ -200,7 +213,7 @@ export default function AdminDashboard() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>
+          <TabsTrigger value="clients">Clients</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -234,8 +247,30 @@ export default function AdminDashboard() {
           <VideosByStatus videos={videos} role="admin" />
         </TabsContent>
 
-        <TabsContent value="knowledge" className="space-y-6">
-          <ClientKnowledgeBase clients={clients} />
+        <TabsContent value="clients" className="space-y-6">
+          <div className="grid grid-cols-1 gap-6">
+            <ClientSelector 
+              clients={clients} 
+              selectedClientId={selectedClientId} 
+              onClientChange={handleClientChange} 
+            />
+            
+            {selectedClientId && (
+              <div className="grid grid-cols-1 gap-6">
+                <VideoTypeManager 
+                  initialTypes={getClientVideoTypes(selectedClientId)} 
+                  onTypesChange={handleVideoTypesChange}
+                  clientId={selectedClientId}
+                  clientName={clients.find(c => c.id === selectedClientId)?.name || ""}
+                />
+                
+                <ClientKnowledgeBase 
+                  clientId={selectedClientId}
+                  clientName={clients.find(c => c.id === selectedClientId)?.name || ""}
+                />
+              </div>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
