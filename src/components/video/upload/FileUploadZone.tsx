@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils";
 interface FileUploadZoneProps {
   onFilesSelected: (files: FileList) => void;
   maxFiles: number;
+  disabled?: boolean;
 }
 
-export function FileUploadZone({ onFilesSelected, maxFiles }: FileUploadZoneProps) {
+export function FileUploadZone({ onFilesSelected, maxFiles, disabled = false }: FileUploadZoneProps) {
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -43,12 +44,13 @@ export function FileUploadZone({ onFilesSelected, maxFiles }: FileUploadZoneProp
   return (
     <>
       <div
-        onDragEnter={handleDrag}
+        onDragEnter={disabled ? undefined : handleDrag}
         className={cn(
           "flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-12 transition-colors",
           dragActive 
             ? "border-accent bg-accent/5" 
-            : "border-border hover:border-accent/50 hover:bg-accent/5"
+            : "border-border hover:border-accent/50 hover:bg-accent/5",
+          disabled && "opacity-60 cursor-not-allowed"
         )}
       >
         <input
@@ -57,6 +59,7 @@ export function FileUploadZone({ onFilesSelected, maxFiles }: FileUploadZoneProp
           multiple
           accept="video/*,image/*"
           onChange={handleChange}
+          disabled={disabled}
           className="hidden"
         />
         
@@ -68,8 +71,9 @@ export function FileUploadZone({ onFilesSelected, maxFiles }: FileUploadZoneProp
           </p>
           <Button 
             variant="outline" 
-            onClick={() => inputRef.current?.click()}
+            onClick={() => !disabled && inputRef.current?.click()}
             className="mt-2"
+            disabled={disabled}
           >
             Select Files
           </Button>
@@ -77,7 +81,7 @@ export function FileUploadZone({ onFilesSelected, maxFiles }: FileUploadZoneProp
       </div>
       
       {/* Drag and drop event handlers */}
-      {dragActive && (
+      {dragActive && !disabled && (
         <div
           className="absolute inset-0 z-10"
           onDragEnter={handleDrag}

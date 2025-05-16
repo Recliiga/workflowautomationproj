@@ -70,7 +70,7 @@ export function UploadSection({
       
       // Close modal and return new videos
       onVideosUploaded(newVideos);
-      setIsModalOpen(false);
+      setIsUploadModalOpen(false);
       toast.success(`${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully with AI content!`);
     }, 2000); // Simulate 2 second delay for AI processing
   };
