@@ -12,24 +12,24 @@ export default function Login() {
   const [firstLogin, setFirstLogin] = useState(false);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const [currentEmail, setCurrentEmail] = useState("");
-  const { login, user } = useAuth();
+  const { login, user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Only redirect if user is authenticated and component is mounted
+  // Redirect if user is already authenticated
   useEffect(() => {
-    let mounted = true;
-    
-    // Only redirect if we have a valid user object
-    if (user && mounted) {
+    if (user) {
       const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
+      console.log("User authenticated, redirecting to:", from);
       navigate(from, { replace: true });
     }
     
-    return () => { mounted = false; };
+    // No cleanup needed for this effect
   }, [user, navigate, location]);
 
   const handleLogin = async (email: string, password: string) => {
+    if (isLoading || authLoading) return; // Prevent multiple login attempts
+    
     setIsLoading(true);
     setCurrentEmail(email);
 
@@ -42,7 +42,7 @@ export default function Login() {
       if (isFirstTimeUser) {
         setFirstLogin(true);
       } else {
-        // Redirect will happen in the useEffect hook once user state is updated
+        // The redirect will happen in the useEffect when user state updates
         toast.success("Login successful!");
       }
     } catch (error) {
@@ -72,12 +72,17 @@ export default function Login() {
     }
   };
 
+  // If user is already authenticated, return null (will be redirected by useEffect)
+  if (user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-accent/10 to-background p-4">
       <div className="w-full max-w-md mx-auto">
         <LoginForm 
           onSubmit={handleLogin} 
-          isLoading={isLoading} 
+          isLoading={isLoading || authLoading} 
           onForgotPassword={() => setIsPasswordReset(true)} 
         />
       </div>
