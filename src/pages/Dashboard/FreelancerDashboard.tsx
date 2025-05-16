@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { Video, VideoStatus } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -130,6 +129,16 @@ export default function FreelancerDashboard() {
     setIsUploadModalOpen(true);
   };
   
+  const handleUpdateAIContent = (videoId: string, updatedContent: any) => {
+    setVideos(prev => 
+      prev.map(video => 
+        video.id === videoId
+          ? { ...video, aiContent: updatedContent }
+          : video
+      )
+    );
+  };
+  
   const videosByStatus = {
     "in-progress": videos.filter(v => v.status === "in-progress"),
     "rejected": videos.filter(v => v.status === "rejected"),
@@ -197,6 +206,7 @@ export default function FreelancerDashboard() {
                   <VideoPreviewCard
                     video={video}
                     role="freelancer"
+                    onUpdateAIContent={handleUpdateAIContent}
                   />
                   <Button 
                     className="w-full"

@@ -9,6 +9,7 @@ import { StatCard } from "@/components/admin/dashboard/StatCard";
 import { RecentVideos } from "@/components/admin/dashboard/RecentVideos";
 import { UserManagement } from "@/components/admin/dashboard/UserManagement";
 import { VideosByStatus } from "@/components/admin/dashboard/VideosByStatus";
+import { ClientKnowledgeBase } from "@/components/admin/ClientKnowledgeBase";
 
 // Mock users for demonstration
 const MOCK_CLIENTS: Client[] = [
@@ -199,6 +200,7 @@ export default function AdminDashboard() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -230,6 +232,10 @@ export default function AdminDashboard() {
           
           {/* Videos by Status */}
           <VideosByStatus videos={videos} role="admin" />
+        </TabsContent>
+
+        <TabsContent value="knowledge" className="space-y-6">
+          <ClientKnowledgeBase clients={clients} />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">

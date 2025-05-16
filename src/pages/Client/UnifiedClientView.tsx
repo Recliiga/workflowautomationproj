@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from "react";
-import { Video, VideoStatus, CalendarEvent } from "@/types";
+import { Video, VideoStatus, CalendarEvent, AIContent } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { RejectModal } from "@/components/client/RejectModal";
@@ -104,6 +104,16 @@ export default function UnifiedClientView() {
     toast.success("Content successfully deleted");
   };
 
+  const handleUpdateAIContent = (videoId: string, updatedContent: AIContent) => {
+    // For clients, we don't allow updating AI content, but this is here for consistency
+    // In a real app with user roles, this would be conditionally enabled
+    setVideos(prev => 
+      prev.map(video => 
+        video.id === videoId ? { ...video, aiContent: updatedContent } : video
+      )
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -146,6 +156,8 @@ export default function UnifiedClientView() {
         onApprove={handleApprove}
         openRejectModal={openRejectModal}
         onDelete={handleDeleteVideo}
+        onUpdateAIContent={handleUpdateAIContent}
+        role="client"
       />
       
       {/* Reject Modal with Required Reasoning */}

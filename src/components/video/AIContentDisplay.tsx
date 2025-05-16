@@ -5,22 +5,30 @@ import { AIContent } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface AIContentDisplayProps {
   content: AIContent;
   videoId: string;
   editable?: boolean;
   onUpdate?: (videoId: string, updatedContent: AIContent) => void;
+  role?: "client" | "freelancer" | "admin";
 }
 
 export function AIContentDisplay({ 
   content, 
   videoId,
   editable = false,
-  onUpdate
+  onUpdate,
+  role = "client"
 }: AIContentDisplayProps) {
   const [editMode, setEditMode] = useState(false);
   const [localContent, setLocalContent] = useState<AIContent>(content);
+
+  // Only freelancers and admins can see the copy buttons
+  const showCopyButtons = role === "freelancer" || role === "admin";
+  // Only freelancers can edit the content
+  const canEdit = editable && role === "freelancer";
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -71,14 +79,16 @@ export function AIContentDisplay({
       <div className="p-3 border rounded-md bg-secondary/30">
         <div className="flex justify-between items-center mb-1">
           <h5 className="text-sm font-medium">{label}</h5>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleCopy(value, label)}
-            className="h-7 w-7 p-0"
-          >
-            <Copy className="h-3.5 w-3.5" />
-          </Button>
+          {showCopyButtons && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleCopy(value, label)}
+              className="h-7 w-7 p-0"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          )}
         </div>
         <p className="text-sm whitespace-pre-line">{value}</p>
       </div>
@@ -86,44 +96,49 @@ export function AIContentDisplay({
   };
 
   return (
-    <div className="space-y-4">
-      {editMode ? (
-        <div className="flex justify-end space-x-2 mb-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleCancel}
-          >
-            <X className="h-4 w-4 mr-1" />
-            Cancel
-          </Button>
-          <Button 
-            size="sm" 
-            onClick={handleSave}
-          >
-            <Save className="h-4 w-4 mr-1" />
-            Save Changes
-          </Button>
-        </div>
-      ) : (
-        editable && (
-          <div className="flex justify-end mb-4">
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Content Suggestions</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {editMode ? (
+          <div className="flex justify-end space-x-2 mb-4">
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={handleEdit}
+              onClick={handleCancel}
             >
-              <Edit className="h-4 w-4 mr-1" />
-              Edit Content
+              <X className="h-4 w-4 mr-1" />
+              Cancel
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={handleSave}
+            >
+              <Save className="h-4 w-4 mr-1" />
+              Save Changes
             </Button>
           </div>
-        )
-      )}
+        ) : (
+          canEdit && (
+            <div className="flex justify-end mb-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleEdit}
+              >
+                <Edit className="h-4 w-4 mr-1" />
+                Edit Content
+              </Button>
+            </div>
+          )
+        )}
 
-      {renderContentBlock("hook", "Hook", content.hook)}
-      {renderContentBlock("caption", "Caption", content.caption)}
-      {renderContentBlock("cta", "Call to Action", content.cta)}
-      {renderContentBlock("emailCopy", "Email Copy", content.emailCopy)}
-    </div>
+        {renderContentBlock("hook", "Hook", content.hook)}
+        {renderContentBlock("caption", "Caption", content.caption)}
+        {renderContentBlock("cta", "Call to Action", content.cta)}
+        {renderContentBlock("emailCopy", "Email Copy", content.emailCopy)}
+      </CardContent>
+    </Card>
   );
 }

@@ -15,6 +15,7 @@ interface VideoPreviewCardProps {
   onReject?: (videoId: string) => void;
   onSchedule?: (videoId: string) => void;
   showAIContent?: boolean;
+  onUpdateAIContent?: (videoId: string, updatedContent: any) => void;
 }
 
 export function VideoPreviewCard({ 
@@ -24,6 +25,7 @@ export function VideoPreviewCard({
   onReject,
   onSchedule,
   showAIContent = true,
+  onUpdateAIContent
 }: VideoPreviewCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -122,6 +124,13 @@ export function VideoPreviewCard({
             )}
           </div>
           
+          {/* Display a preview of AI content if available */}
+          {video.aiContent && (
+            <div className="mt-3 p-2 bg-secondary/20 rounded-md">
+              <p className="text-xs font-medium">Content Suggestions Available</p>
+            </div>
+          )}
+          
           {renderActionButtons()}
         </div>
       </div>
@@ -157,11 +166,12 @@ export function VideoPreviewCard({
             {/* Show AI content if available and requested */}
             {showAIContent && video.aiContent && (
               <div className="mt-6">
-                <h4 className="text-sm font-medium mb-2">AI-Generated Content</h4>
                 <AIContentDisplay 
                   content={video.aiContent} 
                   videoId={video.id}
-                  editable={role === 'client'} 
+                  editable={role === 'freelancer'} 
+                  role={role}
+                  onUpdate={onUpdateAIContent}
                 />
               </div>
             )}

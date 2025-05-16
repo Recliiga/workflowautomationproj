@@ -18,6 +18,7 @@ interface FileUploadModuleProps {
   ) => void;
   className?: string;
   videoTypes?: string[];
+  isProcessing?: boolean;
 }
 
 // Default video types (if not provided)
@@ -34,7 +35,8 @@ export function FileUploadModule({
   maxFiles = 5, 
   onFilesSelected,
   className,
-  videoTypes = DEFAULT_VIDEO_TYPES
+  videoTypes = DEFAULT_VIDEO_TYPES,
+  isProcessing = false
 }: FileUploadModuleProps) {
   
   const {
@@ -99,12 +101,14 @@ export function FileUploadModule({
         value={videoType}
         onChange={setVideoType}
         videoTypes={videoTypes}
+        disabled={isProcessing}
       />
       
       {/* File Upload Area */}
       <FileUploadZone
         onFilesSelected={handleFiles}
         maxFiles={maxFiles}
+        disabled={isProcessing}
       />
       
       {/* List of uploaded files */}
@@ -128,6 +132,7 @@ export function FileUploadModule({
             onTargetDateChange={setTargetDate}
             onSubmit={handleSubmit}
             filesCount={uploadedFiles.length}
+            disabled={isProcessing}
           />
         </div>
       )}

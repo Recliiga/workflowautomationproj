@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Video, CalendarEvent } from "@/types";
+import { Video, CalendarEvent, AIContent } from "@/types";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { VideoPreviewCard } from "@/components/video/VideoPreviewCard";
 import { ProjectModal } from "@/components/client/ProjectModal";
@@ -18,6 +18,8 @@ interface VideoDetailSectionProps {
   onApprove: (videoId: string) => void;
   openRejectModal: (videoId: string) => void;
   onDelete?: (videoId: string) => void;
+  onUpdateAIContent?: (videoId: string, updatedContent: AIContent) => void;
+  role?: 'client' | 'freelancer' | 'admin';
 }
 
 export function VideoDetailSection({
@@ -29,7 +31,9 @@ export function VideoDetailSection({
   setSelectedVideoId,
   onApprove,
   openRejectModal,
-  onDelete
+  onDelete,
+  onUpdateAIContent,
+  role = 'client'
 }: VideoDetailSectionProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -54,20 +58,23 @@ export function VideoDetailSection({
             <>
               <VideoPreviewCard
                 video={selectedVideo}
-                role="client"
+                role={role}
                 onApprove={selectedVideo.status === "submitted" ? onApprove : undefined}
                 onReject={selectedVideo.status === "submitted" ? () => openRejectModal(selectedVideo.id) : undefined}
+                onUpdateAIContent={onUpdateAIContent}
               />
               <div className="mt-4 flex justify-end">
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  className="flex items-center"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Content
-                </Button>
+                {role === 'client' && (
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    className="flex items-center"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Content
+                  </Button>
+                )}
               </div>
             </>
           )}
