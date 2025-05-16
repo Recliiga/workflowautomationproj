@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { 
@@ -52,6 +53,9 @@ export function AppSidebar() {
   const handleProfileSettings = () => {
     navigate('/profile');
   };
+
+  // If not logged in, don't show sidebar
+  if (!user) return null;
 
   return (
     <Sidebar

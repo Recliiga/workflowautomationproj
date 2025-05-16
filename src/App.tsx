@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
 
 // Mock user for development is now moved to AuthContext
 
@@ -28,6 +29,7 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
+                <Route path="/login" element={<Login />} />
                 <Route path="/main" element={<MainPage />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/users" element={<Users />} />

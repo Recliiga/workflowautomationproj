@@ -12,7 +12,7 @@ const mockUser = {
 };
 
 interface AuthContextType {
-  user: User;
+  user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -24,26 +24,31 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Create a state to manage the current user with role switching
-  const [currentUser, setCurrentUser] = useState<User>(mockUser);
+  const [currentUser, setCurrentUser] = useState<User | null>(mockUser);
   
   // Mock login function
   const login = async (email: string, password: string) => {
     console.log("Mock login - always successful");
+    setCurrentUser(mockUser);
     return Promise.resolve();
   };
 
-  // Mock logout function
+  // Updated logout function
   const logout = () => {
-    console.log("Mock logout - does nothing");
+    console.log("Logging out user");
+    setCurrentUser(null);
+    // Note: The actual redirection happens in the AppSidebar component
   };
 
   // Role switcher function
   const switchRole = (role: UserRole) => {
-    setCurrentUser({
-      ...currentUser,
-      role
-    });
-    console.log(`Switched to ${role} role`);
+    if (currentUser) {
+      setCurrentUser({
+        ...currentUser,
+        role
+      });
+      console.log(`Switched to ${role} role`);
+    }
   };
 
   // Auth context value
