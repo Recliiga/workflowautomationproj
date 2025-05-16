@@ -1,17 +1,10 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
-
-interface KnowledgeBaseItem {
-  id: string;
-  title: string;
-  content: string;
-}
+import { KnowledgeBaseAccordion } from "./knowledge-base/KnowledgeBaseAccordion";
+import { KnowledgeBaseItem } from "./knowledge-base/types";
 
 interface ClientKnowledgeBaseProps {
   clientId: string;
@@ -72,26 +65,12 @@ export function ClientKnowledgeBase({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <Accordion type="multiple" className="w-full">
-            {selectedClientKnowledge.map(item => (
-              <AccordionItem key={item.id} value={item.id}>
-                <AccordionTrigger>{item.title}</AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-2">
-                    <Label htmlFor={`${clientId}-${item.id}`} className="text-sm">
-                      {item.title} for {clientName}
-                    </Label>
-                    <Textarea
-                      id={`${clientId}-${item.id}`}
-                      value={item.content}
-                      onChange={(e) => handleContentChange(item.id, e.target.value)}
-                      className="min-h-[100px]"
-                    />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          <KnowledgeBaseAccordion 
+            knowledgeItems={selectedClientKnowledge}
+            clientId={clientId}
+            clientName={clientName}
+            onContentChange={handleContentChange}
+          />
           
           <div className="flex justify-end">
             <Button onClick={handleSave}>Save Changes</Button>

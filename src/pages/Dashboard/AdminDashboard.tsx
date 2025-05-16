@@ -1,16 +1,11 @@
 import { useState } from "react";
 import { User, Client, Freelancer, DashboardStats, Video } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileVideo, CheckCircle, AlertCircle, Clock, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { VideoTypeManager } from "@/components/admin/VideoTypeManager";
-import { StatCard } from "@/components/admin/dashboard/StatCard";
-import { RecentVideos } from "@/components/admin/dashboard/RecentVideos";
 import { UserManagement } from "@/components/admin/dashboard/UserManagement";
-import { VideosByStatus } from "@/components/admin/dashboard/VideosByStatus";
-import { ClientKnowledgeBase } from "@/components/admin/ClientKnowledgeBase";
-import { ClientSelector } from "@/components/admin/ClientSelector";
+import { AdminDashboardContent } from "@/components/admin/AdminDashboardContent";
+import { ClientSettingsTab } from "@/components/admin/ClientSettingsTab";
+import { GlobalSettingsTab } from "@/components/admin/GlobalSettingsTab";
 
 // Mock users for demonstration
 const MOCK_CLIENTS: Client[] = [
@@ -143,15 +138,6 @@ export default function AdminDashboard() {
   const [freelancers] = useState<Freelancer[]>(MOCK_FREELANCERS);
   const [videos] = useState<Video[]>(MOCK_VIDEOS);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [videoTypes, setVideoTypes] = useState<string[]>([
-    "Dialogue",
-    "Evergreen Content",
-    "Exercises",
-    "Huge Client Win",
-    "Partnership/Sponsorship",
-    "Testimonial"
-  ]);
-  const [selectedClientId, setSelectedClientId] = useState<string>(clients[0]?.id || "");
   
   // Calculate stats
   const stats: DashboardStats = {
@@ -185,23 +171,6 @@ export default function AdminDashboard() {
   const getFreelancerById = (freelancerId: string) => {
     return freelancers.find(f => f.id === freelancerId);
   };
-
-  const handleVideoTypesChange = (newTypes: string[]) => {
-    setVideoTypes(newTypes);
-    // In a real app, this would save the changes to a database or API
-    console.log("Video types updated:", newTypes);
-  };
-  
-  // Get client specific video types (in a real app, this would come from a database)
-  const getClientVideoTypes = (clientId: string) => {
-    // For now, all clients use the same video types
-    return videoTypes;
-  };
-  
-  // Handle client selection change
-  const handleClientChange = (clientId: string) => {
-    setSelectedClientId(clientId);
-  };
   
   return (
     <div className="space-y-6">
@@ -218,18 +187,14 @@ export default function AdminDashboard() {
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard title="Total Videos" value={stats.totalVideos} icon={FileVideo} />
-            <StatCard title="In Progress" value={stats.inProgress} icon={Clock} />
-            <StatCard title="Approved" value={stats.approved} icon={CheckCircle} />
-            <StatCard title="Rejected" value={stats.rejected} icon={AlertCircle} />
-          </div>
-          
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Recent Videos */}
             <div className="lg:col-span-2">
-              <RecentVideos videos={videos} getClientById={getClientById} />
+              <AdminDashboardContent 
+                stats={stats}
+                clients={clients}
+                videos={videos}
+                getClientById={getClientById}
+              />
             </div>
             
             {/* User Management */}
@@ -242,44 +207,14 @@ export default function AdminDashboard() {
               />
             </div>
           </div>
-          
-          {/* Videos by Status */}
-          <VideosByStatus videos={videos} role="admin" />
         </TabsContent>
 
         <TabsContent value="clients" className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
-            <ClientSelector 
-              clients={clients} 
-              selectedClientId={selectedClientId} 
-              onClientChange={handleClientChange} 
-            />
-            
-            {selectedClientId && (
-              <div className="grid grid-cols-1 gap-6">
-                <VideoTypeManager 
-                  initialTypes={getClientVideoTypes(selectedClientId)} 
-                  onTypesChange={handleVideoTypesChange}
-                  clientId={selectedClientId}
-                  clientName={clients.find(c => c.id === selectedClientId)?.name || ""}
-                />
-                
-                <ClientKnowledgeBase 
-                  clientId={selectedClientId}
-                  clientName={clients.find(c => c.id === selectedClientId)?.name || ""}
-                />
-              </div>
-            )}
-          </div>
+          <ClientSettingsTab clients={clients} />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
-            <VideoTypeManager 
-              initialTypes={videoTypes} 
-              onTypesChange={handleVideoTypesChange} 
-            />
-          </div>
+          <GlobalSettingsTab />
         </TabsContent>
       </Tabs>
     </div>

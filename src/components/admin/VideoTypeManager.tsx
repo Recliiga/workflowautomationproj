@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, X, Edit, Check } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { VideoTypeList } from "./video-types/VideoTypeList";
 
 interface VideoTypeManagerProps {
   initialTypes?: string[];
@@ -30,8 +31,6 @@ export function VideoTypeManager({
     initialTypes.sort((a, b) => a.localeCompare(b))
   );
   const [newType, setNewType] = useState("");
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editValue, setEditValue] = useState("");
 
   const handleAddType = () => {
     if (!newType.trim()) {
@@ -66,36 +65,23 @@ export function VideoTypeManager({
     toast.success(`Video type removed ${clientName ? `for ${clientName}` : ''}`);
   };
 
-  const handleStartEdit = (index: number) => {
-    setEditingIndex(index);
-    setEditValue(videoTypes[index]);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingIndex(null);
-    setEditValue("");
-  };
-
-  const handleSaveEdit = () => {
-    if (!editValue.trim()) {
+  const handleEditType = (index: number, newValue: string) => {
+    if (!newValue.trim()) {
       toast.error("Video type cannot be empty");
       return;
     }
     
-    if (editingIndex !== null) {
-      const updatedTypes = [...videoTypes];
-      updatedTypes[editingIndex] = editValue.trim();
-      const sortedTypes = updatedTypes.sort((a, b) => a.localeCompare(b));
-      
-      setVideoTypes(sortedTypes);
-      setEditingIndex(null);
-      
-      if (onTypesChange) {
-        onTypesChange(sortedTypes);
-      }
-      
-      toast.success(`Video type updated ${clientName ? `for ${clientName}` : ''}`);
+    const updatedTypes = [...videoTypes];
+    updatedTypes[index] = newValue.trim();
+    const sortedTypes = updatedTypes.sort((a, b) => a.localeCompare(b));
+    
+    setVideoTypes(sortedTypes);
+    
+    if (onTypesChange) {
+      onTypesChange(sortedTypes);
     }
+    
+    toast.success(`Video type updated ${clientName ? `for ${clientName}` : ''}`);
   };
 
   return (
@@ -126,67 +112,12 @@ export function VideoTypeManager({
             </Button>
           </div>
           
-          <div className="border rounded-lg overflow-hidden">
-            <div className="bg-muted px-4 py-2 border-b font-medium text-sm">
-              Available Video Types
-              {clientName && <span className="ml-1 text-muted-foreground">for {clientName}</span>}
-            </div>
-            <ul className="divide-y">
-              {videoTypes.map((type, index) => (
-                <li key={`${type}-${index}`} className="px-4 py-2 flex items-center justify-between">
-                  {editingIndex === index ? (
-                    <div className="flex-1 flex items-center space-x-2">
-                      <Input
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        className="flex-1"
-                        autoFocus
-                      />
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={handleSaveEdit}
-                      >
-                        <Check className="h-4 w-4 text-green-500" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={handleCancelEdit}
-                      >
-                        <X className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <span className="flex-1">{type}</span>
-                      <div className="flex items-center space-x-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleStartEdit(index)}
-                        >
-                          <Edit className="h-4 w-4 text-blue-500" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleDeleteType(index)}
-                        >
-                          <X className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </li>
-              ))}
-              {videoTypes.length === 0 && (
-                <li className="px-4 py-6 text-center text-muted-foreground">
-                  No video types available. Add one above.
-                </li>
-              )}
-            </ul>
-          </div>
+          <VideoTypeList 
+            videoTypes={videoTypes}
+            clientName={clientName}
+            onDeleteType={handleDeleteType}
+            onEditType={handleEditType}
+          />
         </div>
       </CardContent>
     </Card>
