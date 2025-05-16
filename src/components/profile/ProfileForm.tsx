@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { ProfileData, SocialMedia } from "@/types";
+import { ProfileData } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +27,7 @@ export function ProfileForm({ initialData, onSubmit }: ProfileFormProps) {
     }));
   };
   
-  const handleSocialMediaChange = (socialMedia: SocialMedia[]) => {
+  const handleSocialMediaChange = (socialMedia: { platform: string; handle: string }[]) => {
     setFormData(prev => ({
       ...prev,
       socialMedia
@@ -155,19 +155,19 @@ export function ProfileForm({ initialData, onSubmit }: ProfileFormProps) {
         
         <div className="space-y-6">
           <SocialMediaSection 
-            socialMedia={formData.socialMedia || []}
+            initialSocialMedia={formData.socialMedia || []}
             onChange={handleSocialMediaChange}
           />
           
           {formData.role === "freelancer" && (
             <>
               <SpecialtiesSection 
-                specialties={formData.specialties || []}
+                initialSpecialties={formData.specialties || []}
                 onChange={handleSpecialtiesChange}
               />
               
               <CertificationsSection 
-                certifications={formData.certifications || []}
+                initialCertifications={formData.certifications || []}
                 onChange={handleCertificationsChange}
               />
             </>
