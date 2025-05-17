@@ -1,8 +1,7 @@
 
 import React from "react";
-import { AppSidebar } from "@/components/layout/AppSidebar";
+import { AppHeader } from "@/components/layout/AppHeader";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { SidebarInset } from "@/components/ui/sidebar";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -12,21 +11,17 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col w-full">
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-        <SidebarInset>
-          <div className="flex flex-col h-full">
-            <div className="container py-6 md:py-8">
-              <div className="mb-6">
-                <Breadcrumbs className="mb-2" />
-                <div className="flex-1">
-                  {children}
-                </div>
-              </div>
+      <AppHeader />
+      <main className="flex-1">
+        <div className="container py-6 md:py-8">
+          <div className="mb-6">
+            <Breadcrumbs className="mb-2" />
+            <div className="flex-1">
+              {children}
             </div>
           </div>
-        </SidebarInset>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

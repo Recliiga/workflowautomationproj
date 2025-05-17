@@ -21,8 +21,6 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { UserRole } from "@/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Upload } from "lucide-react";
 
 interface UserCreationFormProps {
   onUserCreated: (newUser: any) => void;
@@ -30,7 +28,6 @@ interface UserCreationFormProps {
 
 export function UserCreationForm({ onUserCreated }: UserCreationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   
   const form = useForm({
     defaultValues: {
@@ -40,24 +37,10 @@ export function UserCreationForm({ onUserCreated }: UserCreationFormProps) {
       role: "client" as UserRole,
       company: "",
       specialties: "",
-      avatar: ""
     }
   });
 
   const role = form.watch("role");
-
-  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setAvatarPreview(result);
-        form.setValue("avatar", result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true);
@@ -79,7 +62,7 @@ export function UserCreationForm({ onUserCreated }: UserCreationFormProps) {
           email: data.email,
           role: "client",
           company: data.company,
-          avatar: data.avatar || "", // Using uploaded avatar or default
+          avatar: "", // Default avatar
           assignedFreelancers: []
         };
       } else if (data.role === "freelancer") {
@@ -92,7 +75,7 @@ export function UserCreationForm({ onUserCreated }: UserCreationFormProps) {
           role: "freelancer",
           specialties: specialtiesArray,
           certifications: [],
-          avatar: data.avatar || "", // Using uploaded avatar or default
+          avatar: "", // Default avatar
           assignedClients: []
         };
       }
@@ -102,7 +85,6 @@ export function UserCreationForm({ onUserCreated }: UserCreationFormProps) {
       
       toast.success(`New ${data.role} account created successfully`);
       form.reset();
-      setAvatarPreview(null);
     } catch (error) {
       console.error("Error creating user:", error);
       toast.error("Failed to create user account");
@@ -114,29 +96,6 @@ export function UserCreationForm({ onUserCreated }: UserCreationFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <div className="flex flex-col items-center mb-4">
-          <Avatar className="h-24 w-24 mb-2">
-            <AvatarImage src={avatarPreview || ""} />
-            <AvatarFallback className="text-lg">
-              {form.watch("name") ? form.watch("name").charAt(0).toUpperCase() : "U"}
-            </AvatarFallback>
-          </Avatar>
-          
-          <label htmlFor="avatar-upload" className="cursor-pointer">
-            <div className="flex items-center gap-2 text-sm text-primary">
-              <Upload className="h-4 w-4" />
-              <span>Upload profile picture</span>
-            </div>
-            <input
-              id="avatar-upload"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarUpload}
-            />
-          </label>
-        </div>
-
         <FormField
           control={form.control}
           name="role"

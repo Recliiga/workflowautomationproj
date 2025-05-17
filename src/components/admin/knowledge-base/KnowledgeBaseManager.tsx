@@ -5,20 +5,20 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { KnowledgeBaseAccordion } from "./KnowledgeBaseAccordion";
 import { KnowledgeBaseItem } from "./types";
-import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface KnowledgeBaseManagerProps {
   clientId: string;
   clientName: string;
 }
 
-// Updated knowledge base structure with the new categories
+// Default knowledge base structure
 const DEFAULT_KNOWLEDGE_ITEMS: KnowledgeBaseItem[] = [
-  { id: "basic", title: "Basic Instructions", content: "Include any fundamental guidelines or instructions for content creation here." },
-  { id: "objective", title: "Objective", content: "Define the primary goals and purpose of the content." },
-  { id: "structure", title: "Structure", content: "Outline how the content should be organized and formatted." },
-  { id: "additional", title: "Additional Information", content: "Any supplementary details or context that would be helpful for content creation." },
-  { id: "examples", title: "Examples", content: "Provide sample content or references that demonstrate the desired output." }
+  { id: "voice", title: "Brand Voice & Tone", content: "Friendly, professional, and approachable. Use conversational language that avoids jargon." },
+  { id: "products", title: "Product/Service Descriptions", content: "Our software helps businesses streamline their workflow and increase productivity. Focus on time-saving features and user-friendly interface." },
+  { id: "pillars", title: "Messaging Pillars", content: "1. Efficiency\n2. Reliability\n3. Support\n4. Innovation" },
+  { id: "objections", title: "Objections/Pain Points", content: "1. \"It's too expensive\" - Focus on ROI and long-term value\n2. \"It's too complicated\" - Emphasize ease of use and training" },
+  { id: "cta", title: "CTA Library", content: "1. \"Start your free trial today\"\n2. \"Book a demo\"\n3. \"Join thousands of satisfied customers\"\n4. \"See how it works in 2 minutes\"" },
+  { id: "keywords", title: "Keywords/Themes", content: "productivity, efficiency, time-saving, automation, workflow, business solution" }
 ];
 
 export function KnowledgeBaseManager({ clientId, clientName }: KnowledgeBaseManagerProps) {
@@ -26,9 +26,6 @@ export function KnowledgeBaseManager({ clientId, clientName }: KnowledgeBaseMana
   const [knowledgeBase, setKnowledgeBase] = useState<{ [clientId: string]: KnowledgeBaseItem[] }>({
     [clientId]: [...DEFAULT_KNOWLEDGE_ITEMS]
   });
-  
-  // Track which accordion items are expanded
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const selectedClientKnowledge = knowledgeBase[clientId] || [...DEFAULT_KNOWLEDGE_ITEMS];
 
@@ -45,28 +42,6 @@ export function KnowledgeBaseManager({ clientId, clientName }: KnowledgeBaseMana
     });
   };
 
-  const handleToggleItem = (itemId: string) => {
-    setExpandedItems(prev => 
-      prev.includes(itemId) 
-        ? prev.filter(id => id !== itemId) 
-        : [...prev, itemId]
-    );
-  };
-
-  const handleExpandAll = () => {
-    // Extract all item IDs
-    const allItemIds = selectedClientKnowledge.map(item => item.id);
-    setExpandedItems(allItemIds);
-  };
-
-  const handleCollapseAll = () => {
-    setExpandedItems([]);
-  };
-  
-  // Check if all items are currently expanded
-  const allExpanded = selectedClientKnowledge.length > 0 && 
-    expandedItems.length === selectedClientKnowledge.length;
-
   const handleSave = () => {
     // In a real application, this would save to a backend
     toast.success(`Knowledge base updated for ${clientName}`);
@@ -82,33 +57,11 @@ export function KnowledgeBaseManager({ clientId, clientName }: KnowledgeBaseMana
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex justify-end mb-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={allExpanded ? handleCollapseAll : handleExpandAll}
-            >
-              {allExpanded ? (
-                <>
-                  <ChevronUp className="mr-1" />
-                  Collapse All
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="mr-1" />
-                  Expand All
-                </>
-              )}
-            </Button>
-          </div>
-          
           <KnowledgeBaseAccordion 
             knowledgeItems={selectedClientKnowledge}
             clientId={clientId}
             clientName={clientName}
-            expandedItems={expandedItems}
             onContentChange={handleContentChange}
-            onToggleItem={handleToggleItem}
           />
           
           <div className="flex justify-end">

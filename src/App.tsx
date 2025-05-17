@@ -32,6 +32,7 @@ const App = () => {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/settings" element={<Navigate to="/main" replace />} />
                 <Route path="/" element={<Navigate to="/main" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
