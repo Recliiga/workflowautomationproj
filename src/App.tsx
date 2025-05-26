@@ -14,6 +14,7 @@ import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import ChangePassword from "./pages/ChangePassword";
 import UnifiedClientView from "./pages/Client/UnifiedClientView";
 import UnifiedFreelancerView from "./pages/Freelancer/UnifiedFreelancerView";
 
@@ -32,6 +33,7 @@ const App = () => {
               <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/change-password" element={<ChangePassword />} />
                 
                 {/* Protected routes */}
                 <Route path="/main" element={
