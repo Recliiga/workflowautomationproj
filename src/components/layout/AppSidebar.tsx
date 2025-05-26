@@ -4,8 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { 
   Home, 
   User, 
-  Users, 
-  Settings,
+  Users,
   FileVideo,
   LogOut,
   ChevronRight,
@@ -27,6 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn, sidebarStyles } from "@/lib/utils";
+import { RoleSwitcher } from "./RoleSwitcher";
 
 export function AppSidebar() {
   const { user, logout } = useAuth();
@@ -40,7 +40,6 @@ export function AppSidebar() {
 
     const adminItems = [
       { title: "Users", url: "/users", icon: Users },
-      { title: "Settings", url: "/settings", icon: Settings },
     ];
 
     if (!user) return baseItems;
@@ -55,6 +54,9 @@ export function AppSidebar() {
   const handleProfileSettings = () => {
     navigate('/profile');
   };
+
+  // If not logged in, don't show sidebar
+  if (!user) return null;
 
   return (
     <Sidebar
@@ -113,6 +115,8 @@ export function AppSidebar() {
                 <p className="text-xs text-sidebar-foreground/70 capitalize">{user.role}</p>
               </div>
             </div>
+            
+            <RoleSwitcher />
             
             <div className="grid grid-cols-2 gap-2">
               <button 
