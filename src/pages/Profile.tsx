@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProfileForm } from "@/components/profile/ProfileForm";
+import { PasswordChangeSection } from "@/components/profile/PasswordChangeSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, ProfileData } from "@/types";
 
@@ -70,19 +71,23 @@ export default function Profile() {
           <p className="text-muted-foreground">View and update your profile information</p>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {profileData && (
-              <ProfileForm 
-                initialData={profileData} 
-                onSubmit={handleSubmit} 
-              />
-            )}
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {profileData && (
+                <ProfileForm 
+                  initialData={profileData} 
+                  onSubmit={handleSubmit} 
+                />
+              )}
+            </CardContent>
+          </Card>
+          
+          <PasswordChangeSection />
+        </div>
       </div>
     </AppLayout>
   );
