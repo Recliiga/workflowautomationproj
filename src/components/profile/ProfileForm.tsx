@@ -92,8 +92,10 @@ export function ProfileForm({ initialData, onSubmit }: ProfileFormProps) {
         </label>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
+      {/* Personal Information Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Personal Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="name">Full Name</Label>
             <Input 
@@ -117,18 +119,16 @@ export function ProfileForm({ initialData, onSubmit }: ProfileFormProps) {
             />
           </div>
           
-          {formData.role === "client" && (
-            <div>
-              <Label htmlFor="company">Company</Label>
-              <Input 
-                id="company" 
-                name="company" 
-                value={formData.company}
-                onChange={handleChange}
-                placeholder="Your company" 
-              />
-            </div>
-          )}
+          <div>
+            <Label htmlFor="company">Company</Label>
+            <Input 
+              id="company" 
+              name="company" 
+              value={formData.company || ""}
+              onChange={handleChange}
+              placeholder={formData.role === "client" ? "Your company" : "Company (optional)"} 
+            />
+          </div>
           
           <div>
             <Label htmlFor="phone">Phone</Label>
@@ -141,7 +141,7 @@ export function ProfileForm({ initialData, onSubmit }: ProfileFormProps) {
             />
           </div>
           
-          <div>
+          <div className="md:col-span-2">
             <Label htmlFor="website">Website</Label>
             <Input 
               id="website" 
@@ -152,28 +152,30 @@ export function ProfileForm({ initialData, onSubmit }: ProfileFormProps) {
             />
           </div>
         </div>
-        
+      </div>
+      
+      {/* Social Media Section */}
+      <div>
+        <SocialMediaSection 
+          initialSocialMedia={formData.socialMedia || []}
+          onChange={handleSocialMediaChange}
+        />
+      </div>
+      
+      {/* Freelancer-only sections */}
+      {formData.role === "freelancer" && (
         <div className="space-y-6">
-          <SocialMediaSection 
-            initialSocialMedia={formData.socialMedia || []}
-            onChange={handleSocialMediaChange}
+          <SpecialtiesSection 
+            initialSpecialties={formData.specialties || []}
+            onChange={handleSpecialtiesChange}
           />
           
-          {formData.role === "freelancer" && (
-            <>
-              <SpecialtiesSection 
-                initialSpecialties={formData.specialties || []}
-                onChange={handleSpecialtiesChange}
-              />
-              
-              <CertificationsSection 
-                initialCertifications={formData.certifications || []}
-                onChange={handleCertificationsChange}
-              />
-            </>
-          )}
+          <CertificationsSection 
+            initialCertifications={formData.certifications || []}
+            onChange={handleCertificationsChange}
+          />
         </div>
-      </div>
+      )}
       
       <div className="flex justify-end">
         <Button type="submit">Save Profile</Button>
