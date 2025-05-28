@@ -17,6 +17,7 @@ import Login from "./pages/Login";
 import ChangePassword from "./pages/ChangePassword";
 import UnifiedClientView from "./pages/Client/UnifiedClientView";
 import UnifiedFreelancerView from "./pages/Freelancer/UnifiedFreelancerView";
+import NewsletterTemplate from "./pages/NewsletterTemplate";
 
 const App = () => {
   // Create a new QueryClient instance 
@@ -54,6 +55,11 @@ const App = () => {
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/newsletter-template" element={
+                  <ProtectedRoute>
+                    <NewsletterTemplate />
                   </ProtectedRoute>
                 } />
                 {/* Add direct routes to client and freelancer views */}

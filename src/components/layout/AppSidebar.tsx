@@ -8,7 +8,8 @@ import {
   FileVideo,
   LogOut,
   ChevronRight,
-  UserCog
+  UserCog,
+  Mail
 } from "lucide-react";
 import {
   Sidebar,
@@ -42,8 +43,19 @@ export function AppSidebar() {
       { title: "Users", url: "/users", icon: Users },
     ];
 
+    const clientItems = [
+      { title: "Newsletter Template", url: "/newsletter-template", icon: Mail },
+    ];
+
     if (!user) return baseItems;
-    return user.role === 'admin' ? [...baseItems, ...adminItems] : baseItems;
+    
+    if (user.role === 'admin') {
+      return [...baseItems, ...adminItems];
+    } else if (user.role === 'client') {
+      return [...baseItems, ...clientItems];
+    }
+    
+    return baseItems;
   };
 
   const handleLogout = () => {
