@@ -8,6 +8,16 @@ import { Badge } from "@/components/ui/badge";
 import { Copy, RefreshCw, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface NewsletterTemplateGeneratorProps {
   approvedVideos: Video[];
@@ -26,21 +36,34 @@ export function NewsletterTemplateGenerator({
   const [currentTemplate, setCurrentTemplate] = useState<NewsletterTemplate | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedRevision, setSelectedRevision] = useState(0);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [currentCreditsUsed, setCurrentCreditsUsed] = useState(creditsUsed);
 
-  const canGenerate = creditsUsed < monthlyCredits;
+  const canGenerate = currentCreditsUsed < monthlyCredits;
   const canRevise = currentTemplate && currentTemplate.revisionsUsed < 2;
 
-  const generateTemplate = async (video: Video) => {
+  const handleGenerateClick = () => {
+    if (!selectedVideo || !canGenerate) return;
+    setShowConfirmDialog(true);
+  };
+
+  const confirmGenerate = async () => {
+    if (!selectedVideo) return;
+    
+    setShowConfirmDialog(false);
     setIsGenerating(true);
+    
+    // Consume credit immediately
+    setCurrentCreditsUsed(prev => prev + 1);
     
     // Simulate API call to generate newsletter template
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     const template: NewsletterTemplate = {
       id: `template-${Date.now()}`,
-      videoId: video.id,
-      clientId: video.clientId,
-      content: generateNewsletterContent(video, basicInstructions),
+      videoId: selectedVideo.id,
+      clientId: selectedVideo.clientId,
+      content: generateNewsletterContent(selectedVideo, basicInstructions),
       revisions: [],
       revisionsUsed: 0,
       createdAt: new Date().toISOString(),
@@ -50,7 +73,7 @@ export function NewsletterTemplateGenerator({
     setCurrentTemplate(template);
     setSelectedRevision(0);
     setIsGenerating(false);
-    toast.success("Newsletter template generated successfully!");
+    toast.success("Newsletter template generated successfully! 1 credit has been used.");
   };
 
   const generateRevision = async () => {
@@ -77,9 +100,9 @@ export function NewsletterTemplateGenerator({
     setSelectedRevision(updatedTemplate.revisions.length);
     setIsGenerating(false);
     
-    // If this was the last revision (2nd revision), consume a credit
+    // Show revision success message
     if (updatedTemplate.revisionsUsed === 2) {
-      toast.success("Final revision generated! This template has consumed 1 credit.");
+      toast.success("Final revision generated! No additional credits used for revisions.");
     } else {
       toast.success("New revision generated!");
     }
@@ -106,7 +129,7 @@ export function NewsletterTemplateGenerator({
           </p>
         </div>
         <Badge variant={canGenerate ? "default" : "destructive"}>
-          {creditsUsed}/{monthlyCredits} Credits Used
+          {currentCreditsUsed}/{monthlyCredits} Credits Used
         </Badge>
       </div>
 
@@ -167,7 +190,7 @@ export function NewsletterTemplateGenerator({
             
             {selectedVideo && canGenerate && (
               <Button 
-                onClick={() => generateTemplate(selectedVideo)}
+                onClick={handleGenerateClick}
                 disabled={isGenerating}
                 className="w-full"
               >
@@ -233,14 +256,12 @@ export function NewsletterTemplateGenerator({
                   </div>
                 )}
                 
-                {/* Credit Usage Warning */}
-                {currentTemplate.revisionsUsed === 2 && (
-                  <div className="bg-orange-50 border border-orange-200 p-3 rounded-lg">
-                    <p className="text-sm text-orange-800">
-                      ⚠️ This template has used all available revisions and consumed 1 credit.
-                    </p>
-                  </div>
-                )}
+                {/* Credit Usage Info */}
+                <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    💡 This template has used 1 credit. Revisions are free!
+                  </p>
+                </div>
                 
                 {/* Template Content */}
                 <div className="bg-muted p-4 rounded-lg max-h-96 overflow-y-auto">
@@ -257,6 +278,28 @@ export function NewsletterTemplateGenerator({
           </CardContent>
         </Card>
       </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Newsletter Template Generation</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will generate a newsletter template for "{selectedVideo?.title}" and will consume 1 credit from your monthly allowance. 
+              <br /><br />
+              You will have 2 free revisions available after the initial generation.
+              <br /><br />
+              Current usage: {currentCreditsUsed}/{monthlyCredits} credits
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmGenerate}>
+              Generate Template (Use 1 Credit)
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
