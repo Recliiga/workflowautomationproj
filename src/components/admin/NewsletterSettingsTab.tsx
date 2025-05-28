@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { NewsletterSettings } from "@/types/newsletter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Save } from "lucide-react";
+import { Plus, Trash2, Save, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
 interface NewsletterSettingsTabProps {
@@ -28,6 +27,7 @@ export function NewsletterSettingsTab({ clientId, clientName }: NewsletterSettin
 
   const [newExample, setNewExample] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [expandedExamples, setExpandedExamples] = useState<{ [key: number]: boolean }>({});
 
   const handleInstructionsChange = (value: string) => {
     setSettings(prev => ({
@@ -59,6 +59,18 @@ export function NewsletterSettingsTab({ clientId, clientName }: NewsletterSettin
       ...prev,
       examples: prev.examples.filter((_, i) => i !== index)
     }));
+  };
+
+  const toggleExample = (index: number) => {
+    setExpandedExamples(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  const getPreviewText = (text: string, maxLength: number = 100) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
   };
 
   const saveSettings = async () => {
@@ -141,17 +153,43 @@ export function NewsletterSettingsTab({ clientId, clientName }: NewsletterSettin
                   <Badge variant="secondary">
                     Example {index + 1}
                   </Badge>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => removeExample(index)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => toggleExample(index)}
+                      className="h-8 w-8 p-0"
+                    >
+                      {expandedExamples[index] ? (
+                        <ChevronUp className="h-3 w-3" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3" />
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeExample(index)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
                 <div className="bg-background p-3 rounded border">
-                  <pre className="text-sm whitespace-pre-wrap font-mono">{example}</pre>
+                  <pre className="text-sm whitespace-pre-wrap font-mono">
+                    {expandedExamples[index] ? example : getPreviewText(example)}
+                  </pre>
+                  {!expandedExamples[index] && example.length > 100 && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={() => toggleExample(index)}
+                      className="p-0 h-auto text-xs mt-2"
+                    >
+                      Show more
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
