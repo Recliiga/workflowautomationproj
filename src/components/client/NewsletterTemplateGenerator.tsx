@@ -28,7 +28,7 @@ export function NewsletterTemplateGenerator({
   const [selectedRevision, setSelectedRevision] = useState(0);
 
   const canGenerate = creditsUsed < monthlyCredits;
-  const canRevise = currentTemplate && currentTemplate.revisionsUsed < 3;
+  const canRevise = currentTemplate && currentTemplate.revisionsUsed < 2;
 
   const generateTemplate = async (video: Video) => {
     setIsGenerating(true);
@@ -76,7 +76,13 @@ export function NewsletterTemplateGenerator({
     setCurrentTemplate(updatedTemplate);
     setSelectedRevision(updatedTemplate.revisions.length);
     setIsGenerating(false);
-    toast.success("New revision generated!");
+    
+    // If this was the last revision (2nd revision), consume a credit
+    if (updatedTemplate.revisionsUsed === 2) {
+      toast.success("Final revision generated! This template has consumed 1 credit.");
+    } else {
+      toast.success("New revision generated!");
+    }
   };
 
   const copyToClipboard = (content: string) => {
@@ -103,17 +109,6 @@ export function NewsletterTemplateGenerator({
           {creditsUsed}/{monthlyCredits} Credits Used
         </Badge>
       </div>
-
-      {basicInstructions && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Instructions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">{basicInstructions}</p>
-          </CardContent>
-        </Card>
-      )}
 
       {!canGenerate && (
         <Card className="border-destructive">
@@ -198,7 +193,7 @@ export function NewsletterTemplateGenerator({
                       disabled={isGenerating}
                     >
                       <RefreshCw className="mr-2 h-3 w-3" />
-                      Revise ({3 - currentTemplate.revisionsUsed} left)
+                      Revise ({2 - currentTemplate.revisionsUsed} left)
                     </Button>
                   )}
                   <Button
@@ -235,6 +230,15 @@ export function NewsletterTemplateGenerator({
                         Revision {index + 1}
                       </Button>
                     ))}
+                  </div>
+                )}
+                
+                {/* Credit Usage Warning */}
+                {currentTemplate.revisionsUsed === 2 && (
+                  <div className="bg-orange-50 border border-orange-200 p-3 rounded-lg">
+                    <p className="text-sm text-orange-800">
+                      ⚠️ This template has used all available revisions and consumed 1 credit.
+                    </p>
                   </div>
                 )}
                 
@@ -323,29 +327,7 @@ ${video.aiContent?.cta || "I'd love to hear your thoughts after you check it out
 Best,
 [Your Name]
 
-P.S. This is exactly the kind of content that has helped our community achieve remarkable results.`,
-
-    // Revision 3
-    `Subject: [First Name], This Changed Everything
-
-Hi there,
-
-${video.aiContent?.hook || "Sometimes a single piece of content can shift your entire perspective."}
-
-That's exactly what happened when I created "${video.title}".
-
-${video.description || "This content explores breakthrough concepts that challenge conventional thinking."}
-
-Why am I sharing this with you?
-
-Because ${video.aiContent?.caption || "I believe you're someone who values growth and isn't afraid to think differently."}
-
-${video.aiContent?.cta || "Dive in when you have a moment and let me know what resonates with you."}
-
-Cheers,
-[Your Name]
-
-P.S. ${video.aiContent?.emailCopy?.split('.')[0] + '.' || "The feedback on this has been incredible."}`
+P.S. This is exactly the kind of content that has helped our community achieve remarkable results.`
   ];
 
   return variations[revision] || variations[0];
