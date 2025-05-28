@@ -20,11 +20,8 @@ export function NewsletterSettingsTab({ clientId, clientName }: NewsletterSettin
   const [settings, setSettings] = useState<NewsletterSettings>({
     basicInstructions: "Create engaging email newsletter templates based on approved video content. Focus on compelling subject lines, clear value propositions, and strong calls-to-action.",
     examples: [
-      "Use personalized greetings with [First Name] placeholders",
-      "Start with a hook that captures attention",
-      "Include video title and description prominently",
-      "End with a clear call-to-action",
-      "Keep tone conversational and engaging"
+      "Subject: 🚀 This Changed Everything for Our Clients\n\nHey [First Name],\n\nI wanted to share something that's been getting incredible results...\n\n[Video content summary]\n\nThe response has been amazing - people are saying this is exactly what they needed to hear.\n\nCheck it out here: [Link]\n\nLet me know what you think!\n\nBest,\n[Your Name]",
+      "Subject: Personal Note About [Video Title]\n\n[First Name],\n\nI've been working on something that I think you'll really appreciate.\n\n[Video hook/teaser]\n\nWhat you'll discover:\n• Key insight #1\n• Practical strategy #2\n• Game-changing perspective #3\n\nThis represents hours of research and real-world application.\n\nTake a look: [Link]\n\nTalk soon,\n[Your Name]"
     ],
     monthlyCredits: 2
   });
@@ -131,42 +128,49 @@ export function NewsletterSettingsTab({ clientId, clientName }: NewsletterSettin
         </CardContent>
       </Card>
 
-      {/* Examples */}
+      {/* Newsletter Examples */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Best Practice Examples</CardTitle>
+          <CardTitle className="text-base">Newsletter Examples</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-4">
             {settings.examples.map((example, index) => (
-              <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
-                <Badge variant="secondary" className="shrink-0">
-                  {index + 1}
-                </Badge>
-                <span className="text-sm flex-1">{example}</span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => removeExample(index)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+              <div key={index} className="space-y-2 p-4 bg-muted rounded-lg">
+                <div className="flex items-center justify-between">
+                  <Badge variant="secondary">
+                    Example {index + 1}
+                  </Badge>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => removeExample(index)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+                <div className="bg-background p-3 rounded border">
+                  <pre className="text-sm whitespace-pre-wrap font-mono">{example}</pre>
+                </div>
               </div>
             ))}
           </div>
 
           <Separator />
 
-          <div className="flex gap-2">
-            <Input
+          <div className="space-y-2">
+            <Label htmlFor="newExample">Add New Newsletter Example</Label>
+            <Textarea
+              id="newExample"
               value={newExample}
               onChange={(e) => setNewExample(e.target.value)}
-              placeholder="Add a new example..."
-              onKeyPress={(e) => e.key === 'Enter' && addExample()}
+              placeholder="Paste your newsletter example here...&#10;&#10;Include subject line, body text, and any formatting you want to preserve."
+              rows={8}
             />
-            <Button onClick={addExample} disabled={!newExample.trim()}>
-              <Plus className="h-4 w-4" />
+            <Button onClick={addExample} disabled={!newExample.trim()} className="w-full">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Newsletter Example
             </Button>
           </div>
         </CardContent>
