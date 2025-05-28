@@ -49,13 +49,9 @@ export function NewsletterTemplateGenerator({
             Generate email newsletter templates from your approved videos
           </p>
         </div>
-        <div className={`px-4 py-2 rounded-md text-sm font-medium border ${
-          canGenerate 
-            ? "bg-green-50 border-green-200 text-green-800" 
-            : "bg-red-50 border-red-200 text-red-800"
-        }`}>
-          Credits Used: {currentCreditsUsed} / {monthlyCredits}
-        </div>
+        <Badge variant={canGenerate ? "default" : "destructive"}>
+          {currentCreditsUsed}/{monthlyCredits} Credits Used
+        </Badge>
       </div>
 
       {!canGenerate && (

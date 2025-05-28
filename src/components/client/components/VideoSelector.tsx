@@ -2,7 +2,7 @@
 import { Video } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, FileText } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
@@ -63,7 +63,7 @@ export function VideoSelector({
                           alt={video.title}
                           className="w-16 h-10 object-cover rounded"
                         />
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1">
                           <h4 className="font-medium text-sm">{video.title}</h4>
                           <p className="text-xs text-muted-foreground">
                             {video.videoType || "Unclassified"}
@@ -71,6 +71,8 @@ export function VideoSelector({
                           <p className="text-xs text-muted-foreground">
                             {video.publishDate && format(new Date(video.publishDate), "MMM d, yyyy")}
                           </p>
+                        </div>
+                        <div className="flex flex-col gap-1">
                           {hasExistingTemplate(video.id) && (
                             <Button
                               size="sm"
@@ -79,21 +81,22 @@ export function VideoSelector({
                                 e.stopPropagation();
                                 onLoadExistingTemplate(video.id);
                               }}
-                              className="text-xs h-7 px-3 mt-2"
+                              className="text-xs h-6 px-2"
                             >
+                              <Eye className="h-3 w-3 mr-1" />
                               View Template
                             </Button>
                           )}
+                          {selectedVideo?.id === video.id && (
+                            <div className="flex-shrink-0">
+                              {isContentExpanded ? (
+                                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </div>
+                          )}
                         </div>
-                        {selectedVideo?.id === video.id && (
-                          <div className="flex-shrink-0 self-start">
-                            {isContentExpanded ? (
-                              <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            )}
-                          </div>
-                        )}
                       </div>
                     </div>
                     
