@@ -49,12 +49,12 @@ export function NewsletterTemplateGenerator({
             Generate email newsletter templates from your approved videos
           </p>
         </div>
-        <div className={`px-4 py-2 rounded-md text-sm font-medium border ${
+        <div className={`px-4 py-2 rounded-md text-sm font-medium border whitespace-nowrap min-w-fit ${
           canGenerate 
             ? "bg-green-50 border-green-200 text-green-800" 
             : "bg-red-50 border-red-200 text-red-800"
         }`}>
-          Credits Used: {currentCreditsUsed} / {monthlyCredits}
+          Credits Used: {currentCreditsUsed}/{monthlyCredits}
         </div>
       </div>
 
