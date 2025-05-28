@@ -66,7 +66,7 @@ export function NewsletterTemplateGenerator({
         </div>
         <div className="bg-muted px-4 py-2 rounded-lg border">
           <div className="text-sm font-medium">
-            Monthly Credits {currentCreditsUsed}/{monthlyCredits}
+            Monthly Credits {currentCreditsUsed}/{monthlyCredits} Used
           </div>
         </div>
       </div>
