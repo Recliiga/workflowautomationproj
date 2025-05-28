@@ -35,7 +35,6 @@ export function NewsletterTemplateGenerator({
     confirmGenerate,
     generateRevision,
     getCurrentContent,
-    loadExistingTemplate,
     setShowConfirmDialog,
     setSelectedRevision
   } = useNewsletterGeneration(approvedVideos, monthlyCredits, creditsUsed, basicInstructions);
@@ -74,7 +73,6 @@ export function NewsletterTemplateGenerator({
           isGenerating={isGenerating}
           onVideoSelect={handleVideoSelect}
           onGenerateClick={handleGenerateClick}
-          onLoadExistingTemplate={loadExistingTemplate}
         />
 
         <TemplateDisplay
