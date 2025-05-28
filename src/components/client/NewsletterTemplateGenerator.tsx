@@ -2,6 +2,7 @@
 import { Video } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { VideoSelector } from "./components/VideoSelector";
 import { TemplateDisplay } from "./components/TemplateDisplay";
 import { GenerationDialog } from "./components/GenerationDialog";
@@ -30,14 +31,21 @@ export function NewsletterTemplateGenerator({
     isContentExpanded,
     canGenerate,
     canRevise,
+    generatedTemplates,
+    showNewsletterModal,
+    selectedNewsletterVideoId,
     handleGenerateClick,
     handleVideoSelect,
+    handleViewNewsletter,
     confirmGenerate,
     generateRevision,
     getCurrentContent,
     setShowConfirmDialog,
-    setSelectedRevision
+    setSelectedRevision,
+    setShowNewsletterModal
   } = useNewsletterGeneration(approvedVideos, monthlyCredits, creditsUsed, basicInstructions);
+
+  const selectedNewsletterTemplate = selectedNewsletterVideoId ? generatedTemplates[selectedNewsletterVideoId] : null;
 
   return (
     <div className="space-y-6">
@@ -48,9 +56,20 @@ export function NewsletterTemplateGenerator({
             Generate email newsletter templates from your approved videos
           </p>
         </div>
-        <Badge variant={canGenerate ? "default" : "destructive"}>
-          {currentCreditsUsed}/{monthlyCredits} Credits Used
-        </Badge>
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <div className="text-sm text-muted-foreground">Monthly Credits</div>
+            <div className="text-lg font-semibold">
+              <span className={currentCreditsUsed >= monthlyCredits ? "text-destructive" : "text-primary"}>
+                {currentCreditsUsed}
+              </span>
+              <span className="text-muted-foreground">/{monthlyCredits}</span>
+            </div>
+          </div>
+          <Badge variant={canGenerate ? "default" : "destructive"} className="text-xs">
+            {canGenerate ? "Available" : "Limit Reached"}
+          </Badge>
+        </div>
       </div>
 
       {!canGenerate && (
@@ -73,6 +92,8 @@ export function NewsletterTemplateGenerator({
           isGenerating={isGenerating}
           onVideoSelect={handleVideoSelect}
           onGenerateClick={handleGenerateClick}
+          generatedTemplates={generatedTemplates}
+          onViewNewsletter={handleViewNewsletter}
         />
 
         <TemplateDisplay
@@ -94,6 +115,23 @@ export function NewsletterTemplateGenerator({
         monthlyCredits={monthlyCredits}
         onConfirm={confirmGenerate}
       />
+
+      <Dialog open={showNewsletterModal} onOpenChange={setShowNewsletterModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Newsletter Template</DialogTitle>
+          </DialogHeader>
+          {selectedNewsletterTemplate && (
+            <div className="space-y-4">
+              <div className="prose prose-sm max-w-none">
+                <div className="whitespace-pre-wrap font-mono text-sm bg-muted p-4 rounded-lg">
+                  {selectedNewsletterTemplate.content}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

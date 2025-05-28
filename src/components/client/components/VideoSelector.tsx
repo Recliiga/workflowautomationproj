@@ -2,7 +2,7 @@
 import { Video } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, FileText } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
@@ -15,6 +15,8 @@ interface VideoSelectorProps {
   isGenerating: boolean;
   onVideoSelect: (video: Video) => void;
   onGenerateClick: () => void;
+  generatedTemplates?: { [videoId: string]: any }; // Store generated templates by video ID
+  onViewNewsletter?: (videoId: string) => void;
 }
 
 export function VideoSelector({
@@ -24,7 +26,9 @@ export function VideoSelector({
   canGenerate,
   isGenerating,
   onVideoSelect,
-  onGenerateClick
+  onGenerateClick,
+  generatedTemplates = {},
+  onViewNewsletter
 }: VideoSelectorProps) {
   return (
     <Card>
@@ -64,6 +68,22 @@ export function VideoSelector({
                           <p className="text-xs text-muted-foreground">
                             {video.publishDate && format(new Date(video.publishDate), "MMM d, yyyy")}
                           </p>
+                          {generatedTemplates[video.id] && (
+                            <div className="mt-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onViewNewsletter?.(video.id);
+                                }}
+                                className="text-xs h-6 px-2"
+                              >
+                                <Eye className="mr-1 h-3 w-3" />
+                                View Newsletter
+                              </Button>
+                            </div>
+                          )}
                         </div>
                         {selectedVideo?.id === video.id && (
                           <div className="flex-shrink-0">

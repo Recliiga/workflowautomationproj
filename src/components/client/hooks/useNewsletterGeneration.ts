@@ -19,6 +19,9 @@ export function useNewsletterGeneration(
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [currentCreditsUsed, setCurrentCreditsUsed] = useState(creditsUsed);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
+  const [generatedTemplates, setGeneratedTemplates] = useState<{ [videoId: string]: NewsletterTemplate }>({});
+  const [showNewsletterModal, setShowNewsletterModal] = useState(false);
+  const [selectedNewsletterVideoId, setSelectedNewsletterVideoId] = useState<string | null>(null);
 
   const canGenerate = currentCreditsUsed < monthlyCredits;
   const canRevise = currentTemplate && currentTemplate.revisionsUsed < 2;
@@ -35,6 +38,11 @@ export function useNewsletterGeneration(
       setSelectedVideo(video);
       setIsContentExpanded(true);
     }
+  };
+
+  const handleViewNewsletter = (videoId: string) => {
+    setSelectedNewsletterVideoId(videoId);
+    setShowNewsletterModal(true);
   };
 
   const confirmGenerate = async () => {
@@ -59,6 +67,7 @@ export function useNewsletterGeneration(
     };
     
     setCurrentTemplate(template);
+    setGeneratedTemplates(prev => ({ ...prev, [selectedVideo.id]: template }));
     setSelectedRevision(0);
     setIsGenerating(false);
     toast.success("Newsletter template generated successfully! 1 credit has been used.");
@@ -84,6 +93,7 @@ export function useNewsletterGeneration(
     };
     
     setCurrentTemplate(updatedTemplate);
+    setGeneratedTemplates(prev => ({ ...prev, [currentTemplate.videoId]: updatedTemplate }));
     setSelectedRevision(updatedTemplate.revisions.length);
     setIsGenerating(false);
     
@@ -110,12 +120,17 @@ export function useNewsletterGeneration(
     isContentExpanded,
     canGenerate,
     canRevise,
+    generatedTemplates,
+    showNewsletterModal,
+    selectedNewsletterVideoId,
     handleGenerateClick,
     handleVideoSelect,
+    handleViewNewsletter,
     confirmGenerate,
     generateRevision,
     getCurrentContent,
     setShowConfirmDialog,
-    setSelectedRevision
+    setSelectedRevision,
+    setShowNewsletterModal
   };
 }
