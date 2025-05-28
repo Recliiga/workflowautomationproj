@@ -1,12 +1,13 @@
 
 import { Video } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { VideoSelector } from "./components/VideoSelector";
 import { TemplateDisplay } from "./components/TemplateDisplay";
 import { GenerationDialog } from "./components/GenerationDialog";
 import { useNewsletterGeneration } from "./hooks/useNewsletterGeneration";
+import { useState } from "react";
 
 interface NewsletterTemplateGeneratorProps {
   approvedVideos: Video[];
@@ -46,6 +47,13 @@ export function NewsletterTemplateGenerator({
   } = useNewsletterGeneration(approvedVideos, monthlyCredits, creditsUsed, basicInstructions);
 
   const selectedNewsletterTemplate = selectedNewsletterVideoId ? generatedTemplates[selectedNewsletterVideoId] : null;
+  const [modalSelectedRevision, setModalSelectedRevision] = useState(0);
+
+  const getModalContent = () => {
+    if (!selectedNewsletterTemplate) return "";
+    if (modalSelectedRevision === 0) return selectedNewsletterTemplate.content;
+    return selectedNewsletterTemplate.revisions[modalSelectedRevision - 1];
+  };
 
   return (
     <div className="space-y-6">
@@ -56,19 +64,10 @@ export function NewsletterTemplateGenerator({
             Generate email newsletter templates from your approved videos
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <div className="text-sm text-muted-foreground">Monthly Credits</div>
-            <div className="text-lg font-semibold">
-              <span className={currentCreditsUsed >= monthlyCredits ? "text-destructive" : "text-primary"}>
-                {currentCreditsUsed}
-              </span>
-              <span className="text-muted-foreground">/{monthlyCredits}</span>
-            </div>
+        <div className="bg-muted px-4 py-2 rounded-lg border">
+          <div className="text-sm font-medium">
+            Monthly Credits {currentCreditsUsed}/{monthlyCredits}
           </div>
-          <Badge variant={canGenerate ? "default" : "destructive"} className="text-xs">
-            {canGenerate ? "Available" : "Limit Reached"}
-          </Badge>
         </div>
       </div>
 
@@ -123,9 +122,32 @@ export function NewsletterTemplateGenerator({
           </DialogHeader>
           {selectedNewsletterTemplate && (
             <div className="space-y-4">
+              {/* Version Selector */}
+              {selectedNewsletterTemplate.revisions.length > 0 && (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant={modalSelectedRevision === 0 ? "default" : "outline"}
+                    onClick={() => setModalSelectedRevision(0)}
+                  >
+                    Original
+                  </Button>
+                  {selectedNewsletterTemplate.revisions.map((_, index) => (
+                    <Button
+                      key={index}
+                      size="sm"
+                      variant={modalSelectedRevision === index + 1 ? "default" : "outline"}
+                      onClick={() => setModalSelectedRevision(index + 1)}
+                    >
+                      Revision {index + 1}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              
               <div className="prose prose-sm max-w-none">
                 <div className="whitespace-pre-wrap font-mono text-sm bg-muted p-4 rounded-lg">
-                  {selectedNewsletterTemplate.content}
+                  {getModalContent()}
                 </div>
               </div>
             </div>
