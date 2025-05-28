@@ -2,10 +2,11 @@
 import { Video } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, FileText } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { getTemplateByVideoId } from "../utils/templateStorage";
 
 interface VideoSelectorProps {
   approvedVideos: Video[];
@@ -15,6 +16,7 @@ interface VideoSelectorProps {
   isGenerating: boolean;
   onVideoSelect: (video: Video) => void;
   onGenerateClick: () => void;
+  onLoadExistingTemplate: (videoId: string) => void;
 }
 
 export function VideoSelector({
@@ -24,8 +26,13 @@ export function VideoSelector({
   canGenerate,
   isGenerating,
   onVideoSelect,
-  onGenerateClick
+  onGenerateClick,
+  onLoadExistingTemplate
 }: VideoSelectorProps) {
+  const hasExistingTemplate = (videoId: string) => {
+    return getTemplateByVideoId(videoId) !== null;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -65,15 +72,31 @@ export function VideoSelector({
                             {video.publishDate && format(new Date(video.publishDate), "MMM d, yyyy")}
                           </p>
                         </div>
-                        {selectedVideo?.id === video.id && (
-                          <div className="flex-shrink-0">
-                            {isContentExpanded ? (
-                              <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            )}
-                          </div>
-                        )}
+                        <div className="flex flex-col gap-1">
+                          {hasExistingTemplate(video.id) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onLoadExistingTemplate(video.id);
+                              }}
+                              className="text-xs h-6 px-2"
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              View Template
+                            </Button>
+                          )}
+                          {selectedVideo?.id === video.id && (
+                            <div className="flex-shrink-0">
+                              {isContentExpanded ? (
+                                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     

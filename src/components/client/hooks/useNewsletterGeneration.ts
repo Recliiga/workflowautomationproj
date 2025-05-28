@@ -5,6 +5,7 @@ import { NewsletterTemplate } from "@/types/newsletter";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { generateNewsletterContent } from "../utils/templateGenerator";
+import { saveTemplate, getTemplateByVideoId } from "../utils/templateStorage";
 
 export function useNewsletterGeneration(
   approvedVideos: Video[],
@@ -34,6 +35,28 @@ export function useNewsletterGeneration(
     } else {
       setSelectedVideo(video);
       setIsContentExpanded(true);
+      
+      // Load existing template if available
+      const existingTemplate = getTemplateByVideoId(video.id);
+      if (existingTemplate) {
+        setCurrentTemplate(existingTemplate);
+        setSelectedRevision(0);
+      } else {
+        setCurrentTemplate(null);
+      }
+    }
+  };
+
+  const loadExistingTemplate = (videoId: string) => {
+    const template = getTemplateByVideoId(videoId);
+    if (template) {
+      const video = approvedVideos.find(v => v.id === videoId);
+      if (video) {
+        setSelectedVideo(video);
+        setCurrentTemplate(template);
+        setSelectedRevision(0);
+        setIsContentExpanded(true);
+      }
     }
   };
 
@@ -57,6 +80,9 @@ export function useNewsletterGeneration(
       createdAt: new Date().toISOString(),
       monthYear: format(new Date(), "yyyy-MM")
     };
+    
+    // Save template to localStorage
+    saveTemplate(template);
     
     setCurrentTemplate(template);
     setSelectedRevision(0);
@@ -82,6 +108,9 @@ export function useNewsletterGeneration(
       revisions: [...currentTemplate.revisions, newRevision],
       revisionsUsed: currentTemplate.revisionsUsed + 1
     };
+    
+    // Save updated template
+    saveTemplate(updatedTemplate);
     
     setCurrentTemplate(updatedTemplate);
     setSelectedRevision(updatedTemplate.revisions.length);
@@ -115,6 +144,7 @@ export function useNewsletterGeneration(
     confirmGenerate,
     generateRevision,
     getCurrentContent,
+    loadExistingTemplate,
     setShowConfirmDialog,
     setSelectedRevision
   };
