@@ -5,9 +5,11 @@ import { NewsletterTemplate } from "@/types/newsletter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Copy, RefreshCw, FileText } from "lucide-react";
+import { Copy, RefreshCw, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +40,7 @@ export function NewsletterTemplateGenerator({
   const [selectedRevision, setSelectedRevision] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [currentCreditsUsed, setCurrentCreditsUsed] = useState(creditsUsed);
+  const [isContentExpanded, setIsContentExpanded] = useState(false);
 
   const canGenerate = currentCreditsUsed < monthlyCredits;
   const canRevise = currentTemplate && currentTemplate.revisionsUsed < 2;
@@ -45,6 +48,17 @@ export function NewsletterTemplateGenerator({
   const handleGenerateClick = () => {
     if (!selectedVideo || !canGenerate) return;
     setShowConfirmDialog(true);
+  };
+
+  const handleVideoSelect = (video: Video) => {
+    if (selectedVideo?.id === video.id) {
+      // If clicking the same video, toggle expansion
+      setIsContentExpanded(!isContentExpanded);
+    } else {
+      // If clicking a different video, select it and expand
+      setSelectedVideo(video);
+      setIsContentExpanded(true);
+    }
   };
 
   const confirmGenerate = async () => {
@@ -156,35 +170,86 @@ export function NewsletterTemplateGenerator({
                 No approved videos available
               </p>
             ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {approvedVideos.map((video) => (
-                  <div
-                    key={video.id}
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      selectedVideo?.id === video.id
-                        ? "border-primary bg-primary/5"
-                        : "hover:border-primary/50"
-                    }`}
-                    onClick={() => setSelectedVideo(video)}
-                  >
-                    <div className="flex items-start gap-3">
-                      <img
-                        src={video.thumbnailUrl || "https://via.placeholder.com/60x40"}
-                        alt={video.title}
-                        className="w-16 h-10 object-cover rounded"
-                      />
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm">{video.title}</h4>
-                        <p className="text-xs text-muted-foreground">
-                          {video.videoType || "Unclassified"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {video.publishDate && format(new Date(video.publishDate), "MMM d, yyyy")}
-                        </p>
+              <div className="space-y-2">
+                <ScrollArea className="h-96 w-full rounded-md border p-4">
+                  <div className="space-y-2">
+                    {approvedVideos.map((video) => (
+                      <div key={video.id} className="space-y-2">
+                        <div
+                          className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                            selectedVideo?.id === video.id
+                              ? "border-primary bg-primary/5"
+                              : "hover:border-primary/50"
+                          }`}
+                          onClick={() => handleVideoSelect(video)}
+                        >
+                          <div className="flex items-start gap-3">
+                            <img
+                              src={video.thumbnailUrl || "https://via.placeholder.com/60x40"}
+                              alt={video.title}
+                              className="w-16 h-10 object-cover rounded"
+                            />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-sm">{video.title}</h4>
+                              <p className="text-xs text-muted-foreground">
+                                {video.videoType || "Unclassified"}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {video.publishDate && format(new Date(video.publishDate), "MMM d, yyyy")}
+                              </p>
+                            </div>
+                            {selectedVideo?.id === video.id && (
+                              <div className="flex-shrink-0">
+                                {isContentExpanded ? (
+                                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Expandable Content Details */}
+                        {selectedVideo?.id === video.id && (
+                          <Collapsible open={isContentExpanded} onOpenChange={setIsContentExpanded}>
+                            <CollapsibleContent className="space-y-0">
+                              <div className="ml-4 p-3 border-l-2 border-primary/20 bg-muted/30 rounded-r-lg space-y-3">
+                                <h5 className="font-medium text-sm text-primary">Content Details</h5>
+                                
+                                {video.aiContent ? (
+                                  <div className="space-y-2">
+                                    <div>
+                                      <p className="text-xs font-medium text-muted-foreground">Hook:</p>
+                                      <p className="text-xs">{video.aiContent.hook}</p>
+                                    </div>
+                                    
+                                    <div>
+                                      <p className="text-xs font-medium text-muted-foreground">Caption:</p>
+                                      <p className="text-xs">{video.aiContent.caption}</p>
+                                    </div>
+                                    
+                                    <div>
+                                      <p className="text-xs font-medium text-muted-foreground">Call to Action:</p>
+                                      <p className="text-xs">{video.aiContent.cta}</p>
+                                    </div>
+                                    
+                                    <div>
+                                      <p className="text-xs font-medium text-muted-foreground">Email Copy:</p>
+                                      <p className="text-xs">{video.aiContent.emailCopy}</p>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-muted-foreground">No content details available for this video.</p>
+                                )}
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        )}
                       </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                </ScrollArea>
               </div>
             )}
             
