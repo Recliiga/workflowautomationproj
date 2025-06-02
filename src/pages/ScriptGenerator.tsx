@@ -6,7 +6,6 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ScriptInputForm } from "@/components/script/ScriptInputForm";
 import { ScriptEditor } from "@/components/script/ScriptEditor";
-import { Teleprompter } from "@/components/script/Teleprompter";
 import { GeneratedScript, ScriptInput } from "@/types/script";
 import { generateScript } from "@/utils/scriptGenerator";
 import { toast } from "sonner";
@@ -15,7 +14,6 @@ export default function ScriptGenerator() {
   const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(false);
   const [script, setScript] = useState<GeneratedScript | null>(null);
-  const [showTeleprompter, setShowTeleprompter] = useState(false);
 
   const handleGenerate = async (input: ScriptInput) => {
     setIsGenerating(true);
@@ -39,14 +37,6 @@ export default function ScriptGenerator() {
     toast.success("Script saved successfully!");
   };
 
-  const handleOpenTeleprompter = () => {
-    setShowTeleprompter(true);
-  };
-
-  const handleCloseTeleprompter = () => {
-    setShowTeleprompter(false);
-  };
-
   const handleNewScript = () => {
     setScript(null);
   };
@@ -68,7 +58,7 @@ export default function ScriptGenerator() {
         <div>
           <h2 className="text-2xl font-bold">Script Generator</h2>
           <p className="text-muted-foreground">
-            Generate video scripts with built-in teleprompter functionality
+            Generate video scripts for your content
           </p>
         </div>
 
@@ -92,19 +82,10 @@ export default function ScriptGenerator() {
               <ScriptEditor
                 script={script}
                 onSave={handleSaveScript}
-                onOpenTeleprompter={handleOpenTeleprompter}
               />
             </div>
           )}
         </div>
-
-        {/* Teleprompter Modal */}
-        {showTeleprompter && script && (
-          <Teleprompter
-            script={script}
-            onClose={handleCloseTeleprompter}
-          />
-        )}
       </div>
     </AppLayout>
   );
