@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,9 +17,10 @@ export function Teleprompter({ script, onClose }: TeleprompterProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState<ScrollSpeed>('normal');
   const [isCountingDown, setIsCountingDown] = useState(false);
-  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [scrollPosition, setScrollPosition] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const linesRef = useRef<HTMLDivElement[]>([]);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const animationFrameRef = useRef<number>();
 
   const fullScript = `${script.hook}\n\n${script.body}\n\n${script.cta}`;
   // Split into lines and filter out empty lines
@@ -55,60 +57,82 @@ export function Teleprompter({ script, onClose }: TeleprompterProps) {
     setIsPlaying(false);
     setIsCountingDown(false);
     setCountdown(5);
-    setCurrentLineIndex(0);
+    setScrollPosition(0);
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
   };
 
-  // Handle line progression based on reading speed
+  // Calculate current line based on scroll position
+  const getCurrentLineIndex = () => {
+    if (!contentRef.current || !scrollContainerRef.current) return 0;
+    
+    const container = scrollContainerRef.current;
+    const containerHeight = container.clientHeight;
+    const centerPosition = container.scrollTop + (containerHeight / 2);
+    
+    const lineElements = contentRef.current.children;
+    for (let i = 0; i < lineElements.length; i++) {
+      const element = lineElements[i] as HTMLElement;
+      const elementTop = element.offsetTop;
+      const elementBottom = elementTop + element.offsetHeight;
+      
+      if (centerPosition >= elementTop && centerPosition <= elementBottom) {
+        return i;
+      }
+    }
+    
+    return 0;
+  };
+
+  const currentLineIndex = getCurrentLineIndex();
+
+  // Handle smooth scrolling animation
   useEffect(() => {
-    if (isPlaying && !isCountingDown && currentLineIndex < lines.length) {
+    if (isPlaying && !isCountingDown && scrollContainerRef.current) {
       const wpm = getScrollSpeed(scrollSpeed);
-      const wordsPerMinute = wpm;
+      // Convert WPM to pixels per second (adjust multiplier for desired speed)
+      const pixelsPerSecond = wpm * 0.8;
       
-      // Calculate time per line based on word count
-      const currentLine = lines[currentLineIndex];
-      const wordsInLine = currentLine.split(' ').length;
-      const millisecondsPerLine = (wordsInLine / wordsPerMinute) * 60 * 1000;
-      
-      const timer = setTimeout(() => {
-        setCurrentLineIndex(prev => {
-          const nextIndex = prev + 1;
+      const animate = () => {
+        if (scrollContainerRef.current && contentRef.current) {
+          const container = scrollContainerRef.current;
+          const content = contentRef.current;
+          const maxScroll = content.offsetHeight - container.clientHeight;
           
-          // Auto-scroll to keep current line in center view
-          if (linesRef.current[nextIndex]) {
-            const lineElement = linesRef.current[nextIndex];
-            const container = scrollContainerRef.current;
-            if (container && lineElement) {
-              const containerHeight = container.clientHeight;
-              const lineTop = lineElement.offsetTop;
-              const lineHeight = lineElement.clientHeight;
-              
-              // Scroll to keep the current line in the center of the view
-              const scrollTo = lineTop - (containerHeight / 2) + (lineHeight / 2);
-              container.scrollTo({
-                top: scrollTo,
-                behavior: 'smooth'
-              });
-            }
-          }
-          
-          if (nextIndex >= lines.length) {
+          if (container.scrollTop < maxScroll) {
+            container.scrollTop += pixelsPerSecond / 60; // 60fps
+            setScrollPosition(container.scrollTop);
+            animationFrameRef.current = requestAnimationFrame(animate);
+          } else {
+            // Reached the end
             setIsPlaying(false);
           }
-          
-          return nextIndex;
-        });
-      }, millisecondsPerLine);
-
-      return () => clearTimeout(timer);
+        }
+      };
+      
+      animationFrameRef.current = requestAnimationFrame(animate);
     }
-  }, [isPlaying, currentLineIndex, lines.length, scrollSpeed, isCountingDown]);
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isPlaying, scrollSpeed, isCountingDown]);
 
   // Start countdown when component mounts
   useEffect(() => {
     startCountdown();
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
   }, []);
 
   return (
@@ -151,24 +175,22 @@ export function Teleprompter({ script, onClose }: TeleprompterProps) {
           {/* Script Content */}
           <div 
             ref={scrollContainerRef}
-            className="flex-1 overflow-auto bg-black text-white p-8 relative"
-            style={{ scrollBehavior: 'smooth' }}
+            className="flex-1 overflow-hidden bg-black text-white relative"
+            style={{ scrollBehavior: 'auto' }}
           >
-            {/* Top padding for centering */}
-            <div className="h-1/2"></div>
+            {/* Reading line indicator - shows center position */}
+            <div className="absolute left-0 right-0 top-1/2 transform -translate-y-1/2 h-1 bg-yellow-400 opacity-50 z-10 pointer-events-none"></div>
             
-            <div className="text-center space-y-6 max-w-4xl mx-auto">
+            {/* Top padding for initial positioning */}
+            <div className="h-screen"></div>
+            
+            <div ref={contentRef} className="text-center space-y-8 max-w-4xl mx-auto px-8">
               {lines.map((line, index) => (
                 <div
                   key={index}
-                  ref={el => {
-                    if (el) linesRef.current[index] = el;
-                  }}
-                  className={`text-3xl md:text-4xl lg:text-5xl leading-relaxed font-light transition-all duration-300 py-3 px-6 rounded-lg ${
+                  className={`text-3xl md:text-4xl lg:text-5xl leading-relaxed font-light transition-all duration-300 py-4 px-6 rounded-lg ${
                     index === currentLineIndex && isPlaying && !isCountingDown
-                      ? 'bg-blue-600/20 text-blue-100 border-l-4 border-blue-400 shadow-lg'
-                      : index < currentLineIndex
-                      ? 'text-gray-500'
+                      ? 'text-yellow-300 font-normal shadow-lg'
                       : 'text-white'
                   }`}
                   style={{
@@ -181,8 +203,8 @@ export function Teleprompter({ script, onClose }: TeleprompterProps) {
               ))}
             </div>
             
-            {/* Bottom padding for centering */}
-            <div className="h-1/2"></div>
+            {/* Bottom padding to allow content to scroll past the center */}
+            <div className="h-screen"></div>
           </div>
 
           {/* Controls */}
