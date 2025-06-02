@@ -12,6 +12,7 @@ import {
   User, 
   Target, 
   MessageCircle, 
+  MessageSquare,
   Calendar,
   Edit,
   Send,
