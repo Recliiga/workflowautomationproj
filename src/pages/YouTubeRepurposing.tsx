@@ -47,6 +47,11 @@ export default function YouTubeRepurposing() {
     setSelectedProject(project);
   };
 
+  const handleProjectSelected = (project: CalendarEvent) => {
+    setSelectedProject(project);
+    setGeneratedContent(null); // Clear previous content when selecting a new project
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -83,8 +88,18 @@ export default function YouTubeRepurposing() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Generated Content Display - Left Side */}
-            <div className="order-2 lg:order-1">
+            {/* Project Selection - Left Side */}
+            <div>
+              <ProjectSelector 
+                projects={projectsWithContent} 
+                selectedProject={selectedProject}
+                onProjectSelected={handleProjectSelected}
+                onContentGenerated={handleContentGenerated}
+              />
+            </div>
+
+            {/* Generated Content Display - Right Side */}
+            <div>
               {generatedContent && selectedProject ? (
                 <GeneratedContentDisplay
                   project={selectedProject}
@@ -96,19 +111,11 @@ export default function YouTubeRepurposing() {
                     <Youtube className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                     <h3 className="text-lg font-medium mb-2">Generate YouTube Content</h3>
                     <p className="text-muted-foreground">
-                      Select a project from the right panel and generate YouTube content to see it here.
+                      Select a project from the left panel and generate YouTube content to see it here.
                     </p>
                   </CardContent>
                 </Card>
               )}
-            </div>
-
-            {/* Project Selection - Right Side */}
-            <div className="order-1 lg:order-2">
-              <ProjectSelector 
-                projects={projectsWithContent} 
-                onContentGenerated={handleContentGenerated}
-              />
             </div>
           </div>
         )}

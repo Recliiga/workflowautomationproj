@@ -1,24 +1,22 @@
 
+import { useState } from "react";
 import { CalendarEvent } from "@/types";
 import { YouTubeContent } from "@/types/youtube";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import { generateYouTubeContent } from "@/utils/youtubeGenerator";
 import { toast } from "sonner";
+import { ProjectDetails } from "./ProjectDetails";
 
 interface ContentGenerationSectionProps {
   project: CalendarEvent;
-  isGenerating: boolean;
   onGenerate: (content: YouTubeContent) => void;
-  onGeneratingChange: (isGenerating: boolean) => void;
 }
 
-export function ContentGenerationSection({ 
-  project, 
-  isGenerating, 
-  onGenerate, 
-  onGeneratingChange 
-}: ContentGenerationSectionProps) {
+export function ContentGenerationSection({ project, onGenerate }: ContentGenerationSectionProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const handleGenerate = async () => {
     const firstVideo = project.videos?.[0];
     if (!firstVideo?.aiContent) {
@@ -26,7 +24,7 @@ export function ContentGenerationSection({
       return;
     }
 
-    onGeneratingChange(true);
+    setIsGenerating(true);
     
     try {
       // Simulate API call delay
@@ -45,35 +43,43 @@ export function ContentGenerationSection({
     } catch (error) {
       toast.error("Failed to generate content. Please try again.");
     } finally {
-      onGeneratingChange(false);
+      setIsGenerating(false);
     }
   };
 
   return (
-    <div className="space-y-4">
-      <Button 
-        onClick={handleGenerate}
-        disabled={isGenerating}
-        className="w-full"
-      >
-        {isGenerating ? (
-          <>
-            <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-            Generating YouTube Content...
-          </>
-        ) : (
-          <>
-            <Sparkles className="mr-2 h-4 w-4" />
-            Generate YouTube Content
-          </>
-        )}
-      </Button>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Generate YouTube Content</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <ProjectDetails project={project} />
 
-      <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-        <p className="text-sm text-blue-800">
-          💡 Content will be optimized using your admin-configured settings for industry, location, and brand voice.
-        </p>
-      </div>
-    </div>
+        <Button 
+          onClick={handleGenerate}
+          disabled={isGenerating}
+          className="w-full"
+          size="lg"
+        >
+          {isGenerating ? (
+            <>
+              <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+              Generating YouTube Content...
+            </>
+          ) : (
+            <>
+              <Sparkles className="mr-2 h-4 w-4" />
+              Generate YouTube Content
+            </>
+          )}
+        </Button>
+
+        <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+          <p className="text-sm text-blue-800">
+            💡 Content will be optimized using your admin-configured settings for industry, location, and brand voice.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
