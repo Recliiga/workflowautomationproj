@@ -1,6 +1,7 @@
 
 import { CalendarEvent } from "@/types";
 import { YouTubeContent } from "@/types/youtube";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Download, Video } from "lucide-react";
@@ -56,22 +57,25 @@ ${content.thumbnailText.join(" | ")}`;
   };
 
   return (
-    <div className="space-y-4 mt-6">
-      <div className="flex items-center justify-between">
-        <h5 className="font-medium text-sm">Generated YouTube Content:</h5>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleCopyAll}>
-            <Copy className="h-3 w-3 mr-1" />
-            Copy All
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="h-3 w-3 mr-1" />
-            Export
-          </Button>
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Generated YouTube Content</CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleCopyAll}>
+              <Copy className="h-3 w-3 mr-1" />
+              Copy All
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport}>
+              <Download className="h-3 w-3 mr-1" />
+              Export
+            </Button>
+          </div>
         </div>
-      </div>
+        <p className="text-sm text-muted-foreground">For project: {project.title}</p>
+      </CardHeader>
       
-      <div className="space-y-3">
+      <CardContent className="space-y-4">
         <div className="p-3 bg-background border rounded">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
@@ -131,17 +135,17 @@ ${content.thumbnailText.join(" | ")}`;
             </Button>
           </div>
         </div>
-      </div>
-      
-      <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
-        <div className="flex items-center gap-2 text-green-800">
-          <Video className="h-4 w-4" />
-          <span className="font-medium text-sm">Ready for YouTube!</span>
+        
+        <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+          <div className="flex items-center gap-2 text-green-800">
+            <Video className="h-4 w-4" />
+            <span className="font-medium text-sm">Ready for YouTube!</span>
+          </div>
+          <p className="text-xs text-green-700 mt-1">
+            Your content is optimized and ready to upload to YouTube Shorts.
+          </p>
         </div>
-        <p className="text-xs text-green-700 mt-1">
-          Your content is optimized and ready to upload to YouTube Shorts.
-        </p>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

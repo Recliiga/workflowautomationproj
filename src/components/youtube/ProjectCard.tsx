@@ -7,13 +7,11 @@ import { Calendar, ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { ProjectDetails } from "./ProjectDetails";
 import { ContentGenerationSection } from "./ContentGenerationSection";
-import { GeneratedContentDisplay } from "./GeneratedContentDisplay";
 
 interface ProjectCardProps {
   project: CalendarEvent;
   isExpanded: boolean;
   onToggle: () => void;
-  generatedContent: YouTubeContent | null;
   isGenerating: boolean;
   onContentGenerated: (content: YouTubeContent) => void;
   onGeneratingChange: (isGenerating: boolean) => void;
@@ -23,7 +21,6 @@ export function ProjectCard({
   project, 
   isExpanded, 
   onToggle,
-  generatedContent,
   isGenerating,
   onContentGenerated,
   onGeneratingChange
@@ -81,13 +78,6 @@ export function ProjectCard({
             onGenerate={onContentGenerated}
             onGeneratingChange={onGeneratingChange}
           />
-
-          {generatedContent && (
-            <GeneratedContentDisplay
-              project={project}
-              content={generatedContent}
-            />
-          )}
         </div>
       </CollapsibleContent>
     </Collapsible>
