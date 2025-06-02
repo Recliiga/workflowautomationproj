@@ -2,10 +2,11 @@
 import { Video } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, FileText, Eye } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { getTemplateByVideoId } from "../utils/templateStorage";
 
 interface VideoSelectorProps {
   approvedVideos: Video[];
@@ -15,8 +16,7 @@ interface VideoSelectorProps {
   isGenerating: boolean;
   onVideoSelect: (video: Video) => void;
   onGenerateClick: () => void;
-  generatedTemplates?: { [videoId: string]: any }; // Store generated templates by video ID
-  onViewNewsletter?: (videoId: string) => void;
+  onLoadExistingTemplate: (videoId: string) => void;
 }
 
 export function VideoSelector({
@@ -27,9 +27,12 @@ export function VideoSelector({
   isGenerating,
   onVideoSelect,
   onGenerateClick,
-  generatedTemplates = {},
-  onViewNewsletter
+  onLoadExistingTemplate
 }: VideoSelectorProps) {
+  const hasExistingTemplate = (videoId: string) => {
+    return getTemplateByVideoId(videoId) !== null;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -60,7 +63,7 @@ export function VideoSelector({
                           alt={video.title}
                           className="w-16 h-10 object-cover rounded"
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <h4 className="font-medium text-sm">{video.title}</h4>
                           <p className="text-xs text-muted-foreground">
                             {video.videoType || "Unclassified"}
@@ -68,25 +71,22 @@ export function VideoSelector({
                           <p className="text-xs text-muted-foreground">
                             {video.publishDate && format(new Date(video.publishDate), "MMM d, yyyy")}
                           </p>
-                          {generatedTemplates[video.id] && (
-                            <div className="mt-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onViewNewsletter?.(video.id);
-                                }}
-                                className="text-xs h-6 px-2"
-                              >
-                                <Eye className="mr-1 h-3 w-3" />
-                                View Newsletter
-                              </Button>
-                            </div>
+                          {hasExistingTemplate(video.id) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onLoadExistingTemplate(video.id);
+                              }}
+                              className="text-xs h-7 px-3 mt-2"
+                            >
+                              View Template
+                            </Button>
                           )}
                         </div>
                         {selectedVideo?.id === video.id && (
-                          <div className="flex-shrink-0">
+                          <div className="flex-shrink-0 self-start">
                             {isContentExpanded ? (
                               <ChevronUp className="h-4 w-4 text-muted-foreground" />
                             ) : (

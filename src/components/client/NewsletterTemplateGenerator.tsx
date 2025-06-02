@@ -1,13 +1,11 @@
 
 import { Video } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { VideoSelector } from "./components/VideoSelector";
 import { TemplateDisplay } from "./components/TemplateDisplay";
 import { GenerationDialog } from "./components/GenerationDialog";
 import { useNewsletterGeneration } from "./hooks/useNewsletterGeneration";
-import { useState } from "react";
 
 interface NewsletterTemplateGeneratorProps {
   approvedVideos: Video[];
@@ -32,28 +30,15 @@ export function NewsletterTemplateGenerator({
     isContentExpanded,
     canGenerate,
     canRevise,
-    generatedTemplates,
-    showNewsletterModal,
-    selectedNewsletterVideoId,
     handleGenerateClick,
     handleVideoSelect,
-    handleViewNewsletter,
     confirmGenerate,
     generateRevision,
     getCurrentContent,
+    loadExistingTemplate,
     setShowConfirmDialog,
-    setSelectedRevision,
-    setShowNewsletterModal
+    setSelectedRevision
   } = useNewsletterGeneration(approvedVideos, monthlyCredits, creditsUsed, basicInstructions);
-
-  const selectedNewsletterTemplate = selectedNewsletterVideoId ? generatedTemplates[selectedNewsletterVideoId] : null;
-  const [modalSelectedRevision, setModalSelectedRevision] = useState(0);
-
-  const getModalContent = () => {
-    if (!selectedNewsletterTemplate) return "";
-    if (modalSelectedRevision === 0) return selectedNewsletterTemplate.content;
-    return selectedNewsletterTemplate.revisions[modalSelectedRevision - 1];
-  };
 
   return (
     <div className="space-y-6">
@@ -64,10 +49,12 @@ export function NewsletterTemplateGenerator({
             Generate email newsletter templates from your approved videos
           </p>
         </div>
-        <div className="bg-muted px-4 py-2 rounded-lg border">
-          <div className="text-sm font-medium">
-            Monthly Credits {currentCreditsUsed}/{monthlyCredits} Used
-          </div>
+        <div className={`px-4 py-2 rounded-md text-sm font-medium border ${
+          canGenerate 
+            ? "bg-green-50 border-green-200 text-green-800" 
+            : "bg-red-50 border-red-200 text-red-800"
+        }`}>
+          Credits Used: {currentCreditsUsed} / {monthlyCredits}
         </div>
       </div>
 
@@ -91,8 +78,7 @@ export function NewsletterTemplateGenerator({
           isGenerating={isGenerating}
           onVideoSelect={handleVideoSelect}
           onGenerateClick={handleGenerateClick}
-          generatedTemplates={generatedTemplates}
-          onViewNewsletter={handleViewNewsletter}
+          onLoadExistingTemplate={loadExistingTemplate}
         />
 
         <TemplateDisplay
@@ -114,46 +100,6 @@ export function NewsletterTemplateGenerator({
         monthlyCredits={monthlyCredits}
         onConfirm={confirmGenerate}
       />
-
-      <Dialog open={showNewsletterModal} onOpenChange={setShowNewsletterModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Newsletter Template</DialogTitle>
-          </DialogHeader>
-          {selectedNewsletterTemplate && (
-            <div className="space-y-4">
-              {/* Version Selector */}
-              {selectedNewsletterTemplate.revisions.length > 0 && (
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant={modalSelectedRevision === 0 ? "default" : "outline"}
-                    onClick={() => setModalSelectedRevision(0)}
-                  >
-                    Original
-                  </Button>
-                  {selectedNewsletterTemplate.revisions.map((_, index) => (
-                    <Button
-                      key={index}
-                      size="sm"
-                      variant={modalSelectedRevision === index + 1 ? "default" : "outline"}
-                      onClick={() => setModalSelectedRevision(index + 1)}
-                    >
-                      Revision {index + 1}
-                    </Button>
-                  ))}
-                </div>
-              )}
-              
-              <div className="prose prose-sm max-w-none">
-                <div className="whitespace-pre-wrap font-mono text-sm bg-muted p-4 rounded-lg">
-                  {getModalContent()}
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
