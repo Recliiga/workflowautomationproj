@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,25 +15,22 @@ interface ScriptInputFormProps {
 
 export function ScriptInputForm({ onGenerate, isGenerating }: ScriptInputFormProps) {
   const [topic, setTopic] = useState("");
-  const [duration, setDuration] = useState<string>("30");
-  const [customDuration, setCustomDuration] = useState("");
+  const [minutes, setMinutes] = useState<string>("0");
+  const [seconds, setSeconds] = useState<string>("30");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic.trim()) return;
 
-    const finalDuration = duration === "custom" 
-      ? parseInt(customDuration) || 30 
-      : parseInt(duration);
-
+    const totalSeconds = parseInt(minutes) * 60 + parseInt(seconds);
+    
     onGenerate({
       topic: topic.trim(),
-      duration: Math.min(finalDuration, 180) // Max 3 minutes
+      duration: Math.min(totalSeconds, 180) // Max 3 minutes
     });
   };
 
-  const isCustom = duration === "custom";
-  const canSubmit = topic.trim() && (!isCustom || customDuration);
+  const canSubmit = topic.trim() && (parseInt(minutes) > 0 || parseInt(seconds) > 0);
 
   return (
     <Card>
@@ -56,35 +52,33 @@ export function ScriptInputForm({ onGenerate, isGenerating }: ScriptInputFormPro
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="duration">Video Length</Label>
-            <Select value={duration} onValueChange={setDuration}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select duration" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="15">15 seconds</SelectItem>
-                <SelectItem value="30">30 seconds</SelectItem>
-                <SelectItem value="45">45 seconds</SelectItem>
-                <SelectItem value="60">1 minute</SelectItem>
-                <SelectItem value="custom">Custom (up to 3 minutes)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {isCustom && (
-            <div className="space-y-2">
-              <Label htmlFor="customDuration">Custom Duration (seconds)</Label>
-              <Input
-                id="customDuration"
-                type="number"
-                min="10"
-                max="180"
-                placeholder="Enter duration in seconds"
-                value={customDuration}
-                onChange={(e) => setCustomDuration(e.target.value)}
-              />
+            <Label>Video Length (Approximate)</Label>
+            <div className="flex items-center gap-2">
+              <Select value={minutes} onValueChange={setMinutes}>
+                <SelectTrigger className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[0, 1, 2, 3].map(min => (
+                    <SelectItem key={min} value={min.toString()}>{min}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-muted-foreground">minutes</span>
+              
+              <Select value={seconds} onValueChange={setSeconds}>
+                <SelectTrigger className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[0, 15, 30, 45].map(sec => (
+                    <SelectItem key={sec} value={sec.toString()}>{sec}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-muted-foreground">seconds</span>
             </div>
-          )}
+          </div>
 
           <Button 
             type="submit" 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,10 +16,12 @@ export function Teleprompter({ script, onClose }: TeleprompterProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState<ScrollSpeed>('normal');
   const [isCountingDown, setIsCountingDown] = useState(false);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const wordsRef = useRef<HTMLSpanElement[]>([]);
 
   const fullScript = `${script.hook}\n\n${script.body}\n\n${script.cta}`;
+  const words = fullScript.split(/(\s+)/).filter(word => word.length > 0);
 
   const startCountdown = () => {
     setIsCountingDown(true);
@@ -53,52 +54,52 @@ export function Teleprompter({ script, onClose }: TeleprompterProps) {
     setIsPlaying(false);
     setIsCountingDown(false);
     setCountdown(5);
+    setCurrentWordIndex(0);
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
-    if (scrollIntervalRef.current) {
-      clearInterval(scrollIntervalRef.current);
-    }
   };
 
-  // Handle scrolling
+  // Handle word progression based on reading speed
   useEffect(() => {
-    if (isPlaying && !isCountingDown) {
-      const speed = getScrollSpeed(scrollSpeed);
-      scrollIntervalRef.current = setInterval(() => {
-        if (scrollContainerRef.current) {
-          const container = scrollContainerRef.current;
-          const newScrollTop = container.scrollTop + (speed / 10); // Divide by 10 for smoother scrolling
+    if (isPlaying && !isCountingDown && currentWordIndex < words.length) {
+      const wpm = getScrollSpeed(scrollSpeed);
+      const wordsPerSecond = wpm / 60;
+      const millisecondsPerWord = 1000 / wordsPerSecond;
+      
+      const timer = setTimeout(() => {
+        setCurrentWordIndex(prev => {
+          const nextIndex = prev + 1;
           
-          if (newScrollTop >= container.scrollHeight - container.clientHeight) {
-            setIsPlaying(false);
-            clearInterval(scrollIntervalRef.current!);
-          } else {
-            container.scrollTop = newScrollTop;
+          // Auto-scroll to keep current word visible
+          if (wordsRef.current[nextIndex]) {
+            const wordElement = wordsRef.current[nextIndex];
+            const container = scrollContainerRef.current;
+            if (container && wordElement) {
+              const containerRect = container.getBoundingClientRect();
+              const wordRect = wordElement.getBoundingClientRect();
+              
+              if (wordRect.bottom > containerRect.bottom - 100) {
+                container.scrollTop += wordRect.bottom - containerRect.bottom + 100;
+              }
+            }
           }
-        }
-      }, 100);
-    } else {
-      if (scrollIntervalRef.current) {
-        clearInterval(scrollIntervalRef.current);
-      }
-    }
+          
+          if (nextIndex >= words.length) {
+            setIsPlaying(false);
+          }
+          
+          return nextIndex;
+        });
+      }, millisecondsPerWord);
 
-    return () => {
-      if (scrollIntervalRef.current) {
-        clearInterval(scrollIntervalRef.current);
-      }
-    };
-  }, [isPlaying, scrollSpeed, isCountingDown]);
+      return () => clearTimeout(timer);
+    }
+  }, [isPlaying, currentWordIndex, words.length, scrollSpeed, isCountingDown]);
 
   // Start countdown when component mounts
   useEffect(() => {
     startCountdown();
-    return () => {
-      if (scrollIntervalRef.current) {
-        clearInterval(scrollIntervalRef.current);
-      }
-    };
   }, []);
 
   return (
@@ -141,14 +142,29 @@ export function Teleprompter({ script, onClose }: TeleprompterProps) {
           {/* Script Content */}
           <div 
             ref={scrollContainerRef}
-            className="flex-1 overflow-hidden bg-black text-white p-8"
-            style={{ scrollBehavior: 'auto' }}
+            className="flex-1 overflow-auto bg-black text-white p-8"
           >
             <div className="text-center space-y-8">
-              <div className="text-2xl md:text-3xl lg:text-4xl leading-relaxed whitespace-pre-line">
-                {fullScript}
+              <div className="text-2xl md:text-3xl lg:text-4xl leading-relaxed">
+                {words.map((word, index) => (
+                  <span
+                    key={index}
+                    ref={el => {
+                      if (el) wordsRef.current[index] = el;
+                    }}
+                    className={`${
+                      index === currentWordIndex && isPlaying && !isCountingDown
+                        ? 'bg-yellow-400 text-black'
+                        : index < currentWordIndex
+                        ? 'text-gray-400'
+                        : 'text-white'
+                    } ${word.includes('\n') ? 'block' : ''}`}
+                  >
+                    {word}
+                  </span>
+                ))}
               </div>
-              <div className="h-screen"></div> {/* Extra space for scrolling */}
+              <div className="h-screen"></div>
             </div>
           </div>
 

@@ -46,7 +46,7 @@ export function ScriptEditor({ script, onSave, onOpenTeleprompter }: ScriptEdito
   };
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Edit Your Script</CardTitle>
@@ -70,7 +70,7 @@ export function ScriptEditor({ script, onSave, onOpenTeleprompter }: ScriptEdito
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="hook">Hook Line</Label>
           <Textarea
@@ -78,8 +78,8 @@ export function ScriptEditor({ script, onSave, onOpenTeleprompter }: ScriptEdito
             value={hook}
             onChange={(e) => handleChange('hook', e.target.value)}
             placeholder="Enter your hook line..."
-            rows={2}
-            className="resize-none"
+            rows={4}
+            className="resize-none text-base"
           />
         </div>
 
@@ -90,8 +90,8 @@ export function ScriptEditor({ script, onSave, onOpenTeleprompter }: ScriptEdito
             value={body}
             onChange={(e) => handleChange('body', e.target.value)}
             placeholder="Enter your main content..."
-            rows={6}
-            className="resize-none"
+            rows={12}
+            className="resize-none text-base"
           />
         </div>
 
@@ -102,14 +102,14 @@ export function ScriptEditor({ script, onSave, onOpenTeleprompter }: ScriptEdito
             value={cta}
             onChange={(e) => handleChange('cta', e.target.value)}
             placeholder="Enter your call-to-action..."
-            rows={2}
-            className="resize-none"
+            rows={4}
+            className="resize-none text-base"
           />
         </div>
 
         <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
           <p className="text-sm text-blue-800">
-            💡 <strong>Topic:</strong> {script.topic} | <strong>Duration:</strong> {script.duration} seconds
+            <strong>Topic:</strong> {script.topic} | <strong>Duration:</strong> {script.duration} seconds
           </p>
         </div>
       </CardContent>
