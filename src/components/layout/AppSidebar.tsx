@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { 
@@ -9,7 +8,8 @@ import {
   LogOut,
   ChevronRight,
   UserCog,
-  Mail
+  Mail,
+  Instagram
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,6 +41,7 @@ export function AppSidebar() {
 
     const adminItems = [
       { title: "Users", url: "/users", icon: Users },
+      { title: "Instagram DM", url: "/instagram-dm", icon: Instagram },
     ];
 
     const clientItems = [

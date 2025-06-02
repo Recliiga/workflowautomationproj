@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +17,7 @@ import ChangePassword from "./pages/ChangePassword";
 import UnifiedClientView from "./pages/Client/UnifiedClientView";
 import UnifiedFreelancerView from "./pages/Freelancer/UnifiedFreelancerView";
 import NewsletterTemplate from "./pages/NewsletterTemplate";
+import InstagramDM from "./pages/InstagramDM";
 
 const App = () => {
   // Create a new QueryClient instance 
@@ -60,6 +60,11 @@ const App = () => {
                 <Route path="/newsletter-template" element={
                   <ProtectedRoute>
                     <NewsletterTemplate />
+                  </ProtectedRoute>
+                } />
+                <Route path="/instagram-dm" element={
+                  <ProtectedRoute>
+                    <InstagramDM />
                   </ProtectedRoute>
                 } />
                 {/* Add direct routes to client and freelancer views */}
