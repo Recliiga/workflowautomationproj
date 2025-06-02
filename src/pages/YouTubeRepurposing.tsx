@@ -1,12 +1,12 @@
 
 import { useState, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Youtube } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { Video, CalendarEvent } from "@/types";
+import { CalendarEvent } from "@/types";
 import { YouTubeContent } from "@/types/youtube";
 import { MOCK_VIDEOS } from "@/data/mockData";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
@@ -69,15 +69,6 @@ export default function YouTubeRepurposing() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <div className="flex items-center gap-3">
-            <Youtube className="h-8 w-8 text-red-600" />
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">YouTube Shorts Repurposing</h1>
-              <p className="text-muted-foreground">
-                Transform your Instagram content into YouTube-ready videos
-              </p>
-            </div>
-          </div>
         </div>
 
         {!selectedProject ? (
@@ -99,7 +90,7 @@ export default function YouTubeRepurposing() {
           />
         )}
 
-        {projectsWithContent.length === 0 && (
+        {projectsWithContent.length === 0 && !selectedProject && (
           <Card>
             <CardContent className="py-12 text-center">
               <Youtube className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />

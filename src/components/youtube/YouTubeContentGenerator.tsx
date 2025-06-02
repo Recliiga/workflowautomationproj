@@ -68,84 +68,98 @@ export function YouTubeContentGenerator({
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Youtube className="h-5 w-5 text-red-600" />
-            Generate YouTube Content
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="p-4 bg-secondary/20 rounded-lg">
-            <h3 className="font-medium mb-2">Selected Project: {project.title}</h3>
-            {firstVideo?.aiContent && (
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="font-medium">Hook: </span>
-                  <span className="text-muted-foreground">{firstVideo.aiContent.hook}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Selected Project Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Selected Project</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-secondary/20 rounded-lg">
+              <h3 className="font-medium mb-2">{project.title}</h3>
+              {firstVideo?.aiContent && (
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="font-medium">Hook: </span>
+                    <span className="text-muted-foreground">{firstVideo.aiContent.hook}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Caption: </span>
+                    <span className="text-muted-foreground">{firstVideo.aiContent.caption}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">CTA: </span>
+                    <span className="text-muted-foreground">{firstVideo.aiContent.cta}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-medium">Caption: </span>
-                  <span className="text-muted-foreground">{firstVideo.aiContent.caption}</span>
-                </div>
-                <div>
-                  <span className="font-medium">CTA: </span>
-                  <span className="text-muted-foreground">{firstVideo.aiContent.cta}</span>
-                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="industry">Industry (Optional)</Label>
+                <Input
+                  id="industry"
+                  placeholder="e.g., Real Estate, Fitness, Marketing"
+                  value={industry}
+                  onChange={(e) => setIndustry(e.target.value)}
+                  disabled={isGenerating}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Helps optimize keywords and SEO
+                </p>
               </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="industry">Industry (Optional)</Label>
-              <Input
-                id="industry"
-                placeholder="e.g., Real Estate, Fitness, Marketing"
-                value={industry}
-                onChange={(e) => setIndustry(e.target.value)}
-                disabled={isGenerating}
-              />
-              <p className="text-xs text-muted-foreground">
-                Helps optimize keywords and SEO
-              </p>
+              
+              <div className="space-y-2">
+                <Label htmlFor="location">Location (Optional)</Label>
+                <Input
+                  id="location"
+                  placeholder="e.g., New York, Miami, Los Angeles"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  disabled={isGenerating}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Adds local SEO targeting
+                </p>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="location">Location (Optional)</Label>
-              <Input
-                id="location"
-                placeholder="e.g., New York, Miami, Los Angeles"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                disabled={isGenerating}
-              />
-              <p className="text-xs text-muted-foreground">
-                Adds local SEO targeting
-              </p>
-            </div>
-          </div>
 
-          <Button 
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="w-full"
-            size="lg"
-          >
-            {isGenerating ? (
-              <>
-                <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-                Generating YouTube Content...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4 mr-2" />
-                Generate YouTube Content
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
+            <Button 
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="w-full"
+            >
+              {isGenerating ? (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generating YouTube Content...
+                </>
+              ) : (
+                <>
+                  <Youtube className="mr-2 h-4 w-4" />
+                  Generate YouTube Content
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* YouTube Content Output */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Youtube className="h-5 w-5 text-red-600" />
+              YouTube Content Output
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-muted-foreground">
+              {isGenerating ? "Generating content..." : "Content will appear here after generation"}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
