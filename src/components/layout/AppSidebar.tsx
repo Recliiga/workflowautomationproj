@@ -1,5 +1,5 @@
 
-import { Calendar, Home, Users, History, MessageSquare, FileText, Youtube } from "lucide-react";
+import { Calendar, Home, Users, History, MessageSquare, FileText, Youtube, Edit } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -57,6 +57,12 @@ export function AppSidebar() {
       title: "YouTube Repurposing",
       url: "/youtube-repurposing",
       icon: Youtube,
+      roles: ["admin", "client", "freelancer"],
+    },
+    {
+      title: "Script Generator",
+      url: "/script-generator",
+      icon: Edit,
       roles: ["admin", "client", "freelancer"],
     },
   ];
