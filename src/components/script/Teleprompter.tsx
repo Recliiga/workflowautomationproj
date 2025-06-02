@@ -1,11 +1,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Play, Pause, RotateCcw } from "lucide-react";
 import { GeneratedScript, ScrollSpeed } from "@/types/script";
-import { getScrollSpeed } from "@/utils/scriptGenerator";
+import { TeleprompterCountdown } from "./TeleprompterCountdown";
+import { TeleprompterHeader } from "./TeleprompterHeader";
+import { TeleprompterContent } from "./TeleprompterContent";
+import { TeleprompterControls } from "./TeleprompterControls";
+import { useTeleprompterScroll } from "./useTeleprompterScroll";
 
 interface TeleprompterProps {
   script: GeneratedScript;
@@ -20,10 +21,8 @@ export function Teleprompter({ script, onClose }: TeleprompterProps) {
   const [scrollPosition, setScrollPosition] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number>();
 
   const fullScript = `${script.hook}\n\n${script.body}\n\n${script.cta}`;
-  // Split into lines and filter out empty lines
   const lines = fullScript.split('\n').filter(line => line.trim().length > 0);
 
   const startCountdown = () => {
@@ -61,9 +60,15 @@ export function Teleprompter({ script, onClose }: TeleprompterProps) {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
+    stopAnimation();
+  };
+
+  const handleScrollEnd = () => {
+    setIsPlaying(false);
+  };
+
+  const handleScrollPositionChange = (position: number) => {
+    setScrollPosition(position);
   };
 
   // Calculate current line based on scroll position
@@ -90,48 +95,22 @@ export function Teleprompter({ script, onClose }: TeleprompterProps) {
 
   const currentLineIndex = getCurrentLineIndex();
 
-  // Handle smooth scrolling animation
-  useEffect(() => {
-    if (isPlaying && !isCountingDown && scrollContainerRef.current) {
-      const wpm = getScrollSpeed(scrollSpeed);
-      // Convert WPM to pixels per second (adjust multiplier for desired speed)
-      const pixelsPerSecond = wpm * 0.8;
-      
-      const animate = () => {
-        if (scrollContainerRef.current && contentRef.current) {
-          const container = scrollContainerRef.current;
-          const content = contentRef.current;
-          const maxScroll = content.offsetHeight - container.clientHeight;
-          
-          if (container.scrollTop < maxScroll) {
-            container.scrollTop += pixelsPerSecond / 60; // 60fps
-            setScrollPosition(container.scrollTop);
-            animationFrameRef.current = requestAnimationFrame(animate);
-          } else {
-            // Reached the end
-            setIsPlaying(false);
-          }
-        }
-      };
-      
-      animationFrameRef.current = requestAnimationFrame(animate);
-    }
-    
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [isPlaying, scrollSpeed, isCountingDown]);
+  const { stopAnimation } = useTeleprompterScroll({
+    isPlaying,
+    isCountingDown,
+    scrollSpeed,
+    scrollContainerRef,
+    contentRef,
+    onScrollEnd: handleScrollEnd,
+    onScrollPositionChange: handleScrollPositionChange
+  });
 
   // Start countdown when component mounts
   useEffect(() => {
     startCountdown();
     
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
+      stopAnimation();
     };
   }, []);
 
@@ -139,104 +118,32 @@ export function Teleprompter({ script, onClose }: TeleprompterProps) {
     <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
       <Card className="w-full max-w-5xl h-[95vh] m-4 bg-black border-gray-800">
         <CardContent className="p-0 h-full flex flex-col bg-black">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900">
-            <h2 className="text-lg font-semibold text-white">Teleprompter</h2>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-300">Speed:</span>
-                <Select value={scrollSpeed} onValueChange={(value: ScrollSpeed) => setScrollSpeed(value)}>
-                  <SelectTrigger className="w-24 bg-gray-800 border-gray-700 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700">
-                    <SelectItem value="slow" className="text-white hover:bg-gray-700">Slow</SelectItem>
-                    <SelectItem value="normal" className="text-white hover:bg-gray-700">Normal</SelectItem>
-                    <SelectItem value="fast" className="text-white hover:bg-gray-700">Fast</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-gray-800">
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <TeleprompterHeader
+            scrollSpeed={scrollSpeed}
+            onScrollSpeedChange={setScrollSpeed}
+            onClose={onClose}
+          />
 
-          {/* Countdown Overlay */}
-          {isCountingDown && (
-            <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-10">
-              <div className="text-white text-center">
-                <div className="text-9xl font-bold mb-6 text-green-400">{countdown}</div>
-                <div className="text-2xl text-gray-300">Get ready to read...</div>
-              </div>
-            </div>
-          )}
+          <TeleprompterCountdown
+            countdown={countdown}
+            isVisible={isCountingDown}
+          />
 
-          {/* Script Content */}
-          <div 
-            ref={scrollContainerRef}
-            className="flex-1 overflow-hidden bg-black text-white relative"
-            style={{ scrollBehavior: 'auto' }}
-          >
-            {/* Reading line indicator - shows center position */}
-            <div className="absolute left-0 right-0 top-1/2 transform -translate-y-1/2 h-1 bg-yellow-400 opacity-50 z-10 pointer-events-none"></div>
-            
-            {/* Top padding for initial positioning */}
-            <div className="h-screen"></div>
-            
-            <div ref={contentRef} className="text-center space-y-8 max-w-4xl mx-auto px-8">
-              {lines.map((line, index) => (
-                <div
-                  key={index}
-                  className={`text-3xl md:text-4xl lg:text-5xl leading-relaxed font-light transition-all duration-300 py-4 px-6 rounded-lg ${
-                    index === currentLineIndex && isPlaying && !isCountingDown
-                      ? 'text-yellow-300 font-normal shadow-lg'
-                      : 'text-white'
-                  }`}
-                  style={{
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                    letterSpacing: '0.01em'
-                  }}
-                >
-                  {line}
-                </div>
-              ))}
-            </div>
-            
-            {/* Bottom padding to allow content to scroll past the center */}
-            <div className="h-screen"></div>
-          </div>
+          <TeleprompterContent
+            ref={{ current: { scrollContainer: scrollContainerRef.current, content: contentRef.current } }}
+            script={script}
+            currentLineIndex={currentLineIndex}
+            isPlaying={isPlaying}
+            isCountingDown={isCountingDown}
+          />
 
-          {/* Controls */}
-          <div className="flex items-center justify-center gap-6 p-6 border-t border-gray-800 bg-gray-900">
-            <Button
-              onClick={togglePlayPause}
-              disabled={isCountingDown}
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
-            >
-              {isPlaying ? (
-                <>
-                  <Pause className="h-6 w-6 mr-2" />
-                  Pause
-                </>
-              ) : (
-                <>
-                  <Play className="h-6 w-6 mr-2" />
-                  {countdown === 0 ? 'Resume' : 'Start'}
-                </>
-              )}
-            </Button>
-            <Button
-              onClick={restart}
-              variant="outline"
-              size="lg"
-              className="border-gray-600 text-gray-300 hover:bg-gray-800 px-8 py-3"
-            >
-              <RotateCcw className="h-6 w-6 mr-2" />
-              Restart
-            </Button>
-          </div>
+          <TeleprompterControls
+            isPlaying={isPlaying}
+            isCountingDown={isCountingDown}
+            countdown={countdown}
+            onTogglePlayPause={togglePlayPause}
+            onRestart={restart}
+          />
         </CardContent>
       </Card>
     </div>
