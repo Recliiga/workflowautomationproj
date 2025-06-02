@@ -25,10 +25,16 @@ export const MOCK_VIDEOS: Video[] = [
     originalUrl: "https://example.com/videos/original2.mp4",
     editedUrl: "https://example.com/videos/edited2.mp4",
     thumbnailUrl: "https://images.unsplash.com/photo-1626908013351-800ddd734b8a?q=80&w=300",
-    status: "submitted",
+    status: "approved",
     uploadDate: "2023-05-02T12:00:00Z",
     dueDate: "2023-05-12T12:00:00Z",
-    videoType: "Tutorial"
+    videoType: "Tutorial",
+    aiContent: {
+      caption: "See how our new feature transforms your workflow in just 60 seconds!",
+      hook: "What if you could save 5 hours every week with just one click?",
+      cta: "Try our new feature now - free for 14 days!",
+      emailCopy: "Hi [Name],\n\nWe've just released our most requested feature, and we think you're going to love it. In the attached video, you'll see how it can save you hours every week.\n\nLog in now to try it yourself!\n\nRegards,\nProduct Team"
+    }
   },
   {
     id: "3",
@@ -63,7 +69,13 @@ export const MOCK_VIDEOS: Video[] = [
     uploadDate: "2023-04-25T12:00:00Z",
     dueDate: "2023-05-05T12:00:00Z",
     publishDate: "2023-05-24T12:00:00Z",
-    videoType: "Tutorial"
+    videoType: "Tutorial",
+    aiContent: {
+      caption: "Master our advanced features with this comprehensive step-by-step guide.",
+      hook: "Did you know you're only using 20% of our platform's capabilities?",
+      cta: "Unlock your full potential - watch the full tutorial now!",
+      emailCopy: "Hi [Name],\n\nAre you getting the most out of our platform? Our data shows that most users are only scratching the surface of what's possible.\n\nWe've created a comprehensive tutorial to help you leverage our advanced features and maximize your ROI.\n\nCheck it out below!\n\nBest,\nTraining Team"
+    }
   },
   {
     id: "5",
@@ -105,7 +117,47 @@ export const MOCK_VIDEOS: Video[] = [
       emailCopy: "Hello [Name],\n\nWhat an amazing conference we had last month! For those who couldn't make it (and those who want to relive the experience), we've put together a highlights video.\n\nIn just 3 minutes, you'll see all the major announcements, product reveals, and inspiring moments from our biggest event of the year.\n\nAnd don't forget - early bird registration is now open for next year!\n\nBest regards,\nEvents Team"
     }
   },
-  // Adding more videos for upcoming content
+  {
+    id: "13",
+    title: "Getting Started - Platform Basics",
+    description: "Essential guide for new users to get started with our platform.",
+    clientId: "2",
+    freelancerId: "3",
+    originalUrl: "https://example.com/videos/original13.mp4",
+    editedUrl: "https://example.com/videos/edited13.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=300",
+    status: "approved",
+    uploadDate: "2023-05-10T09:00:00Z",
+    publishDate: "2023-06-08T12:00:00Z",
+    videoType: "Tutorial",
+    aiContent: {
+      caption: "New to our platform? This 5-minute guide will get you up and running!",
+      hook: "From zero to hero in just 5 minutes.",
+      cta: "Start your free trial today and see the difference!",
+      emailCopy: "Welcome to [Platform Name]!\n\nWe're excited to have you on board. To help you get the most out of our platform from day one, we've created this quick getting started guide.\n\nIn just 5 minutes, you'll learn how to:\n- Set up your workspace\n- Navigate the main features\n- Complete your first project\n\nReady to dive in?\n\nWelcome aboard!\nThe Onboarding Team"
+    }
+  },
+  {
+    id: "14",
+    title: "Success Story - StartupXYZ Growth",
+    description: "How StartupXYZ scaled from 10 to 1000 users using our platform.",
+    clientId: "2",
+    freelancerId: "3",
+    originalUrl: "https://example.com/videos/original14.mp4",
+    editedUrl: "https://example.com/videos/edited14.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?q=80&w=300",
+    status: "approved",
+    uploadDate: "2023-05-12T14:30:00Z",
+    publishDate: "2023-06-12T12:00:00Z",
+    videoType: "Testimonial",
+    aiContent: {
+      caption: "From 10 to 1000 users: StartupXYZ's incredible growth story with our platform.",
+      hook: "What if you could 100x your user base in just 6 months?",
+      cta: "Book a strategy session to learn how we can help you scale!",
+      emailCopy: "Hi [Name],\n\nGrowth stories like this one never get old. StartupXYZ came to us as a small team of 5 with big dreams and 10 users.\n\nSix months later? They've reached 1000+ active users and secured Series A funding.\n\nIn this case study video, their founder shares the exact strategies and tools that made this growth possible.\n\nCurious about your own growth potential?\n\nBest,\nGrowth Team"
+    }
+  },
+  // Adding some non-approved videos to show the filter is working
   {
     id: "7",
     title: "Summer Product Line Introduction",
