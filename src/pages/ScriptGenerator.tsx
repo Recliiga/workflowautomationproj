@@ -72,46 +72,28 @@ export default function ScriptGenerator() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Side - Input or Generated Script */}
-          <div className="h-full">
-            {!script ? (
+        {/* Full width content */}
+        <div>
+          {!script ? (
+            <div className="max-w-2xl mx-auto">
               <ScriptInputForm 
                 onGenerate={handleGenerate}
                 isGenerating={isGenerating}
               />
-            ) : (
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Your Generated Script</h3>
+                <Button onClick={handleNewScript} variant="outline">
+                  Generate New Script
+                </Button>
+              </div>
               <ScriptEditor
                 script={script}
                 onSave={handleSaveScript}
                 onOpenTeleprompter={handleOpenTeleprompter}
               />
-            )}
-          </div>
-
-          {/* Right Side - New Script Button when script exists */}
-          {script && (
-            <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-2 text-green-900">Script Ready!</h3>
-                <p className="text-sm text-green-800 mb-4">
-                  Your script has been generated and is ready for editing. Use the teleprompter feature when you're ready to film.
-                </p>
-                <Button onClick={handleNewScript} variant="outline" className="border-green-300 text-green-700 hover:bg-green-100">
-                  Generate New Script
-                </Button>
-              </div>
-              
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-medium mb-2 text-blue-900">Teleprompter Features:</h4>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• 5-second countdown before reading starts</li>
-                  <li>• Adjustable reading speed (Slow, Normal, Fast)</li>
-                  <li>• Current word highlighting in yellow</li>
-                  <li>• Pause/Resume controls</li>
-                  <li>• Restart button to begin again</li>
-                </ul>
-              </div>
             </div>
           )}
         </div>
