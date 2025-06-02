@@ -5,6 +5,7 @@ import { ClientSelector } from "./ClientSelector";
 import { VideoTypeManager } from "./VideoTypeManager";
 import { ClientKnowledgeBase } from "./ClientKnowledgeBase";
 import { NewsletterSettingsTab } from "./NewsletterSettingsTab";
+import { YouTubeSettingsTab } from "./YouTubeSettingsTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UnifiedClientView from "@/pages/Client/UnifiedClientView";
 
@@ -69,6 +70,11 @@ export function ClientSettingsTab({ clients }: ClientSettingsTabProps) {
             />
 
             <NewsletterSettingsTab
+              clientId={selectedClientId}
+              clientName={clients.find(c => c.id === selectedClientId)?.name || ""}
+            />
+
+            <YouTubeSettingsTab
               clientId={selectedClientId}
               clientName={clients.find(c => c.id === selectedClientId)?.name || ""}
             />

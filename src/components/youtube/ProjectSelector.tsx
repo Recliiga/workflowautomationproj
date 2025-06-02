@@ -1,10 +1,9 @@
 
 import { CalendarEvent } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { Play, Calendar, Video } from "lucide-react";
+import { Calendar, Video } from "lucide-react";
 
 interface ProjectSelectorProps {
   projects: CalendarEvent[];
@@ -66,7 +65,6 @@ export function ProjectSelector({ projects, onProjectSelect }: ProjectSelectorPr
                           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                             <Calendar className="h-3 w-3" />
                             {format(new Date(project.date), "MMM d, yyyy")}
-                            <Badge className="text-xs">{project.status}</Badge>
                           </div>
                           {firstVideo?.description && (
                             <p className="text-xs text-muted-foreground line-clamp-2">
