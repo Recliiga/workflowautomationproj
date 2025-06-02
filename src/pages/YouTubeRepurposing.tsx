@@ -1,24 +1,18 @@
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Youtube } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { CalendarEvent } from "@/types";
-import { YouTubeContent } from "@/types/youtube";
 import { MOCK_VIDEOS } from "@/data/mockData";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { ProjectSelector } from "@/components/youtube/ProjectSelector";
-import { YouTubeContentGenerator } from "@/components/youtube/YouTubeContentGenerator";
-import { YouTubeContentDisplay } from "@/components/youtube/YouTubeContentDisplay";
 
 export default function YouTubeRepurposing() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [selectedProject, setSelectedProject] = useState<CalendarEvent | null>(null);
-  const [generatedContent, setGeneratedContent] = useState<YouTubeContent | null>(null);
 
   // Filter videos based on user role
   const videos = useMemo(() => {
@@ -43,20 +37,6 @@ export default function YouTubeRepurposing() {
     [calendarEvents]
   );
 
-  const handleProjectSelect = (project: CalendarEvent) => {
-    setSelectedProject(project);
-    setGeneratedContent(null);
-  };
-
-  const handleContentGenerated = (content: YouTubeContent) => {
-    setGeneratedContent(content);
-  };
-
-  const handleReset = () => {
-    setSelectedProject(null);
-    setGeneratedContent(null);
-  };
-
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -71,26 +51,9 @@ export default function YouTubeRepurposing() {
           </Button>
         </div>
 
-        {!selectedProject ? (
-          <ProjectSelector
-            projects={projectsWithContent}
-            onProjectSelect={handleProjectSelect}
-          />
-        ) : !generatedContent ? (
-          <YouTubeContentGenerator
-            project={selectedProject}
-            onContentGenerated={handleContentGenerated}
-            onBack={handleReset}
-          />
-        ) : (
-          <YouTubeContentDisplay
-            content={generatedContent}
-            project={selectedProject}
-            onGenerateNew={handleReset}
-          />
-        )}
+        <ProjectSelector projects={projectsWithContent} />
 
-        {projectsWithContent.length === 0 && !selectedProject && (
+        {projectsWithContent.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
               <Youtube className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
