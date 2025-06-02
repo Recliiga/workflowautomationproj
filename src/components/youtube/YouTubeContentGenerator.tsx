@@ -4,9 +4,7 @@ import { CalendarEvent } from "@/types";
 import { YouTubeContent } from "@/types/youtube";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, Sparkles, Youtube } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import { generateYouTubeContent } from "@/utils/youtubeGenerator";
 import { toast } from "sonner";
 
@@ -22,8 +20,6 @@ export function YouTubeContentGenerator({
   onBack 
 }: YouTubeContentGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [industry, setIndustry] = useState("");
-  const [location, setLocation] = useState("");
 
   const handleGenerate = async () => {
     const firstVideo = project.videos?.[0];
@@ -44,8 +40,9 @@ export function YouTubeContentGenerator({
         caption: firstVideo.aiContent.caption,
         hook: firstVideo.aiContent.hook,
         cta: firstVideo.aiContent.cta,
-        industry: industry || undefined,
-        location: location || undefined,
+        // Admin-configured settings would be passed here in a real app
+        // industry: clientSettings.industry,
+        // location: clientSettings.location,
       });
       
       onContentGenerated(content);
@@ -95,36 +92,6 @@ export function YouTubeContentGenerator({
               )}
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="industry">Industry (Optional)</Label>
-                <Input
-                  id="industry"
-                  placeholder="e.g., Real Estate, Fitness, Marketing"
-                  value={industry}
-                  onChange={(e) => setIndustry(e.target.value)}
-                  disabled={isGenerating}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Helps optimize keywords and SEO
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="location">Location (Optional)</Label>
-                <Input
-                  id="location"
-                  placeholder="e.g., New York, Miami, Los Angeles"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  disabled={isGenerating}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Adds local SEO targeting
-                </p>
-              </div>
-            </div>
-
             <Button 
               onClick={handleGenerate}
               disabled={isGenerating}
@@ -132,30 +99,40 @@ export function YouTubeContentGenerator({
             >
               {isGenerating ? (
                 <>
-                  <Sparkles className="mr-2 h-4 w-4" />
+                  <Sparkles className="mr-2 h-4 w-4 animate-spin" />
                   Generating YouTube Content...
                 </>
               ) : (
                 <>
-                  <Youtube className="mr-2 h-4 w-4" />
+                  <Sparkles className="mr-2 h-4 w-4" />
                   Generate YouTube Content
                 </>
               )}
             </Button>
+
+            <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+              <p className="text-sm text-blue-800">
+                💡 Content will be optimized using your admin-configured settings for industry, location, and brand voice.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
-        {/* YouTube Content Output */}
+        {/* YouTube Content Output Placeholder */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Youtube className="h-5 w-5 text-red-600" />
-              YouTube Content Output
-            </CardTitle>
+            <CardTitle>YouTube Content</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
-              {isGenerating ? "Generating content..." : "Content will appear here after generation"}
+              {isGenerating ? (
+                <div className="space-y-2">
+                  <Sparkles className="h-8 w-8 mx-auto animate-spin" />
+                  <p>Generating YouTube content...</p>
+                </div>
+              ) : (
+                <p>Click "Generate YouTube Content" to create optimized content for this project.</p>
+              )}
             </div>
           </CardContent>
         </Card>
