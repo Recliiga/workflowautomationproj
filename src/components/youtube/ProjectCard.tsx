@@ -1,17 +1,33 @@
 
 import { CalendarEvent } from "@/types";
+import { YouTubeContent } from "@/types/youtube";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Calendar, ChevronDown, ChevronUp } from "lucide-react";
-import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { ProjectDetails } from "./ProjectDetails";
+import { ContentGenerationSection } from "./ContentGenerationSection";
+import { GeneratedContentDisplay } from "./GeneratedContentDisplay";
 
 interface ProjectCardProps {
   project: CalendarEvent;
   isExpanded: boolean;
   onToggle: () => void;
+  generatedContent: YouTubeContent | null;
+  isGenerating: boolean;
+  onContentGenerated: (content: YouTubeContent) => void;
+  onGeneratingChange: (isGenerating: boolean) => void;
 }
 
-export function ProjectCard({ project, isExpanded, onToggle }: ProjectCardProps) {
+export function ProjectCard({ 
+  project, 
+  isExpanded, 
+  onToggle,
+  generatedContent,
+  isGenerating,
+  onContentGenerated,
+  onGeneratingChange
+}: ProjectCardProps) {
   const firstVideo = project.videos?.[0];
   const hasMultipleVideos = project.videos && project.videos.length > 1;
 
@@ -54,6 +70,26 @@ export function ProjectCard({ project, isExpanded, onToggle }: ProjectCardProps)
           </div>
         </div>
       </CollapsibleTrigger>
+      
+      <CollapsibleContent>
+        <div className="mt-4 p-4 bg-secondary/20 rounded-lg space-y-4">
+          <ProjectDetails project={project} />
+
+          <ContentGenerationSection
+            project={project}
+            isGenerating={isGenerating}
+            onGenerate={onContentGenerated}
+            onGeneratingChange={onGeneratingChange}
+          />
+
+          {generatedContent && (
+            <GeneratedContentDisplay
+              project={project}
+              content={generatedContent}
+            />
+          )}
+        </div>
+      </CollapsibleContent>
     </Collapsible>
   );
 }
