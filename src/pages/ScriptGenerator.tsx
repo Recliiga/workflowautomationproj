@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ScriptInputForm } from "@/components/script/ScriptInputForm";
 import { ScriptEditor } from "@/components/script/ScriptEditor";
+import { FinalScriptView } from "@/components/script/FinalScriptView";
 import { GeneratedScript, ScriptInput } from "@/types/script";
 import { generateScript } from "@/utils/scriptGenerator";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ export default function ScriptGenerator() {
   const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(false);
   const [script, setScript] = useState<GeneratedScript | null>(null);
+  const [showFinalScript, setShowFinalScript] = useState(false);
 
   const handleGenerate = async (input: ScriptInput) => {
     setIsGenerating(true);
@@ -37,8 +39,17 @@ export default function ScriptGenerator() {
     toast.success("Script saved successfully!");
   };
 
+  const handleViewFinal = () => {
+    setShowFinalScript(true);
+  };
+
+  const handleBackToEditor = () => {
+    setShowFinalScript(false);
+  };
+
   const handleNewScript = () => {
     setScript(null);
+    setShowFinalScript(false);
   };
 
   return (
@@ -71,6 +82,14 @@ export default function ScriptGenerator() {
                 isGenerating={isGenerating}
               />
             </div>
+          ) : showFinalScript ? (
+            <div className="space-y-4">
+              <FinalScriptView
+                script={script}
+                onBack={handleBackToEditor}
+                onNewScript={handleNewScript}
+              />
+            </div>
           ) : (
             <div className="space-y-4">
               <div className="flex justify-between items-center">
@@ -82,6 +101,7 @@ export default function ScriptGenerator() {
               <ScriptEditor
                 script={script}
                 onSave={handleSaveScript}
+                onViewFinal={handleViewFinal}
               />
             </div>
           )}
