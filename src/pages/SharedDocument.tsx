@@ -90,21 +90,6 @@ export default function SharedDocument() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{document.title}</h1>
-            <div className="flex items-center gap-2 mt-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Shared with:</span>
-              <div className="flex gap-1">
-                {document.assignedUserIds.map((userId) => (
-                  <Badge 
-                    key={userId}
-                    variant={getUserType(userId) === "Client" ? "secondary" : "outline"}
-                    className="text-xs"
-                  >
-                    {getUserName(userId)}
-                  </Badge>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 
