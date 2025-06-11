@@ -17,7 +17,6 @@ import TaskHistory from "@/pages/TaskHistory";
 import InstagramDM from "@/pages/InstagramDM";
 import NewsletterTemplate from "@/pages/NewsletterTemplate";
 import YouTubeRepurposing from "@/pages/YouTubeRepurposing";
-import ScriptGenerator from "@/pages/ScriptGenerator";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -108,14 +107,6 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <YouTubeRepurposing />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/script-generator"
-                  element={
-                    <ProtectedRoute>
-                      <ScriptGenerator />
                     </ProtectedRoute>
                   }
                 />
