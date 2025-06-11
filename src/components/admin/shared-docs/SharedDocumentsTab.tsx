@@ -6,15 +6,7 @@ import { Plus, Edit, Trash2, Users } from "lucide-react";
 import { SharedDocumentList } from "../shared-docs/SharedDocumentList";
 import { CreateDocumentDialog } from "../shared-docs/CreateDocumentDialog";
 import { EditDocumentDialog } from "../shared-docs/EditDocumentDialog";
-
-export interface SharedDocument {
-  id: string;
-  title: string;
-  content: string;
-  assignedUserIds: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { SharedDocument } from "../tabs/SharedDocumentsTab";
 
 export function SharedDocumentsTab() {
   const [documents, setDocuments] = useState<SharedDocument[]>([]);

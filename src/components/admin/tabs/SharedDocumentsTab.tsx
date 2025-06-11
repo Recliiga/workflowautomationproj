@@ -11,8 +11,7 @@ export interface SharedDocument {
   id: string;
   title: string;
   content: string;
-  availableFor: "client" | "freelancer" | "both";
-  assignedUsers: string[];
+  assignedUserIds: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -58,7 +57,7 @@ export function SharedDocumentsTab() {
               Shared Documents
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Create and manage shared documents between admin and users
+              Create and manage shared documents with specific users
             </p>
           </div>
           <Button 
