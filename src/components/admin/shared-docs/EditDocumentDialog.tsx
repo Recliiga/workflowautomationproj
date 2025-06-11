@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SharedDocument } from "../tabs/SharedDocumentsTab";
+import { UserSelector } from "./UserSelector";
 
 interface EditDocumentDialogProps {
   document: SharedDocument;
@@ -18,30 +18,30 @@ interface EditDocumentDialogProps {
 export function EditDocumentDialog({ document, open, onOpenChange, onUpdate }: EditDocumentDialogProps) {
   const [title, setTitle] = useState(document.title);
   const [content, setContent] = useState(document.content);
-  const [availableFor, setAvailableFor] = useState<"client" | "freelancer" | "both">(document.availableFor);
+  const [assignedUserIds, setAssignedUserIds] = useState<string[]>(document.assignedUserIds);
 
   useEffect(() => {
     setTitle(document.title);
     setContent(document.content);
-    setAvailableFor(document.availableFor);
+    setAssignedUserIds(document.assignedUserIds);
   }, [document]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) return;
+    if (!title.trim() || assignedUserIds.length === 0) return;
 
     onUpdate({
       ...document,
       title: title.trim(),
       content: content.trim(),
-      availableFor,
+      assignedUserIds,
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Shared Document</DialogTitle>
         </DialogHeader>
@@ -57,19 +57,10 @@ export function EditDocumentDialog({ document, open, onOpenChange, onUpdate }: E
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="availableFor">Available For</Label>
-            <Select value={availableFor} onValueChange={(value: "client" | "freelancer" | "both") => setAvailableFor(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select user type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="client">Clients Only</SelectItem>
-                <SelectItem value="freelancer">Freelancers Only</SelectItem>
-                <SelectItem value="both">Both Clients & Freelancers</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <UserSelector
+            selectedUserIds={assignedUserIds}
+            onSelectionChange={setAssignedUserIds}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="content">Content</Label>
@@ -86,7 +77,7 @@ export function EditDocumentDialog({ document, open, onOpenChange, onUpdate }: E
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!title.trim()}>
+            <Button type="submit" disabled={!title.trim() || assignedUserIds.length === 0}>
               Update Document
             </Button>
           </DialogFooter>

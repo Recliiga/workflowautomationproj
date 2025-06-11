@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, FileText } from "lucide-react";
 import { format } from "date-fns";
+import { MOCK_CLIENTS, MOCK_FREELANCERS } from "@/data/mockUsers";
 
 interface SharedDocumentListProps {
   documents: SharedDocument[];
@@ -23,17 +24,15 @@ export function SharedDocumentList({ documents, onEdit, onDelete }: SharedDocume
     );
   }
 
-  const getAvailabilityBadge = (availableFor: string) => {
-    switch (availableFor) {
-      case "client":
-        return <Badge variant="secondary">Clients</Badge>;
-      case "freelancer":
-        return <Badge variant="outline">Freelancers</Badge>;
-      case "both":
-        return <Badge>Both</Badge>;
-      default:
-        return <Badge variant="secondary">{availableFor}</Badge>;
-    }
+  const getUserName = (userId: string) => {
+    const client = MOCK_CLIENTS.find(c => c.id === userId);
+    const freelancer = MOCK_FREELANCERS.find(f => f.id === userId);
+    return client?.name || freelancer?.name || "Unknown User";
+  };
+
+  const getUserType = (userId: string) => {
+    const isClient = MOCK_CLIENTS.some(c => c.id === userId);
+    return isClient ? "Client" : "Freelancer";
   };
 
   return (
@@ -42,7 +41,6 @@ export function SharedDocumentList({ documents, onEdit, onDelete }: SharedDocume
         <TableHeader>
           <TableRow>
             <TableHead>Title</TableHead>
-            <TableHead>Available For</TableHead>
             <TableHead>Assigned Users</TableHead>
             <TableHead>Last Updated</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -52,8 +50,24 @@ export function SharedDocumentList({ documents, onEdit, onDelete }: SharedDocume
           {documents.map((doc) => (
             <TableRow key={doc.id}>
               <TableCell className="font-medium">{doc.title}</TableCell>
-              <TableCell>{getAvailabilityBadge(doc.availableFor)}</TableCell>
-              <TableCell>{doc.assignedUsers.length} users</TableCell>
+              <TableCell>
+                <div className="flex flex-wrap gap-1">
+                  {doc.assignedUserIds.slice(0, 3).map((userId) => (
+                    <Badge 
+                      key={userId} 
+                      variant={getUserType(userId) === "Client" ? "secondary" : "outline"}
+                      className="text-xs"
+                    >
+                      {getUserName(userId)}
+                    </Badge>
+                  ))}
+                  {doc.assignedUserIds.length > 3 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{doc.assignedUserIds.length - 3} more
+                    </Badge>
+                  )}
+                </div>
+              </TableCell>
               <TableCell>{format(doc.updatedAt, "MMM dd, yyyy")}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">

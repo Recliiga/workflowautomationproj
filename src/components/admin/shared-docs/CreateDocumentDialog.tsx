@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SharedDocument } from "../tabs/SharedDocumentsTab";
+import { UserSelector } from "./UserSelector";
 
 interface CreateDocumentDialogProps {
   open: boolean;
@@ -17,36 +17,35 @@ interface CreateDocumentDialogProps {
 export function CreateDocumentDialog({ open, onOpenChange, onCreate }: CreateDocumentDialogProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [availableFor, setAvailableFor] = useState<"client" | "freelancer" | "both">("client");
+  const [assignedUserIds, setAssignedUserIds] = useState<string[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) return;
+    if (!title.trim() || assignedUserIds.length === 0) return;
 
     onCreate({
       title: title.trim(),
       content: content.trim(),
-      availableFor,
-      assignedUsers: [], // Will be populated later when users are assigned
+      assignedUserIds,
     });
 
     // Reset form
     setTitle("");
     setContent("");
-    setAvailableFor("client");
+    setAssignedUserIds([]);
   };
 
   const handleClose = () => {
     setTitle("");
     setContent("");
-    setAvailableFor("client");
+    setAssignedUserIds([]);
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Shared Document</DialogTitle>
         </DialogHeader>
@@ -62,19 +61,10 @@ export function CreateDocumentDialog({ open, onOpenChange, onCreate }: CreateDoc
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="availableFor">Available For</Label>
-            <Select value={availableFor} onValueChange={(value: "client" | "freelancer" | "both") => setAvailableFor(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select user type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="client">Clients Only</SelectItem>
-                <SelectItem value="freelancer">Freelancers Only</SelectItem>
-                <SelectItem value="both">Both Clients & Freelancers</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <UserSelector
+            selectedUserIds={assignedUserIds}
+            onSelectionChange={setAssignedUserIds}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="content">Initial Content</Label>
@@ -91,7 +81,7 @@ export function CreateDocumentDialog({ open, onOpenChange, onCreate }: CreateDoc
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!title.trim()}>
+            <Button type="submit" disabled={!title.trim() || assignedUserIds.length === 0}>
               Create Document
             </Button>
           </DialogFooter>

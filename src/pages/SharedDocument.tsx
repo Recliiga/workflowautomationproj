@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Save, FileText } from "lucide-react";
+import { Save, FileText, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { MOCK_CLIENTS, MOCK_FREELANCERS } from "@/data/mockUsers";
 
 // Mock data - in a real app, this would come from an API
 const mockDocuments = [
@@ -16,19 +17,19 @@ const mockDocuments = [
     id: "1",
     title: "Project Guidelines",
     content: "This document contains the project guidelines and best practices for all team members.\n\nPlease follow these guidelines when working on any project:\n\n1. Always communicate clearly\n2. Meet deadlines\n3. Ask questions when uncertain\n\nFeel free to add your own notes and suggestions below:",
-    availableFor: "both" as const,
+    assignedUserIds: ["client1", "client2", "freelancer1"],
   },
   {
     id: "2", 
     title: "Brand Standards",
     content: "Brand guidelines and standards for client projects.\n\nColors:\n- Primary: #1a365d\n- Secondary: #2d3748\n\nFonts:\n- Headers: Inter\n- Body: Open Sans\n\nPlease ensure all deliverables follow these standards.",
-    availableFor: "client" as const,
+    assignedUserIds: ["client1", "client3"],
   },
   {
     id: "3",
     title: "Technical Requirements",
     content: "Technical specifications and requirements for development projects.\n\nFrameworks:\n- React for frontend\n- Node.js for backend\n\nCode standards:\n- Use TypeScript\n- Follow ESLint rules\n- Write unit tests\n\nAdd your technical notes here:",
-    availableFor: "freelancer" as const,
+    assignedUserIds: ["freelancer1", "freelancer2"],
   },
 ];
 
@@ -58,6 +59,17 @@ export default function SharedDocument() {
     setIsSaving(false);
   };
 
+  const getUserName = (userId: string) => {
+    const client = MOCK_CLIENTS.find(c => c.id === userId);
+    const freelancer = MOCK_FREELANCERS.find(f => f.id === userId);
+    return client?.name || freelancer?.name || "Unknown User";
+  };
+
+  const getUserType = (userId: string) => {
+    const isClient = MOCK_CLIENTS.some(c => c.id === userId);
+    return isClient ? "Client" : "Freelancer";
+  };
+
   if (!document) {
     return (
       <AppLayout>
@@ -72,19 +84,6 @@ export default function SharedDocument() {
     );
   }
 
-  const getAvailabilityBadge = (availableFor: string) => {
-    switch (availableFor) {
-      case "client":
-        return <Badge variant="secondary">Clients</Badge>;
-      case "freelancer":
-        return <Badge variant="outline">Freelancers</Badge>;
-      case "both":
-        return <Badge>Both</Badge>;
-      default:
-        return <Badge variant="secondary">{availableFor}</Badge>;
-    }
-  };
-
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -92,8 +91,19 @@ export default function SharedDocument() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{document.title}</h1>
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-muted-foreground">Available for:</span>
-              {getAvailabilityBadge(document.availableFor)}
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Shared with:</span>
+              <div className="flex gap-1">
+                {document.assignedUserIds.map((userId) => (
+                  <Badge 
+                    key={userId}
+                    variant={getUserType(userId) === "Client" ? "secondary" : "outline"}
+                    className="text-xs"
+                  >
+                    {getUserName(userId)}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -116,8 +126,8 @@ export default function SharedDocument() {
           <CardContent>
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">
-                This document is shared between admin and {document.availableFor === "both" ? "all users" : document.availableFor + "s"}. 
-                Changes made here will be visible to all authorized users.
+                This document is shared with specific users. 
+                Changes made here will be visible to all assigned collaborators.
               </div>
               
               <Textarea
