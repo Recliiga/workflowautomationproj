@@ -4,11 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { Save } from "lucide-react";
+import { Save, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface AdTrackingData {
   weekRange: string;
+  startDate: Date | undefined;
+  endDate: Date | undefined;
   video: string;
   adSpend: string;
   reach: string;
@@ -35,7 +41,11 @@ const generateWeekRanges = () => {
       return `${day} ${month} ${year}`;
     };
     
-    ranges.push(`${formatDate(startDate)} - ${formatDate(endDate)}`);
+    ranges.push({
+      weekRange: `${formatDate(startDate)} - ${formatDate(endDate)}`,
+      startDate,
+      endDate
+    });
   }
   
   return ranges;
@@ -47,7 +57,9 @@ export function AdTracking() {
   // Initialize data with empty values for each week
   const [adData, setAdData] = useState<AdTrackingData[]>(
     weekRanges.map(range => ({
-      weekRange: range,
+      weekRange: range.weekRange,
+      startDate: range.startDate,
+      endDate: range.endDate,
       video: "",
       adSpend: "",
       reach: "",
@@ -61,6 +73,30 @@ export function AdTracking() {
       prev.map((row, index) => 
         index === rowIndex ? { ...row, [field]: value } : row
       )
+    );
+  };
+
+  const handleDateChange = (rowIndex: number, dateType: 'startDate' | 'endDate', date: Date | undefined) => {
+    setAdData(prev => 
+      prev.map((row, index) => {
+        if (index === rowIndex) {
+          const updatedRow = { ...row, [dateType]: date };
+          
+          // Update the weekRange display when either date changes
+          if (updatedRow.startDate && updatedRow.endDate) {
+            const formatDate = (date: Date) => {
+              const day = String(date.getDate()).padStart(2, '0');
+              const month = date.toLocaleDateString('en-US', { month: 'short' });
+              const year = String(date.getFullYear()).slice(-2);
+              return `${day} ${month} ${year}`;
+            };
+            updatedRow.weekRange = `${formatDate(updatedRow.startDate)} - ${formatDate(updatedRow.endDate)}`;
+          }
+          
+          return updatedRow;
+        }
+        return row;
+      })
     );
   };
 
@@ -95,7 +131,61 @@ export function AdTracking() {
             <TableBody>
               {adData.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell className="font-medium">{row.weekRange}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="space-y-2">
+                      <div className="flex gap-1">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={cn(
+                                "w-[90px] justify-start text-left font-normal text-xs",
+                                !row.startDate && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="h-3 w-3 mr-1" />
+                              {row.startDate ? format(row.startDate, "dd MMM") : "Start"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={row.startDate}
+                              onSelect={(date) => handleDateChange(index, 'startDate', date)}
+                              initialFocus
+                              className="p-3 pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={cn(
+                                "w-[90px] justify-start text-left font-normal text-xs",
+                                !row.endDate && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="h-3 w-3 mr-1" />
+                              {row.endDate ? format(row.endDate, "dd MMM") : "End"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={row.endDate}
+                              onSelect={(date) => handleDateChange(index, 'endDate', date)}
+                              initialFocus
+                              className="p-3 pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Input
                       value={row.video}
