@@ -1,12 +1,17 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { CalendarEvent, VideoStatus, Video } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarVideoCard } from "@/components/video/CalendarVideoCard";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SOPModal } from "@/components/sop/SOPModal";
+import { REELS_EDITING_SOP } from "@/data/sopData";
+import { ClipboardList } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 interface ProjectModalProps {
   project: CalendarEvent;
@@ -14,6 +19,9 @@ interface ProjectModalProps {
 }
 
 export function ProjectModal({ project, onVideoClick }: ProjectModalProps) {
+  const { user } = useAuth();
+  const [isSOPModalOpen, setIsSOPModalOpen] = useState(false);
+  
   // Helper function to get color for video status
   const getStatusColor = (status: VideoStatus) => {
     switch (status) {
@@ -30,10 +38,28 @@ export function ProjectModal({ project, onVideoClick }: ProjectModalProps) {
     }
   };
 
+  const handleSOPComplete = () => {
+    // In a real application, this would save the completion status
+    console.log("SOP completed for project:", project.id);
+  };
+
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="text-xl">{project.title}</DialogTitle>
+        <div className="flex items-center justify-between">
+          <DialogTitle className="text-xl">{project.title}</DialogTitle>
+          {user?.role === "freelancer" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSOPModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <ClipboardList className="h-4 w-4" />
+              Client SOP
+            </Button>
+          )}
+        </div>
       </DialogHeader>
       
       <div className="space-y-6 mt-4">
@@ -91,6 +117,13 @@ export function ProjectModal({ project, onVideoClick }: ProjectModalProps) {
           </Card>
         )}
       </div>
+
+      <SOPModal
+        isOpen={isSOPModalOpen}
+        onOpenChange={setIsSOPModalOpen}
+        sopData={REELS_EDITING_SOP}
+        onComplete={handleSOPComplete}
+      />
     </>
   );
 }
