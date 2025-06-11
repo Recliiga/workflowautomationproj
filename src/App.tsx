@@ -18,6 +18,7 @@ import InstagramDM from "@/pages/InstagramDM";
 import NewsletterTemplate from "@/pages/NewsletterTemplate";
 import YouTubeRepurposing from "@/pages/YouTubeRepurposing";
 import AdTracking from "@/pages/AdTracking";
+import SharedDocument from "@/pages/SharedDocument";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -116,6 +117,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <YouTubeRepurposing />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/shared-docs/:documentId"
+                  element={
+                    <ProtectedRoute>
+                      <SharedDocument />
                     </ProtectedRoute>
                   }
                 />

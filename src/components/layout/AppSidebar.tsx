@@ -7,10 +7,30 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+
+// Mock shared documents - in a real app, this would come from an API
+const mockSharedDocuments = [
+  {
+    id: "1",
+    title: "Project Guidelines",
+    availableFor: "both" as const,
+  },
+  {
+    id: "2", 
+    title: "Brand Standards",
+    availableFor: "client" as const,
+  },
+  {
+    id: "3",
+    title: "Technical Requirements",
+    availableFor: "freelancer" as const,
+  },
+];
 
 export function AppSidebar() {
   const location = useLocation();
@@ -71,6 +91,17 @@ export function AppSidebar() {
     item.roles.includes(user?.role || "")
   );
 
+  // Filter shared documents based on user role
+  const getSharedDocuments = () => {
+    if (!user || user.role === "admin") return [];
+    
+    return mockSharedDocuments.filter(doc => 
+      doc.availableFor === "both" || doc.availableFor === user.role
+    );
+  };
+
+  const sharedDocuments = getSharedDocuments();
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -90,6 +121,26 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {sharedDocuments.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Shared Documents</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {sharedDocuments.map((doc) => (
+                  <SidebarMenuItem key={doc.id}>
+                    <SidebarMenuButton asChild isActive={location.pathname === `/shared-docs/${doc.id}`}>
+                      <Link to={`/shared-docs/${doc.id}`}>
+                        <FileText />
+                        <span>{doc.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );
