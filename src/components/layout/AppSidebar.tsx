@@ -1,5 +1,5 @@
 
-import { Calendar, Home, Users, History, MessageSquare, FileText, Youtube } from "lucide-react";
+import { Calendar, Home, Users, History, MessageSquare, FileText, Youtube, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -28,6 +28,12 @@ export function AppSidebar() {
       url: "/calendar",
       icon: Calendar,
       roles: ["admin", "client", "freelancer"],
+    },
+    {
+      title: "Ad Tracking",
+      url: "/ad-tracking",
+      icon: TrendingUp,
+      roles: ["client"],
     },
     {
       title: "Users",

@@ -17,6 +17,7 @@ import TaskHistory from "@/pages/TaskHistory";
 import InstagramDM from "@/pages/InstagramDM";
 import NewsletterTemplate from "@/pages/NewsletterTemplate";
 import YouTubeRepurposing from "@/pages/YouTubeRepurposing";
+import AdTracking from "@/pages/AdTracking";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Calendar />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/ad-tracking"
+                  element={
+                    <ProtectedRoute>
+                      <AdTracking />
                     </ProtectedRoute>
                   }
                 />
