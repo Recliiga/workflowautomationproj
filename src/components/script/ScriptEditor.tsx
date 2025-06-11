@@ -4,16 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Save, Eye } from "lucide-react";
+import { Save } from "lucide-react";
 import { GeneratedScript } from "@/types/script";
 
 interface ScriptEditorProps {
   script: GeneratedScript;
   onSave: (updatedScript: GeneratedScript) => void;
-  onViewFinal: () => void;
 }
 
-export function ScriptEditor({ script, onSave, onViewFinal }: ScriptEditorProps) {
+export function ScriptEditor({ script, onSave }: ScriptEditorProps) {
   const [hook, setHook] = useState(script.hook);
   const [body, setBody] = useState(script.body);
   const [cta, setCta] = useState(script.cta);
@@ -50,25 +49,15 @@ export function ScriptEditor({ script, onSave, onViewFinal }: ScriptEditorProps)
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Edit Your Script</CardTitle>
-          <div className="flex gap-2">
-            <Button
-              onClick={handleSave}
-              disabled={!hasChanges}
-              variant="outline"
-              size="sm"
-            >
-              <Save className="mr-2 h-4 w-4" />
-              Save Changes
-            </Button>
-            <Button
-              onClick={onViewFinal}
-              disabled={hasChanges}
-              size="sm"
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              View Final Script
-            </Button>
-          </div>
+          <Button
+            onClick={handleSave}
+            disabled={!hasChanges}
+            variant="outline"
+            size="sm"
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save Changes
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
