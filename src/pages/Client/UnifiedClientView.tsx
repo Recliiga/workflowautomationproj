@@ -7,6 +7,7 @@ import { RejectModal } from "@/components/client/RejectModal";
 import { MOCK_VIDEOS, VIDEO_TYPES } from "@/data/mockData";
 import { useCalendarEvents, updateVideoSchedule } from "@/hooks/useCalendarEvents";
 import { toast } from "sonner";
+import { AdTracking } from "@/components/client/AdTracking";
 
 // Import refactored components
 import { ApprovalSection } from "./components/ApprovalSection";
@@ -162,6 +163,9 @@ export default function UnifiedClientView({ adminView = false, clientId }: Unifi
         onEventClick={handleEventClick}
         updateVideoSchedules={updateVideoSchedules}
       />
+
+      {/* Ad Tracking section */}
+      <AdTracking />
 
       {/* Video Detail Modal */}
       <VideoDetailSection 
