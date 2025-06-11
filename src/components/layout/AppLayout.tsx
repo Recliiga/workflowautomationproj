@@ -2,6 +2,7 @@
 import React from "react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
 import { SidebarInset } from "@/components/ui/sidebar";
 
 interface AppLayoutProps {
@@ -18,7 +19,10 @@ export function AppLayout({ children }: AppLayoutProps) {
           <div className="flex flex-col h-full">
             <div className="container py-6 md:py-8">
               <div className="mb-6">
-                <Breadcrumbs className="mb-2" />
+                <div className="flex items-center justify-between mb-2">
+                  <Breadcrumbs />
+                  <RoleSwitcher />
+                </div>
                 <div className="flex-1">
                   {children}
                 </div>
