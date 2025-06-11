@@ -16,14 +16,8 @@ export default function Login() {
   // Redirect if user is already authenticated
   useEffect(() => {
     if (user) {
-      // Redirect based on user role
-      let destination = "/dashboard"; // default for admin
-      
-      if (user.role === "client") {
-        destination = "/client";
-      } else if (user.role === "freelancer") {
-        destination = "/freelancer";
-      }
+      // All roles use the same main routes - the MainPage component handles role-specific content
+      const destination = "/dashboard";
       
       console.log(`User authenticated as ${user.role}, redirecting to:`, destination);
       navigate(destination, { replace: true });

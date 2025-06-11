@@ -45,15 +45,8 @@ export default function ChangePassword() {
       
       toast.success("Password changed successfully! You can now access the application.");
       
-      // Redirect based on user role
-      let destination = "/dashboard";
-      if (user.role === "client") {
-        destination = "/client";
-      } else if (user.role === "freelancer") {
-        destination = "/freelancer";
-      }
-      
-      navigate(destination, { replace: true });
+      // All roles use the same main routes - redirect to dashboard
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error("Password change failed:", error);
       toast.error("Failed to change password. Please try again.");
