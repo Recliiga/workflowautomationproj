@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -6,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, User, Bot, ArrowLeft, Clock, MessageSquare, Phone, Video } from "lucide-react";
+import { Send, User, Bot, ArrowLeft, Clock, MessageSquare, Phone, Video, ExternalLink } from "lucide-react";
+import { LeadStatusManager, LeadStatus } from "./LeadStatusManager";
+import { NewFollowerDetection } from "./NewFollowerDetection";
 
 interface Message {
   id: string;
@@ -23,7 +24,7 @@ interface Conversation {
   leadAvatar?: string;
   lastMessage: string;
   timestamp: string;
-  status: 'active' | 'pending' | 'closed';
+  status: LeadStatus;
   unreadCount: number;
 }
 
@@ -33,7 +34,7 @@ interface ConversationViewProps {
   onConversationSelect: (conversationId: string) => void;
 }
 
-// Mock data for conversations
+// Updated mock data with lead statuses
 const mockConversations: Conversation[] = [
   {
     id: "conv1",
@@ -41,7 +42,7 @@ const mockConversations: Conversation[] = [
     leadAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40",
     lastMessage: "I'm interested in your video services",
     timestamp: "2 min ago",
-    status: 'active',
+    status: 'contacted',
     unreadCount: 2
   },
   {
@@ -50,7 +51,7 @@ const mockConversations: Conversation[] = [
     leadAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40",
     lastMessage: "What packages do you offer?",
     timestamp: "15 min ago",
-    status: 'pending',
+    status: 'awaiting_reply',
     unreadCount: 1
   },
   {
@@ -58,7 +59,7 @@ const mockConversations: Conversation[] = [
     leadName: "Emily Davis",
     lastMessage: "Thanks for the information!",
     timestamp: "1 hour ago",
-    status: 'closed',
+    status: 'replied',
     unreadCount: 0
   },
   {
@@ -67,11 +68,12 @@ const mockConversations: Conversation[] = [
     leadAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40",
     lastMessage: "When can we schedule a call?",
     timestamp: "3 hours ago",
-    status: 'active',
+    status: 'new',
     unreadCount: 0
   }
 ];
 
+// Mock data for messages
 const mockMessages: { [key: string]: Message[] } = {
   "conv1": [
     {
@@ -105,14 +107,17 @@ export function ConversationView({ clientId, conversationId, onConversationSelec
   const [newMessage, setNewMessage] = useState("");
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
+  const [showNewFollowers, setShowNewFollowers] = useState(false);
 
   useEffect(() => {
     if (conversationId) {
-      const conversation = mockConversations.find(c => c.id === conversationId);
+      const conversation = conversations.find(c => c.id === conversationId);
       setSelectedConversation(conversation || null);
       setMessages(mockMessages[conversationId] || []);
+      setShowNewFollowers(false);
     }
-  }, [conversationId]);
+  }, [conversationId, conversations]);
 
   const handleSendMessage = () => {
     if (!newMessage.trim() || !conversationId) return;
@@ -130,28 +135,85 @@ export function ConversationView({ clientId, conversationId, onConversationSelec
     setNewMessage("");
   };
 
-  const getStatusColor = (status: string) => {
+  const handleStatusChange = (conversationId: string, newStatus: LeadStatus) => {
+    setConversations(prev => 
+      prev.map(conv => 
+        conv.id === conversationId ? { ...conv, status: newStatus } : conv
+      )
+    );
+  };
+
+  const handleStartConversation = (followerId: string) => {
+    // This would create a new conversation from the new follower
+    console.log("Starting conversation with follower:", followerId);
+    setShowNewFollowers(false);
+  };
+
+  const handleViewProfile = (followerId: string) => {
+    // This would open Instagram profile (developer will implement)
+    console.log("Viewing profile:", followerId);
+  };
+
+  const getStatusColor = (status: LeadStatus) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
-      case 'closed': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+      case 'new': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+      case 'contacted': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+      case 'awaiting_reply': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+      case 'replied': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      case 'no_response': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (showNewFollowers) {
+    return (
+      <div className="h-full">
+        <div className="p-4 border-b">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setShowNewFollowers(false)}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Conversations
+          </Button>
+        </div>
+        <div className="p-4">
+          <NewFollowerDetection
+            clientId={clientId}
+            onStartConversation={handleStartConversation}
+            onViewProfile={handleViewProfile}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">
       {!conversationId ? (
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Active Conversations</h3>
-            <Badge variant="secondary" className="bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300">
-              {mockConversations.length} total
-            </Badge>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Lead Conversations</h3>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowNewFollowers(true)}
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                <User className="h-4 w-4 mr-1" />
+                New Followers
+              </Button>
+              <Badge variant="secondary" className="bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300">
+                {conversations.length} total
+              </Badge>
+            </div>
           </div>
           
           <div className="space-y-3">
-            {mockConversations.map((conversation) => (
+            {conversations.map((conversation) => (
               <Card 
                 key={conversation.id}
                 className="cursor-pointer hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 dark:hover:from-pink-950/20 dark:hover:to-purple-950/20 transition-all duration-200 hover:shadow-md border-l-4 border-l-transparent hover:border-l-pink-400"
@@ -166,18 +228,18 @@ export function ConversationView({ clientId, conversationId, onConversationSelec
                           <User className="h-5 w-5" />
                         </AvatarFallback>
                       </Avatar>
-                      {conversation.status === 'active' && (
+                      {conversation.status === 'replied' && (
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{conversation.leadName}</p>
-                        <Badge 
-                          className={getStatusColor(conversation.status)}
-                        >
-                          {conversation.status}
-                        </Badge>
+                        <LeadStatusManager
+                          currentStatus={conversation.status}
+                          onStatusChange={(newStatus) => handleStatusChange(conversation.id, newStatus)}
+                          leadName={conversation.leadName}
+                        />
                         {conversation.unreadCount > 0 && (
                           <Badge variant="destructive" className="text-xs px-2">
                             {conversation.unreadCount}
@@ -221,7 +283,16 @@ export function ConversationView({ clientId, conversationId, onConversationSelec
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
             </div>
             <div className="flex-1">
-              <p className="font-semibold text-gray-900 dark:text-gray-100">{selectedConversation?.leadName}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold text-gray-900 dark:text-gray-100">{selectedConversation?.leadName}</p>
+                {selectedConversation && (
+                  <LeadStatusManager
+                    currentStatus={selectedConversation.status}
+                    onStatusChange={(newStatus) => handleStatusChange(selectedConversation.id, newStatus)}
+                    leadName={selectedConversation.leadName}
+                  />
+                )}
+              </div>
               <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span>Online</span>
@@ -233,6 +304,10 @@ export function ConversationView({ clientId, conversationId, onConversationSelec
               </Button>
               <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                 <Video className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="flex items-center gap-1 px-3">
+                <ExternalLink className="h-4 w-4" />
+                <span className="text-xs">Open Instagram</span>
               </Button>
             </div>
           </div>
